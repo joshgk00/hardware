@@ -58,6 +58,13 @@ that its Apple FIFO status layout differs from Samsung's. The current J71s
 experiment uses the generic S5L UART driver's FIFO and interrupt path. This is
 a comparison to investigate, not evidence that the same difference applies to
 S8000 or that data reached the receive FIFO.
+In the J71s diagnostic boot, read-only snapshots of the configuration
+registers already read by the Linux UART driver reported ULCON `0x07`, UCON
+`0x1885`, UFCON `0x31`, and UBRDIV `0x19`. The A5 polling example uses ULCON
+`0x07`, UCON `0x405`, UFCON `0x01`, and UBRDIV `0x19`. The control and FIFO
+differences are observations only: they are on different SoCs and support
+different interrupt strategies, so copying settings would not establish a
+safe or correct J71s configuration. No register values were changed.
 
 The reused HDQ driver's receive decoder treats bytes `>= 0xf0` as a one.
 TI's [HDQ UART application note](https://www.ti.com/lit/an/slua408/slua408.pdf)
