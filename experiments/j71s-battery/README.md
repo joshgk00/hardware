@@ -52,6 +52,11 @@ For further comparison, [Project Cascadia's older iPad mini driver](https://gith
 uses direct UART polling and different initialization on its A5 device. Its
 success is not evidence that the same register settings are safe or correct
 for S8000; the J71s receive path still needs investigation.
+That older implementation checks its receive-ready status directly and warns
+that its Apple FIFO status layout differs from Samsung's. The current J71s
+experiment uses the generic S5L UART driver's FIFO and interrupt path. This is
+a comparison to investigate, not evidence that the same difference applies to
+S8000 or that data reached the receive FIFO.
 
 The reused gauge driver provides only its read callback, not a gauge-write
 callback. Nevertheless, the experiment configures UART/pinctrl and transmits
