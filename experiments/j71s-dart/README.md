@@ -41,12 +41,11 @@ found that its DART needed an explicit PCIe power domain to avoid a probe hang;
 this supports a hypothesis, not a guarantee for J71s. Booting the test tree
 powers PCIe and causes the driver to reset DART registers; it may hang and
 require DFU recovery. It adds no PCIe host or NVMe device and is not a storage
-access or installation test. It has not been booted on J71s.
+access or installation test.
 The current battery/SPI diagnostic reports no DART0 platform device; the
 `dart0-probe.sh` read-only script records the device binding and kernel log
 after a future test. The DART-only tree built and rejected the wrong board
-and an existing output file. A kernel containing the stream fix also built;
-the assembled RAM image has not yet been tested on hardware.
+and an existing output file. A kernel containing the stream fix also built.
 `assemble-test-image.py` reconstructs that exact local test image from the
 previously verified battery image and its manifest plus the DART tree and
 kernel. It checks the hashes and ranges of all components, checks the final
@@ -55,6 +54,12 @@ experimental build and are not a general installer or compatibility claim.
 `add-reset-markers.py` optionally adds logs immediately before and after the
 DART0 reset in a corrected source tree. They may help identify where a boot
 hang occurred if the framebuffer log is visible. The markers do not change the
-reset sequence. A separate kernel and RAM image built with the markers; neither
-has been booted. `assemble-test-image.py --reset-markers` validates that exact
-image and refuses the non-marker kernel when this option is selected.
+reset sequence. `assemble-test-image.py --reset-markers` validates the separate
+marker image and refuses the non-marker kernel when this option is selected.
+
+On one J71s physical RAM boot, the marker image logged both the start and
+successful return of DART0 reset, bound `apple-dart` to `601008000.iommu`,
+and registered `apple-dart.601008000.iommu` with 4 KiB pages and four streams.
+USB serial and the battery gauge remained available. No PCIe host or NVMe
+block device appeared. This confirms only isolated initialization; no IOMMU
+consumer, translation, DMA, PCIe link or internal storage was tested.
