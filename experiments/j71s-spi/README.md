@@ -53,3 +53,8 @@ SPI transfers, touch power, firmware, or touchscreen input.
 Read-only pinctrl metadata also showed the identified touch IRQ, power, sync,
 reset and chip-select lines (65, 73, 74, 75 and 102) as unclaimed after the
 controller boot. "Unclaimed" does not reveal their electrical state.
+The Linux pin controller's GPIO102 configuration register reported peripheral
+function 0, input enabled and pull code 0 in that boot. This is a read-only
+snapshot, not proof of a chip-select signal or the right peripheral function.
+`cs-pin-observe.sh` repeats that bounded, model-guarded read; it does not
+request the line, change its configuration or send SPI traffic.
