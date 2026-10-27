@@ -69,7 +69,7 @@ consumer, translation, DMA, PCIe link or internal storage was tested.
 experimental step: a software-only platform device attached to DART0 stream 0.
 Its platform DMA configuration may allocate page tables and write DART TCR,
 TTBR and TLB-invalidate registers before the diagnostic driver's probe. The
-driver checks for an attached IOMMU domain but does not request DMA buffers,
+driver checks for an attached DMA-API IOMMU domain but does not request DMA buffers,
 submit DMA, or instantiate a PCIe host or physical endpoint. Stream 0 is a
 test choice, not evidence of the storage endpoint's stream ID. The model and
 isolation-checked tree and driver have not been booted; a hang may require DFU.
@@ -80,3 +80,6 @@ The test kernel and image have compiled and passed component-hash checks but
 have not been physically booted. `software-consumer-probe.sh` reads binding,
 IOMMU group and kernel-log information after a test without submitting DMA.
 `assemble-test-image.py --software-consumer` reconstructs the exact test image.
+`test-software-consumer.py` exercises the probe with synthetic model and domain
+states: missing, blocked and identity domains are rejected; a DMA domain is
+accepted. It does not simulate the kernel's pre-probe IOMMU attachment.

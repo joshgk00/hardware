@@ -16,9 +16,9 @@ static int j71s_dart_test_probe(struct platform_device *pdev)
 	if (!of_machine_is_compatible("apple,j71s"))
 		return -ENODEV;
 	domain = iommu_get_domain_for_dev(&pdev->dev);
-	if (!domain)
+	if (!domain || !iommu_is_dma_domain(domain))
 		return dev_err_probe(&pdev->dev, -ENODEV,
-				     "no IOMMU domain attached\n");
+				     "no DMA IOMMU domain attached\n");
 	dev_info(&pdev->dev, "software-only DART consumer: domain type 0x%x\n",
 		 domain->type);
 	return 0;

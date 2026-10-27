@@ -19,7 +19,7 @@ esac
 EOF
 )
 (cd "$here" && sha256sum -c - <<'EOF'
-ab391bdf569b70b95048a6dda105c68f3f3c735eb9ef1f495648878ac823573f  software-consumer.c
+6c00598102ab6c9400af1ec955f5efa018788ddd9c98638b820bc89451fbb66c  software-consumer.c
 EOF
 )
 dest="$kernel/drivers/iommu/j71s-dart-software-test.c"
