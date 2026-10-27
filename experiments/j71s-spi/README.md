@@ -58,3 +58,8 @@ function 0, input enabled and pull code 0 in that boot. This is a read-only
 snapshot, not proof of a chip-select signal or the right peripheral function.
 `cs-pin-observe.sh` repeats that bounded, model-guarded read; it does not
 request the line, change its configuration or send SPI traffic.
+`add-cs-early-observation.py` can add a J71s-only read of the same GPIO102
+configuration before pinctrl registration in a prepared source checkout. It
+checks the exact source digest and refuses reapplication. The resulting log
+would describe the early Linux state, not necessarily the state before all
+bootloader activity; it does not establish the correct SPI function.
