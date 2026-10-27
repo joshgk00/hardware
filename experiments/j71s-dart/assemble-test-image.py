@@ -15,6 +15,9 @@ DART_KERNEL_SHA = 'ae14ae272de5690015aa63f16e49543eca9f48bface744c8c860d88052f22
 IMAGE_SHA = '9187433e84fd6385bc92a9ed9e3738e221ca55ee2bbe92c1b58acf92383d711f'
 MARKER_KERNEL_SHA = 'b6dabc64d164eb269ea3298e97f85ff765a97174d496f82069c9a61e1e07d17e'
 MARKER_IMAGE_SHA = 'f1257433e1ee7f51b91763bdd3796d2c0ee138469a142496d69d96e6114a73d6'
+CONSUMER_DTB_SHA = '0e106b8b57c3b885ef812e2f4f6ebd77f479727c6825110b8bdee87950eaf063'
+CONSUMER_KERNEL_SHA = '234b47c3809ae27b45d3f74399392f0f764105c58ba864269736ba5061044dff'
+CONSUMER_IMAGE_SHA = '5c62e11b55188742cd80f4c7edf9d6f20a6076d44dec52c811af86e40e6673e2'
 
 
 def digest(data: bytes) -> str:
@@ -51,7 +54,9 @@ def main() -> None:
     parser.add_argument('dart_dtb', type=Path)
     parser.add_argument('dart_kernel', type=Path)
     parser.add_argument('output', type=Path)
-    parser.add_argument('--reset-markers', action='store_true', help='assemble the separately built reset-marker diagnostic')
+    variants = parser.add_mutually_exclusive_group()
+    variants.add_argument('--reset-markers', action='store_true', help='assemble the separately built reset-marker diagnostic')
+    variants.add_argument('--software-consumer', action='store_true', help='assemble the software-only consumer diagnostic')
     args = parser.parse_args()
     try:
         data = args.baseline.read_bytes()
@@ -60,9 +65,10 @@ def main() -> None:
         components = split_components(data, json.loads(args.manifest.read_text()))
         components['dtb'] = args.dart_dtb.read_bytes()
         components['kernel'] = args.dart_kernel.read_bytes()
-        kernel_sha = MARKER_KERNEL_SHA if args.reset_markers else DART_KERNEL_SHA
-        image_sha = MARKER_IMAGE_SHA if args.reset_markers else IMAGE_SHA
-        if digest(components['dtb']) != DART_DTB_SHA or digest(components['kernel']) != kernel_sha:
+        kernel_sha = CONSUMER_KERNEL_SHA if args.software_consumer else (MARKER_KERNEL_SHA if args.reset_markers else DART_KERNEL_SHA)
+        image_sha = CONSUMER_IMAGE_SHA if args.software_consumer else (MARKER_IMAGE_SHA if args.reset_markers else IMAGE_SHA)
+        dtb_sha = CONSUMER_DTB_SHA if args.software_consumer else DART_DTB_SHA
+        if digest(components['dtb']) != dtb_sha or digest(components['kernel']) != kernel_sha:
             raise ValueError('unexpected DART tree or kernel')
         image = b''.join(components[name] for name in NAMES)
         if digest(image) != image_sha:

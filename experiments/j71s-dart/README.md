@@ -23,8 +23,9 @@ does not create a device-tree node or access hardware.
 
 The J71s Apple tree identifies a 4 KiB-page S8000 PCIe DART; the kernel's
 older DART variant also uses 4 KiB pages. This similarity does not establish
-that the driver works on S8000. The patch has not been tested on a physical
-DART, does not enable a device tree node, and does not establish why another
+that the driver works on S8000. The corrected code ran during an isolated DART
+reset on one physical J71s, but has not been tested with active stream
+translation or DMA. The patch itself does not enable a device tree node or establish why another
 device hung during DART probe. Do not use it to access internal storage until
 the controller, DMA and recovery path have been separately validated.
 
@@ -63,3 +64,19 @@ and registered `apple-dart.601008000.iommu` with 4 KiB pages and four streams.
 USB serial and the battery gauge remained available. No PCIe host or NVMe
 block device appeared. This confirms only isolated initialization; no IOMMU
 consumer, translation, DMA, PCIe link or internal storage was tested.
+
+`software-consumer.c` and `j71s-dart-consumer-test.dtso` prepare the next
+experimental step: a software-only platform device attached to DART0 stream 0.
+Its platform DMA configuration may allocate page tables and write DART TCR,
+TTBR and TLB-invalidate registers before the diagnostic driver's probe. The
+driver checks for an attached IOMMU domain but does not request DMA buffers,
+submit DMA, or instantiate a PCIe host or physical endpoint. Stream 0 is a
+test choice, not evidence of the storage endpoint's stream ID. The model and
+isolation-checked tree and driver have not been booted; a hang may require DFU.
+`prepare-software-consumer.sh` adds the driver only to the pinned disposable
+kernel checkout, and `build-software-consumer-dtb.sh` rejects other boards,
+existing conflicting nodes and additional IOMMU consumers.
+The test kernel and image have compiled and passed component-hash checks but
+have not been physically booted. `software-consumer-probe.sh` reads binding,
+IOMMU group and kernel-log information after a test without submitting DMA.
+`assemble-test-image.py --software-consumer` reconstructs the exact test image.

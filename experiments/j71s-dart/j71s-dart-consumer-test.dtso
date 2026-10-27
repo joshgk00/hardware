@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
+/* Experimental software-only stream-0 consumer. Attaching a DMA domain writes
+ * DART translation and invalidate registers; it creates no PCIe host or NVMe
+ * device and does not request DMA buffers or submit DMA transfers.
+ */
+/dts-v1/;
+/plugin/;
+#include <dt-bindings/interrupt-controller/apple-aic.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+&{/soc} {
+	#address-cells = <2>;
+	#size-cells = <2>;
+	dart0_software_test: iommu@601008000 {
+		compatible = "apple,s8000-dart", "apple,s5l8960x-dart";
+		reg = <0x6 0x01008000 0x0 0x4000>;
+		interrupt-parent = <&aic>;
+		interrupts = <AIC_IRQ 245 IRQ_TYPE_LEVEL_HIGH>;
+		#iommu-cells = <1>;
+		power-domains = <&ps_pcie>;
+		status = "okay";
+	};
+	j71s-dart-software-consumer {
+		compatible = "orchard,j71s-dart-test";
+		iommus = <&dart0_software_test 0>;
+		status = "okay";
+	};
+};
