@@ -63,3 +63,7 @@ configuration before pinctrl registration in a prepared source checkout. It
 checks the exact source digest and refuses reapplication. The resulting log
 would describe the early Linux state, not necessarily the state before all
 bootloader activity; it does not establish the correct SPI function.
+On one physical diagnostic boot the early log reported GPIO102 function 0,
+input enabled and pull code 0, matching the later read-only snapshot. The SPI
+master and battery gauge remained available. This does not determine which
+function drives chip select or establish electrical timing.
