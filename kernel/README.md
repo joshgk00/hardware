@@ -8,6 +8,11 @@ runs the target's final-DTB recipe. Git and Podman are required.
 ./kernel/build j71b --output out/kernel/j71b
 ```
 
+An experimental J71s kernel and unmodified device tree can be built with
+`./kernel/build j71s --output out/kernel/j71s`. This is a RAM-boot bring-up
+target for the S8000 iPad 5 Wi-Fi, not an installation image. It does not
+enable touchscreen or internal storage; see [J71s device tree](devicetree/j71s/README.md).
+
 Scratch remains in ignored `kernel/.work/j71b/`. `--resume` continues an
 interrupted build using that scratch directory; `--output` must name a new
 directory. The result contains `Image.gz`, `j71b.dtb`, `kernel.release` and

@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Copy the upstream J71s DTB after checking its declared hardware identity.
+set -euo pipefail
+kernel_build='' headers='' output=''
+while (($#)); do
+  case "$1" in
+    --kernel-build) kernel_build=$2; shift 2 ;;
+    --headers) headers=$2; shift 2 ;;
+    --output) output=$2; shift 2 ;;
+    *) echo "Unknown argument: $1" >&2; exit 2 ;;
+  esac
+done
+base="$kernel_build/arch/arm64/boot/dts/apple/s8000-j71s.dtb"
+if [[ ! -f "$base" || ! -d "$headers" || -z "$output" || -e "$output" || -L "$output" ]]; then
+  echo 'Usage: ./kernel/devicetree/j71s/build --kernel-build KERNEL_OUTPUT --headers KERNEL_SOURCE/include --output J71S.dtb' >&2
+  exit 2
+fi
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+cp "$base" "$work/base.dtb"
+python3 -m orchard_hardware.buildenv run \
+  --bind "$work:/dtb:ro" --image localhost/orchard-hardware-kernel-toolchain:bookworm -- \
+  bash -euc '[[ $(fdtget -t s "$ORCHARD_DTB/base.dtb" / compatible) == "apple,j71s apple,s8000 apple,arm-platform" ]]'
+mkdir -p "$(dirname "$output")"
+cp "$work/base.dtb" "$output"
+echo "Experimental J71s DTB: $output"
