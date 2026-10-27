@@ -1,0 +1,34 @@
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
+/* Offline structure experiment only. The clock rate and power-domain mapping
+ * are candidates, not measured or validated. No pins or child device are
+ * described, and both nodes must stay disabled. Never use this as an installer.
+ */
+/dts-v1/;
+/plugin/;
+#include <dt-bindings/interrupt-controller/apple-aic.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+&{/} {
+	j71s_spi3_candidate_clock: spi3-candidate-clock {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <61538461>;
+		status = "disabled";
+	};
+};
+
+&{/soc} {
+	#address-cells = <2>;
+	#size-cells = <2>;
+	spi@20a08c000 {
+		compatible = "apple,s5l8960x-spi";
+		reg = <0x2 0x0a08c000 0x0 0x4000>;
+		interrupt-parent = <&aic>;
+		interrupts = <AIC_IRQ 191 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&j71s_spi3_candidate_clock>;
+		power-domains = <&ps_spi3>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		status = "disabled";
+	};
+};

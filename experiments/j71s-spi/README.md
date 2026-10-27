@@ -17,3 +17,11 @@ board uses different GPIOs and a different PMU; do not copy its settings.
 The reference project retains authorship and licensing of its patches. Keep
 firmware, device-specific trees and calibration data private. This is not an
 installer or device support.
+
+`j71s-spi3-disabled.dtso` is an offline-only structure candidate. Both the
+controller and its tentative fixed clock are disabled; there is no pinmux or
+touch child. The clock rate and `ps_spi3` power-domain association require
+independent hardware validation. `check-disabled-dtb.sh` rejects non-J71s
+trees and preexisting SPI3 nodes, compiles the overlay, verifies the relevant
+values and disabled states, and discards the result. Do not turn the nodes on
+or use this as a boot image based on the structural check alone.
