@@ -21,6 +21,12 @@ module, and `ORCHARD_PYTHON` can select the interpreter containing it.
 `battery-probe.sh` reads battery status and relevant kernel messages in the
 RAM test; it intentionally avoids raw device trees and calibration data.
 
+The selected patch subset was applied and compiled against the pinned kernel.
+The overlay built successfully, its output properties were checked, and a
+J72s base tree was rejected. A RAM-only image containing the experimental
+kernel and overlay was assembled and its component hashes verified. None of
+these checks constitutes a physical boot or battery-gauge validation.
+
 The reused gauge driver provides only its read callback, not a gauge-write
 callback. Nevertheless, the experiment configures UART/pinctrl and transmits
 HDQ read commands. The electrical behavior, UART timing, gauge values and
