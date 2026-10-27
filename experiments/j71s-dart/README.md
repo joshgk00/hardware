@@ -176,3 +176,13 @@ Makefile and holder source hashes. It refuses reapplication and changes no
 device tree or hardware. A prepared copy matched the source and Makefile used
 for the compiled experiment; this check does not validate the rest of the
 kernel checkout or the device tree.
+
+On one physical J71s RAM boot, the AUX holder bound and PMGR reported AUX
+actual/target state 15, while the main PCIe domain also reported active and
+reference/link domains remained off. All five observed DART registers still
+read as `0xffffffff` after AUX became active. DART probe and its invalidate
+attempt occurred before the AUX holder bound, so this shows AUX activation
+alone did not make the registers respond afterward; it does not test powering
+AUX before DART probe or together with the reference domain. No physical DMA,
+PCIe host or storage endpoint was enabled. Battery and system remained
+responsive, but enabling AUX increased the reported discharge current.
