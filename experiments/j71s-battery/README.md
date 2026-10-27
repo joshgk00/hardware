@@ -102,7 +102,12 @@ the sampling limitations above still apply.
 peripheral function, input-enable bit and pull setting immediately before the
 Linux pinctrl driver applies the experimental UART mux. It only reads that
 configuration; the actual pinctrl operation is unchanged. The resulting
-kernel needs a physical RAM boot before any conclusion can be drawn.
+kernel was RAM-booted on one J71s and reported that before Linux applied the
+experimental function 2, GPIO 2 was already set to function 1, input enabled,
+and pull code 0. This is a boot-time observation, not proof that function 1 is
+the correct battery route. `j71s-battery-gauge-bootmux.dtso` is a separate,
+untested hypothesis that selects function 1. Pass `bootmux` as the fourth
+argument to the DTB builder to select that variant.
 
 The reused HDQ driver's receive decoder treats bytes `>= 0xf0` as a one.
 TI's [HDQ UART application note](https://www.ti.com/lit/an/slua408/slua408.pdf)

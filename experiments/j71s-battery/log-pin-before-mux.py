@@ -13,7 +13,8 @@ def main(root):
     before = ('\tstruct apple_gpio_pinctrl *pctl = pinctrl_dev_get_drvdata(pctldev);\n\n'
               '\tapple_gpio_set_reg(\n')
     after = ('\tstruct apple_gpio_pinctrl *pctl = pinctrl_dev_get_drvdata(pctldev);\n\n'
-             '\tif (group == 2 && func == 2 && !strcmp(dev_name(pctl->dev), "20f100000.pinctrl")) {\n'
+             '\tif (group == 2 && (func == 1 || func == 2) &&\n'
+             '\t    !strcmp(dev_name(pctl->dev), "20f100000.pinctrl")) {\n'
              '\t\tu32 before = apple_gpio_get_reg(pctl, group);\n'
              '\t\tdev_info(pctl->dev, "experimental HDQ pin before mux: function=%u input=%u pull=%u\\n",\n'
              '\t\t\t (unsigned int)FIELD_GET(REG_GPIOx_PERIPH, before),\n'

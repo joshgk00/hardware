@@ -1,0 +1,42 @@
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
+/* Unverified J71s HDQ experiment using the observed bootloader pin function 1.
+ * UART address, IRQ and pin are derived from
+ * this model's Apple device tree. Do not use as an installation device tree.
+ * Adapted from Orchard's J71b battery-gauge overlay; electrical behavior and
+ * the UART pin-function interpretation have not been validated on J71s.
+ */
+/dts-v1/;
+/plugin/;
+#include <dt-bindings/interrupt-controller/apple-aic.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/pinctrl/apple.h>
+
+&{/soc} {
+	#address-cells = <2>;
+	#size-cells = <2>;
+	serial@20a0d4000 {
+		compatible = "apple,s5l-uart";
+		reg = <0x2 0x0a0d4000 0x0 0x4000>;
+		reg-io-width = <4>;
+		interrupt-parent = <&aic>;
+		interrupts = <AIC_IRQ 197 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&clkref>, <&clkref>;
+		clock-names = "uart", "clk_uart_baud0";
+		power-domains = <&ps_uart5>;
+		pinctrl-0 = <&battery_swi_pins>;
+		pinctrl-names = "default";
+		status = "okay";
+		onewire {
+			compatible = "ti,hdq-uart";
+			fuel-gauge {
+				compatible = "ti,bq27540-hdq";
+			};
+		};
+	};
+};
+
+&pinctrl_ap {
+	battery_swi_pins: battery-swi-pins {
+		pinmux = <APPLE_PINMUX(2, 1)>;
+	};
+};
