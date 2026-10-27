@@ -64,6 +64,42 @@ int main(void) {
         (root / 'test.c').write_text(program)
         subprocess.run(['cc', '-std=c11', '-Wall', '-Werror', str(root / 'test.c'), '-o', str(root / 'test')], check=True)
         subprocess.run([str(root / 'test')], check=True)
+        concurrent = r'''
+#include <stdint.h>
+#include <pthread.h>
+#include <sched.h>
+typedef uint32_t u32;
+#define DART_S5L8960X_TCR_BITS_PER_STREAM 8
+#define WARN_ON(x) (x)
+struct hw { u32 tcr; };
+struct apple_dart { unsigned char *regs; struct hw *hw; pthread_mutex_t lock; };
+#define spin_lock_irqsave(lock, flags) do { (flags) = 0; pthread_mutex_lock(lock); } while (0)
+#define spin_unlock_irqrestore(lock, flags) do { (void)(flags); pthread_mutex_unlock(lock); } while (0)
+static u32 readl(void *p) { u32 v = *(u32 *)p; sched_yield(); return v; }
+static void writel(u32 v, void *p) { *(u32 *)p = v; }
+''' + function(src) + r'''
+struct input { struct apple_dart *dart; u32 sid; };
+static void *worker(void *arg) {
+    struct input *in = arg;
+    for (int i = 0; i < 1000; i++) apple_dart_s5l8960x_write_tcr(in->dart, in->sid, 0x80);
+    return 0;
+}
+int main(void) {
+    struct hw hw = {0}; u32 reg = 0;
+    struct apple_dart dart = {(unsigned char *)&reg, &hw, PTHREAD_MUTEX_INITIALIZER};
+    pthread_t threads[4]; struct input args[4];
+    for (u32 i = 0; i < 4; i++) {
+        args[i] = (struct input){&dart, i};
+        if (pthread_create(&threads[i], 0, worker, &args[i])) return 1;
+    }
+    for (int i = 0; i < 4; i++) if (pthread_join(threads[i], 0)) return 2;
+    return reg == 0x80808080 ? 0 : 3;
+}
+'''
+        (root / 'concurrent.c').write_text(concurrent)
+        subprocess.run(['cc', '-std=c11', '-Wall', '-Werror', '-pthread', str(root / 'concurrent.c'), '-o', str(root / 'concurrent')], check=True)
+        subprocess.run([str(root / 'concurrent')], check=True)
+        print('Concurrent mocked stream updates retained all four fields')
 
 
 if __name__ == '__main__':

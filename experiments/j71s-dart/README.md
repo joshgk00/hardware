@@ -13,6 +13,9 @@ function and executes it with a mocked register; it checks enabling and
 disabling each stream, preservation of other fields, locking around register
 access, and no writes for invalid
 arguments. It requires a host C compiler and a separately patched kernel tree.
+It also runs simultaneous mocked updates from four threads using a real host
+mutex to exercise the shared-register read/modify/write path; this is not an
+on-device concurrency or DMA test.
 `prepare-dart.sh` applies the fix to a disposable checkout at the pinned
 revision only after checking the source and patch hashes, runs the mock test
 on a staged copy, and checks the resulting hash. It refuses reapplication and
