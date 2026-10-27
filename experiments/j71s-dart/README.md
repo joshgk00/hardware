@@ -43,3 +43,9 @@ previously verified battery image and its manifest plus the DART tree and
 kernel. It checks the hashes and ranges of all components, checks the final
 image hash, and refuses to overwrite a file. These exact digests describe one
 experimental build and are not a general installer or compatibility claim.
+`add-reset-markers.py` optionally adds logs immediately before and after the
+DART0 reset in a corrected source tree. They may help identify where a boot
+hang occurred if the framebuffer log is visible. The markers do not change the
+reset sequence. A separate kernel and RAM image built with the markers; neither
+has been booted. `assemble-test-image.py --reset-markers` validates that exact
+image and refuses the non-marker kernel when this option is selected.

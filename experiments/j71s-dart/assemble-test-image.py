@@ -13,6 +13,8 @@ BASE_SHA = 'b5c71d53c91a8ae931ebde589829587dc3e22fe6917c919c2fbfe8117ab9a3d5'
 DART_DTB_SHA = 'a7e48f28fc49912e8a6f52db95314e71cd241a546d1191bfeab1aed7a1c4cec1'
 DART_KERNEL_SHA = 'ae14ae272de5690015aa63f16e49543eca9f48bface744c8c860d88052f22d84'
 IMAGE_SHA = '9187433e84fd6385bc92a9ed9e3738e221ca55ee2bbe92c1b58acf92383d711f'
+MARKER_KERNEL_SHA = 'b6dabc64d164eb269ea3298e97f85ff765a97174d496f82069c9a61e1e07d17e'
+MARKER_IMAGE_SHA = 'f1257433e1ee7f51b91763bdd3796d2c0ee138469a142496d69d96e6114a73d6'
 
 
 def digest(data: bytes) -> str:
@@ -49,6 +51,7 @@ def main() -> None:
     parser.add_argument('dart_dtb', type=Path)
     parser.add_argument('dart_kernel', type=Path)
     parser.add_argument('output', type=Path)
+    parser.add_argument('--reset-markers', action='store_true', help='assemble the separately built reset-marker diagnostic')
     args = parser.parse_args()
     try:
         data = args.baseline.read_bytes()
@@ -57,10 +60,12 @@ def main() -> None:
         components = split_components(data, json.loads(args.manifest.read_text()))
         components['dtb'] = args.dart_dtb.read_bytes()
         components['kernel'] = args.dart_kernel.read_bytes()
-        if digest(components['dtb']) != DART_DTB_SHA or digest(components['kernel']) != DART_KERNEL_SHA:
+        kernel_sha = MARKER_KERNEL_SHA if args.reset_markers else DART_KERNEL_SHA
+        image_sha = MARKER_IMAGE_SHA if args.reset_markers else IMAGE_SHA
+        if digest(components['dtb']) != DART_DTB_SHA or digest(components['kernel']) != kernel_sha:
             raise ValueError('unexpected DART tree or kernel')
         image = b''.join(components[name] for name in NAMES)
-        if digest(image) != IMAGE_SHA:
+        if digest(image) != image_sha:
             raise ValueError('unexpected assembled image')
         with args.output.open('xb') as stream:
             stream.write(image)
