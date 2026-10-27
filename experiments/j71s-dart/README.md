@@ -148,3 +148,20 @@ link gates reported off. The evidence points to an availability or sequencing
 problem, but does not distinguish an inaccessible hardware block from another
 cause, and does not establish when before the driver's probe the state arose.
 No PCIe endpoint or DMA was enabled.
+
+`aux-power-holder.c` and `j71s-aux-holder.dtso` describe a separate,
+untested J71s experiment. The overlay gives a software-only platform device the
+PCIe AUX power domain; the tiny platform driver stays bound without requesting
+DMA or accessing a controller. Platform-device probe attaches and powers its
+single domain. The experiment is intended to compare the DART register reads
+before and after AUX becomes active, using `pcie-pmgr-observe.sh` and
+`busy-observe.sh`. It does not add the PCIe host or storage endpoint. Turning
+on the power domain is a hardware change and may hang or require DFU recovery;
+its safety and whether it affects DART availability are not established.
+
+An isolated test kernel incorporating the holder and a separate device tree
+have compiled. The exact local image and component hashes were checked, and the
+test tree retains the previously checked software-only consumer; no physical
+boot of this AUX experiment has yet occurred. A bound holder alone does not
+prove the gate reached its requested hardware state: check the power-state
+register separately.
