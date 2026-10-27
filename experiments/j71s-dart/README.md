@@ -170,3 +170,9 @@ actual/target state, five DART register all-ones comparisons, and relevant boot
 messages. On the prior baseline boot it correctly reported no holder, AUX off,
 and all five DART reads as all ones. That baseline result does not test AUX-on
 behavior.
+`prepare-aux-holder.sh` adds the holder to a disposable checkout at the pinned
+kernel revision after verifying the existing software-consumer source, IOMMU
+Makefile and holder source hashes. It refuses reapplication and changes no
+device tree or hardware. A prepared copy matched the source and Makefile used
+for the compiled experiment; this check does not validate the rest of the
+kernel checkout or the device tree.
