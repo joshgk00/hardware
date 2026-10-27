@@ -118,6 +118,9 @@ capacity, voltage, current, temperature and charge readings in three repeated
 checks. It reported discharging while connected to the test host; the image
 has no working charger driver. Values have not been compared with iPadOS and
 the BQ27541 profile remains an approximation for this BQ27540-compatible gauge.
+The host-served, read-only Omarchy A desktop test also displayed the same
+24% battery value in its top bar. This was a temporary overlay session, not
+an installed boot or a validation of charging.
 Pass `bootmux` as the fourth argument to the DTB builder to select the variant.
 
 The reused HDQ driver's receive decoder treats bytes `>= 0xf0` as a one.
