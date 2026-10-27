@@ -1,0 +1,14 @@
+#!/bin/sh
+# Read the bound driver's command-status register; never issue a command.
+set -eu
+model=$(tr '\000' '\n' < /proc/device-tree/compatible | head -n 1)
+[ "$model" = apple,j71s ] || { echo 'Wrong device tree' >&2; exit 1; }
+node=/sys/bus/platform/devices/601008000.iommu
+[ -L "$node/driver" ] || { echo 'DART0 driver not bound' >&2; exit 1; }
+driver=$(readlink "$node/driver")
+[ "${driver##*/}" = apple-dart ] || { echo 'Unexpected DART driver' >&2; exit 1; }
+for i in 1 2 3; do
+    reg=$(busybox devmem 0x601008000 32)
+    printf 'sample=%s busy_bit=%s\n' "$i" "$(((reg >> 3) & 1))"
+    [ "$i" = 3 ] || sleep 1
+done

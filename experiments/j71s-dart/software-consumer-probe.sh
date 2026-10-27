@@ -18,6 +18,9 @@ for node in /sys/bus/platform/devices/*j71s-dart-software-consumer*; do
 done
 echo 'DART and consumer messages:'
 dmesg | grep -iE '601008000|apple-dart|j71s-dart|iommu' | tail -n 60 || true
+if dmesg | grep -q 'busy bit did not clear after command'; then
+    echo 'DART invalidate timeout observed; domain registration does not establish working translation.'
+fi
 echo 'Battery status:'
 for field in status capacity current_now; do
     [ -r "/sys/class/power_supply/battery/$field" ] || continue

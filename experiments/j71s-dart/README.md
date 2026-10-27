@@ -77,9 +77,28 @@ isolation-checked tree and driver have not been booted; a hang may require DFU.
 kernel checkout, and `build-software-consumer-dtb.sh` rejects other boards,
 existing conflicting nodes and additional IOMMU consumers.
 The test kernel and image have compiled and passed component-hash checks but
-have not been physically booted. `software-consumer-probe.sh` reads binding,
+were initially untested on hardware. `software-consumer-probe.sh` reads binding,
 IOMMU group and kernel-log information after a test without submitting DMA.
 `assemble-test-image.py --software-consumer` reconstructs the exact test image.
 `test-software-consumer.py` exercises the probe with synthetic model and domain
 states: missing, blocked and identity domains are rejected; a DMA domain is
 accepted. It does not simulate the kernel's pre-probe IOMMU attachment.
+
+On one J71s boot, the software consumer joined IOMMU group 0 and its probe
+reported a DMA domain. However, the DART driver also reported that its busy
+bit did not clear after an invalidate command for stream 0. The pinned
+driver's `apple_dart_setup_translation()` ignores the invalidate return value,
+so domain registration does not establish a successful translation setup. No
+physical endpoint or DMA transfer was tested. The gauge initially returned
+I/O errors, then recovered on a later reading. The timeout cause is unresolved;
+do not use this result to claim working DMA or storage.
+Afterward, Linux's read-only power-domain summary showed `pcie` on and
+`pcie_aux`, `pcie_ref`, and all four PCIe link domains off. This is a snapshot
+of Linux's domain state, not proof of physical clock state or evidence that
+turning on another domain will resolve the timeout.
+Three later read-only samples of the command-status register, one second apart,
+each showed bit 3 set. That is the bit the current older-DART driver treats as
+busy, so it did not appear to clear within that sampling window. The bit's
+meaning on S8000 is not independently established. `busy-observe.sh` checks
+the J71s model and bound driver before repeating this read; it writes no
+registers and sends no commands.
