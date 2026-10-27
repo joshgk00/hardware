@@ -105,3 +105,8 @@ registers and sends no commands.
 The stream-0 control register also had the driver's translation-enable bit
 set. That indicates the requested control bit was retained, not that the
 invalidate completed or an address translation succeeded.
+
+A further read-only sample reported the command register value was at least
+`0x1000` and bit 12 was set while bit 3 remained set. The meaning of bit 12
+and the reason for the stuck busy bit are not established. The observer now
+reports these fields without exposing the full register value.
