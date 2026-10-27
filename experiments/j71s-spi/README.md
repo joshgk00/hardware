@@ -64,6 +64,9 @@ checks the exact source digest and refuses reapplication. The resulting log
 would describe the early Linux state, not necessarily the state before all
 bootloader activity; it does not establish the correct SPI function.
 On one physical diagnostic boot the early log reported GPIO102 function 0,
-input enabled and pull code 0, matching the later read-only snapshot. The SPI
-master and battery gauge remained available. This does not determine which
-function drives chip select or establish electrical timing.
+input enabled and pull code 0, matching the later read-only snapshot. The
+original logging used a helper that returns zero on read failure, although
+the reported input-enabled bit was set. The updated diagnostic explicitly
+reports a read error and has not yet been physically booted. The SPI master
+and battery gauge remained available. These observations do not determine
+which function drives chip select or establish electrical timing.

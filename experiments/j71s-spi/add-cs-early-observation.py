@@ -11,12 +11,16 @@ ANCHOR = '''\tfor (i = 0; i < npins; i++) {
 INSERT = '''\t/* J71s experiment: observe CS pin before pinctrl registration. */
 \tif (npins > 102 && of_machine_is_compatible("apple,j71s") &&
 \t    !strcmp(dev_name(pctl->dev), "20f100000.pinctrl")) {
-\t\tu32 before = apple_gpio_get_reg(pctl, 102);
+\t\tu32 before;
+\t\tint err = regmap_read(pctl->map, REG_GPIO(102), &before);
 
-\t\tdev_info(pctl->dev, "experimental SPI3 CS early: function=%u input=%u pull=%u\\n",
-\t\t\t (unsigned int)FIELD_GET(REG_GPIOx_PERIPH, before),
-\t\t\t !!(before & REG_GPIOx_INPUT_ENABLE),
-\t\t\t (unsigned int)FIELD_GET(REG_GPIOx_PULL, before));
+\t\tif (err)
+\t\t\tdev_warn(pctl->dev, "experimental SPI3 CS early read failed: %d\\n", err);
+\t\telse
+\t\t\tdev_info(pctl->dev, "experimental SPI3 CS early: function=%u input=%u pull=%u\\n",
+\t\t\t\t (unsigned int)FIELD_GET(REG_GPIOx_PERIPH, before),
+\t\t\t\t !!(before & REG_GPIOx_INPUT_ENABLE),
+\t\t\t\t (unsigned int)FIELD_GET(REG_GPIOx_PULL, before));
 \t}
 
 '''
