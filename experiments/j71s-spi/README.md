@@ -9,8 +9,7 @@ resulting source hash. The third patch applies with line offsets. It does not
 create a device tree node or enable any hardware.
 
 The driver object and a full kernel image built with the Orchard J71s config and
-LLVM 19, combined with the separate experimental battery changes. The latter
-image has not been packaged or booted. A successful build does not prove that
+LLVM 19, combined with the separate experimental battery changes. A successful build does not prove that
 the controller, clocks, touch power or firmware sequence work on J71s. The J81
 board uses different GPIOs and a different PMU; do not copy its settings.
 
@@ -44,3 +43,10 @@ that the clock, transfers, firmware or touchscreen work.
 On the existing battery-only J71s RAM boot, the probe reported no SPI3
 platform device or SPI master. This establishes the baseline for a later
 controller-only test; it does not test the prepared controller image.
+
+On a subsequent controller-only J71s RAM boot, Linux bound `apple-spi` to
+`20a08c000.spi` and registered `spi0` under that controller. No SPI child
+devices were present, and the controller's runtime status was suspended when
+checked. The battery gauge and USB serial remained available. This is one
+successful initialization on one iPad, not a test of IRQs, clock rate, pinmux,
+SPI transfers, touch power, firmware, or touchscreen input.
