@@ -227,3 +227,6 @@ helps DART access are unknown. The holders bind after DART probe, so the test
 still cannot establish whether a different initial probe ordering would help.
 It changes hardware power management, may hang, and may require DFU recovery.
 No storage endpoint or physical DMA is enabled.
+The power-state observer reports each gate's minimum auto-PM state. Before the
+minimum-state experiment, the reference gate's minimum field read 0. This is a
+single read-only baseline, not evidence the later setting will take effect.
