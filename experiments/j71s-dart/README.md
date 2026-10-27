@@ -186,3 +186,7 @@ alone did not make the registers respond afterward; it does not test powering
 AUX before DART probe or together with the reference domain. No physical DMA,
 PCIe host or storage endpoint was enabled. Battery and system remained
 responsive, but enabling AUX increased the reported discharge current.
+After collecting the result, the test holder was unbound. AUX returned to
+actual/target state 0 and reported discharge current fell from approximately
+363 mA to 256 mA. These are individual gauge samples, not power measurements
+or proof of battery accuracy.
