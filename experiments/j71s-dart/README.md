@@ -38,3 +38,8 @@ The current battery/SPI diagnostic reports no DART0 platform device; the
 after a future test. The DART-only tree built and rejected the wrong board
 and an existing output file. A kernel containing the stream fix also built;
 the assembled RAM image has not yet been tested on hardware.
+`assemble-test-image.py` reconstructs that exact local test image from the
+previously verified battery image and its manifest plus the DART tree and
+kernel. It checks the hashes and ranges of all components, checks the final
+image hash, and refuses to overwrite a file. These exact digests describe one
+experimental build and are not a general installer or compatibility claim.
