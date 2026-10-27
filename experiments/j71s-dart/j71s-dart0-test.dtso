@@ -1,0 +1,24 @@
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
+/* Controller-only experiment: booting powers PCIe and lets apple-dart reset
+ * the DART. No PCIe host, NVMe MMU, endpoint, iommu-map or storage is added.
+ * Addresses and IRQ come from the J71s Apple tree; the fallback compatible and
+ * PCIe power association are hypotheses based on related devices.
+ */
+/dts-v1/;
+/plugin/;
+#include <dt-bindings/interrupt-controller/apple-aic.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+&{/soc} {
+	#address-cells = <2>;
+	#size-cells = <2>;
+	iommu@601008000 {
+		compatible = "apple,s8000-dart", "apple,s5l8960x-dart";
+		reg = <0x6 0x01008000 0x0 0x4000>;
+		interrupt-parent = <&aic>;
+		interrupts = <AIC_IRQ 245 IRQ_TYPE_LEVEL_HIGH>;
+		#iommu-cells = <1>;
+		power-domains = <&ps_pcie>;
+		status = "okay";
+	};
+};

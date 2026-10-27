@@ -24,3 +24,17 @@ that the driver works on S8000. The patch has not been tested on a physical
 DART, does not enable a device tree node, and does not establish why another
 device hung during DART probe. Do not use it to access internal storage until
 the controller, DMA and recovery path have been separately validated.
+
+`build-dart0-test-dtb.sh` prepares a separate DART0-only probe tree. It checks
+the model, register range, IRQ, and hypothesized PCIe power domain and refuses
+a base containing the PCIe host. A [J81 investigation](https://github.com/mattonik/ipad-nixos/blob/b94d42f78e04c5465e290340a5b6879bbc5956b6/research/t7000-pcie-hardware-findings.md)
+found that its DART needed an explicit PCIe power domain to avoid a probe hang;
+this supports a hypothesis, not a guarantee for J71s. Booting the test tree
+powers PCIe and causes the driver to reset DART registers; it may hang and
+require DFU recovery. It adds no PCIe host or NVMe device and is not a storage
+access or installation test. It has not been booted on J71s.
+The current battery/SPI diagnostic reports no DART0 platform device; the
+`dart0-probe.sh` read-only script records the device binding and kernel log
+after a future test. The DART-only tree built and rejected the wrong board
+and an existing output file. A kernel containing the stream fix also built;
+the assembled RAM image has not yet been tested on hardware.
