@@ -10,10 +10,10 @@ base=$(realpath "$2")
 output=$3
 [[ -d "$headers/dt-bindings" && -f "$base" && ! -e "$output" && ! -L "$output" ]] || exit 1
 here=$(cd "$(dirname "$0")" && pwd)
-bash "$here/check-disabled-dtb.sh" "$headers" "$base"
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 cp "$base" "$work/base.dtb"
+bash "$here/check-disabled-dtb.sh" "$headers" "$work/base.dtb"
 cp "$here/j71s-spi3-disabled.dtso" "$work/spi.dtso"
 "${ORCHARD_PYTHON:-python3}" -m orchard_hardware.buildenv run \
   --bind "$headers:/headers:ro" --bind "$work:/out:rw" \
@@ -33,6 +33,6 @@ cp "$here/j71s-spi3-disabled.dtso" "$work/spi.dtso"
     [[ $(fdtget -t s "$ORCHARD_OUT/result.dtb" / compatible) == "apple,j71s apple,s8000 apple,arm-platform" ]]
   '
 mkdir -p "$(dirname "$output")"
-cp --no-clobber "$work/result.dtb" "$output"
+( set -o noclobber; cat "$work/result.dtb" > "$output" )
 echo "Experimental controller-only DTB: $output"
 echo 'Booting it powers SPI3 and initializes its controller; no touch child or pinmux is configured.'

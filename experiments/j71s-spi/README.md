@@ -41,3 +41,6 @@ test tree must not be used as an installer or merged into normal support.
 kernel messages after such a boot. It issues no transfer and does not touch
 the touchscreen power or pins. Controller registration alone does not prove
 that the clock, transfers, firmware or touchscreen work.
+On the existing battery-only J71s RAM boot, the probe reported no SPI3
+platform device or SPI master. This establishes the baseline for a later
+controller-only test; it does not test the prepared controller image.
