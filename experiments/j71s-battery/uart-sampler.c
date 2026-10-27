@@ -33,16 +33,21 @@ void _start(void) {
     if (fd < 0) { print("Cannot open /dev/mem\n"); call(93,1,0,0,0,0,0); }
     long base=call(222,0,0x4000,1,1,fd,0x20a0d4000UL);
     if (base < 0) { print("Cannot map UART status\n"); call(93,1,0,0,0,0,0); }
+    long gpio=call(222,0,0x4000,1,1,fd,0x20f100000UL);
+    if (gpio < 0) { print("Cannot map GPIO status\n"); call(93,1,0,0,0,0,0); }
     volatile u32 *status=(volatile u32 *)(base+0x10), *fifo=(volatile u32 *)(base+0x18);
+    volatile u32 *pin=(volatile u32 *)(gpio+8);
     struct timespec delay={0,100000};
-    u32 ready=0,rx=0,tx=0;
+    u32 ready=0,rx=0,tx=0,pin_low=0;
     for (u32 i=0;i<6000;i++) {
         u32 s=*status, f=*fifo;
         ready += !!(s & 1); rx += !!(f & 0x10f); tx += !!(f & 0x2f0);
+        pin_low += !(*pin & 1);
         call(101,(long)&delay,0,0,0,0,0);
     }
     print("samples=6000 rx_ready="); number(ready); print(" rx_fifo="); number(rx);
-    print(" tx_fifo="); number(tx); print("\n");
+    print(" tx_fifo="); number(tx); print(" gpio_data_low="); number(pin_low); print("\n");
+    call(215,gpio,0x4000,0,0,0,0);
     call(215,base,0x4000,0,0,0,0); call(57,fd,0,0,0,0,0); call(93,0,0,0,0,0,0);
     __builtin_unreachable();
 }

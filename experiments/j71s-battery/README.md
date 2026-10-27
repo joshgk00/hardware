@@ -69,6 +69,9 @@ and bound UART driver first. When run around a fresh battery request twice,
 it recorded zero RX-ready and RX-FIFO indications and nine TX-FIFO samples each
 time. Scheduling gaps and concurrent driver reads mean brief receive events
 can still be missed; the result does not establish an electrical cause.
+One further run also sampled GPIO 2's data bit and observed it high in all
+6,000 samples. Its meaning while the pin is muxed to a peripheral is not
+verified, so this does not prove that the physical line stayed high.
 In the J71s diagnostic boot, read-only snapshots of the configuration
 registers already read by the Linux UART driver reported ULCON `0x07`, UCON
 `0x1885`, UFCON `0x31`, and UBRDIV `0x19`. The A5 polling example uses ULCON
