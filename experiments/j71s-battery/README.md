@@ -20,6 +20,11 @@ compatible and hypothesized pinmux. It expects the project's Python build
 module, and `ORCHARD_PYTHON` can select the interpreter containing it.
 `battery-probe.sh` reads battery status and relevant kernel messages in the
 RAM test; it intentionally avoids raw device trees and calibration data.
+`add-hdq-debug.py` can add temporary, disabled-by-default dynamic-debug probes
+to an already prepared source checkout. On a kernel built with those probes,
+`hdq-debug-probe.sh` enables them briefly for one battery status request, then
+disables them and restores a read-only debugfs mount. It reports interrupt
+status and receive-byte counts, not gauge values or private device data.
 
 The selected patch subset was applied and compiled against the pinned kernel.
 The overlay built successfully, its output properties were checked, and a
