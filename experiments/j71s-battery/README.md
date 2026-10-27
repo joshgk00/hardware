@@ -27,6 +27,15 @@ J72s base tree was rejected. A RAM-only image containing the experimental
 kernel and overlay was assembled and its component hashes verified. None of
 these checks constitutes a physical boot or battery-gauge validation.
 
+On the first physical J71s RAM boot, Linux bound the S5L UART at
+`0x20a0d4000`, selected GPIO 2 peripheral function 2, and registered a 1-Wire
+slave and battery power-supply device. Those registrations alone did not prove
+communication: status, capacity, voltage, current and temperature returned I/O
+errors. One dynamically enabled HDQ debug message reported a transfer timeout
+(`-ETIMEDOUT`). This does not identify whether the pin wiring, UART timing,
+echo, gauge response or another part of the transport is responsible. The
+experiment must not be presented as working battery support.
+
 The reused gauge driver provides only its read callback, not a gauge-write
 callback. Nevertheless, the experiment configures UART/pinctrl and transmits
 HDQ read commands. The electrical behavior, UART timing, gauge values and
