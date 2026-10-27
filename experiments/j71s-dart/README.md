@@ -215,3 +215,15 @@ whether activating the reference clock before probe would help. No physical
 DMA or storage endpoint was enabled. Afterward both holders were unbound; both
 gates reported actual/target 0 and the gauge's sampled discharge current fell
 from approximately 444 mA to 260 mA. Gauge accuracy remains unverified.
+
+`j71s-ref-min-active.dtso` prepares another untested RAM experiment: it sets
+the reference power domain's `apple,min-state` to 15. The pinned PMGR binding
+describes this as the minimum auto-power state (15 means on), and the driver
+programs that field during domain probe. The overlay is layered on the AUX
+and reference holder test, and the assembled image, DTB, model, domain offset
+and absence of a PCIe host were checked. This may keep the reference domain
+active and increase battery drain until reboot; actual behavior and whether it
+helps DART access are unknown. The holders bind after DART probe, so the test
+still cannot establish whether a different initial probe ordering would help.
+It changes hardware power management, may hang, and may require DFU recovery.
+No storage endpoint or physical DMA is enabled.
