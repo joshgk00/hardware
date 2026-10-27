@@ -204,3 +204,14 @@ released after observation. No PCIe host or storage endpoint is enabled.
 The observer also reports the reference holder and reference gate; on the
 AUX test after cleanup both gate targets and actual states were zero. Boot
 messages are historical, so current binding is reported separately.
+
+On one physical J71s boot with the combined overlays, both holders bound.
+AUX reported actual/target 15; reference reported target 15, actual 4, and
+automatic power management enabled. The pinned PMGR driver names state 4 as
+clock-gated, so binding the reference holder did not establish that its clock
+was running during the observation. Five DART registers still read all ones.
+The DART probe preceded both holder bindings, so this test does not establish
+whether activating the reference clock before probe would help. No physical
+DMA or storage endpoint was enabled. Afterward both holders were unbound; both
+gates reported actual/target 0 and the gauge's sampled discharge current fell
+from approximately 444 mA to 260 mA. Gauge accuracy remains unverified.
