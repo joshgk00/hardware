@@ -47,7 +47,8 @@ On a second RAM boot with opt-in diagnostic probes, a fresh battery request
 timed out with zero received bytes recorded by the HDQ driver. No UART IRQ
 status message appeared for that request; the transmitted byte counter rose.
 The gauge driver's five-second cache must expire before a diagnostic request
-can force another transfer.
+can force another transfer. Three additional requests after cache expiry each
+timed out with zero received bytes, so the observed failure was repeatable.
 For further comparison, [Project Cascadia's older iPad mini driver](https://github.com/rzxvx/Project-Cascadia/blob/2d2e875e85f8a8e1f5cab063c14a519c72871b5e/patches/files/drivers/power/supply/apple-hdq-battery.c)
 uses direct UART polling and different initialization on its A5 device. Its
 success is not evidence that the same register settings are safe or correct
