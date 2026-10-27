@@ -13,6 +13,10 @@ function and executes it with a mocked register; it checks enabling and
 disabling each stream, preservation of other fields, locking around register
 access, and no writes for invalid
 arguments. It requires a host C compiler and a separately patched kernel tree.
+`prepare-dart.sh` applies the fix to a disposable checkout at the pinned
+revision only after checking the source and patch hashes, runs the mock test
+on a staged copy, and checks the resulting hash. It refuses reapplication and
+does not create a device-tree node or access hardware.
 
 The J71s Apple tree identifies a 4 KiB-page S8000 PCIe DART; the kernel's
 older DART variant also uses 4 KiB pages. This similarity does not establish
