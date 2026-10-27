@@ -1,0 +1,9 @@
+/dts-v1/;
+/plugin/;
+&{/soc} {
+	j71s-pcie-ref-holder {
+		compatible = "orchard,j71s-pcie-aux-test";
+		power-domains = <&ps_pcie_ref>;
+		status = "okay";
+	};
+};

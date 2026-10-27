@@ -190,3 +190,14 @@ After collecting the result, the test holder was unbound. AUX returned to
 actual/target state 0 and reported discharge current fell from approximately
 363 mA to 256 mA. These are individual gauge samples, not power measurements
 or proof of battery accuracy.
+
+`j71s-ref-holder.dtso` is a second untested overlay for the auxiliary test
+image. It binds another instance of the same software-only holder driver to the
+PCIe reference power domain. Its driver log retains the AUX test name; use the
+platform-device name and PMGR register readings to distinguish the two. A
+separate RAM image with both overlays was assembled and its domain phandles,
+register offsets, kernel and image hashes checked. It has not been booted.
+As with the AUX-only test, DART probe happens before these holders bind; this
+experiment checks register access after both domains are requested, not the
+initial power-up ordering. Both domains may increase battery drain and can be
+released after observation. No PCIe host or storage endpoint is enabled.
