@@ -27,7 +27,7 @@ the controller, DMA and recovery path have been separately validated.
 
 `build-dart0-test-dtb.sh` prepares a separate DART0-only probe tree. It checks
 the model, register range, IRQ, and hypothesized PCIe power domain and refuses
-a base containing the PCIe host. A [J81 investigation](https://github.com/mattonik/ipad-nixos/blob/b94d42f78e04c5465e290340a5b6879bbc5956b6/research/t7000-pcie-hardware-findings.md)
+a base containing the PCIe host or any IOMMU consumer. A [J81 investigation](https://github.com/mattonik/ipad-nixos/blob/b94d42f78e04c5465e290340a5b6879bbc5956b6/research/t7000-pcie-hardware-findings.md)
 found that its DART needed an explicit PCIe power domain to avoid a probe hang;
 this supports a hypothesis, not a guarantee for J71s. Booting the test tree
 powers PCIe and causes the driver to reset DART registers; it may hang and

@@ -39,6 +39,21 @@ cp "$here/j71s-dart0-test.dtso" "$work/dart.dtso"
     if fdtget -t s "$ORCHARD_OUT/result.dtb" /soc/pcie@610000000 compatible >/dev/null 2>&1; then
       echo "PCIe host already present; refusing isolated test" >&2; exit 1
     fi
+    # Reject any IOMMU consumer, even on a disabled node: the experiment must
+    # exercise DART probe alone and must not set up an endpoint DMA mapping.
+    no_iommu_consumers() {
+      local path=$1 child next
+      if fdtget "$ORCHARD_OUT/result.dtb" "$path" iommus >/dev/null 2>&1 ||
+         fdtget "$ORCHARD_OUT/result.dtb" "$path" iommu-map >/dev/null 2>&1; then
+        echo "IOMMU consumer found at $path; refusing isolated test" >&2
+        return 1
+      fi
+      for child in $(fdtget -l "$ORCHARD_OUT/result.dtb" "$path"); do
+        if [[ "$path" == / ]]; then next="/$child"; else next="$path/$child"; fi
+        no_iommu_consumers "$next" || return 1
+      done
+    }
+    no_iommu_consumers /
   '
 mkdir -p "$(dirname "$output")"
 ( set -o noclobber; cat "$work/result.dtb" > "$output" )
