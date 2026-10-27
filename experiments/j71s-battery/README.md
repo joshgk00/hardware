@@ -98,6 +98,12 @@ establish functional battery communication. A fast read-only sample during
 another request again found TX FIFO activity but no RX-ready or RX-FIFO bits;
 the sampling limitations above still apply.
 
+`log-pin-before-mux.py` prepares an additional diagnostic that reports GPIO 2's
+peripheral function, input-enable bit and pull setting immediately before the
+Linux pinctrl driver applies the experimental UART mux. It only reads that
+configuration; the actual pinctrl operation is unchanged. The resulting
+kernel needs a physical RAM boot before any conclusion can be drawn.
+
 The reused HDQ driver's receive decoder treats bytes `>= 0xf0` as a one.
 TI's [HDQ UART application note](https://www.ti.com/lit/an/slua408/slua408.pdf)
 lists `0xf0` among possible zero encodings and uses a threshold above `0xf8`.
