@@ -103,8 +103,8 @@ meaning on S8000 is not independently established. `busy-observe.sh` checks
 the J71s model and bound driver before repeating this read; it writes no
 registers and sends no commands.
 The stream-0 control register also had the driver's translation-enable bit
-set. That indicates the requested control bit was retained, not that the
-invalidate completed or an address translation succeeded.
+set, but a later full-value check showed the entire register read as all ones.
+That does not establish that the requested control bit was retained.
 
 A further read-only sample reported the command register value was at least
 `0x1000` and bit 12 was set while bit 3 remained set. The meaning of bit 12
@@ -118,3 +118,14 @@ timeout occurred. Three later read-only samples again showed bit 3 set, the
 command register value at least `0x1000`, and bit 12 set. The test did not
 instantiate a PCIe host, submit DMA, or access storage. Thus requesting all
 four streams alone did not resolve the timeout; the cause remains unknown.
+
+After the all-stream test, read-only checks found that five DART0 offsets
+(command, stream control and three configuration offsets) all returned
+`0xffffffff`. This may mean the block is unavailable or not responding; the
+cause and when the all-ones state began are unknown. It also means the earlier
+busy-bit and translation-enable observations cannot independently establish
+actual controller state. The driver can report reset completion despite these
+reads; binding and reset return therefore do not establish working hardware.
+A future test must sample before the first command as well as afterward and
+should investigate power and availability without attaching a physical DMA
+consumer.
