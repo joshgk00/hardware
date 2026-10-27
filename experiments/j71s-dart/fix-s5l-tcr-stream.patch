@@ -1,0 +1,24 @@
+diff --git i/drivers/iommu/apple-dart.c w/drivers/iommu/apple-dart.c
+index 85311e95f..9e3760479 100644
+--- i/drivers/iommu/apple-dart.c
++++ w/drivers/iommu/apple-dart.c
+@@ -367,11 +367,15 @@ static u32 apple_dart_s5l8960x_read_tcr(struct apple_dart *dart, u32 sid)
+ 
+ static void apple_dart_s5l8960x_write_tcr(struct apple_dart *dart, u32 sid, u32 val)
+ {
+-	WARN_ON(sid >= 4);
+-	u32 tcr = readl(dart->regs + dart->hw->tcr);
++	u32 shift, tcr;
+ 
+-	tcr &= 0xff << (sid * DART_S5L8960X_TCR_BITS_PER_STREAM);
+-	tcr |= val;
++	if (WARN_ON(sid >= 4 || val > 0xff))
++		return;
++
++	shift = sid * DART_S5L8960X_TCR_BITS_PER_STREAM;
++	tcr = readl(dart->regs + dart->hw->tcr);
++	tcr &= ~(0xffU << shift);
++	tcr |= val << shift;
+ 	writel(tcr, dart->regs + dart->hw->tcr);
+ }
+ 
