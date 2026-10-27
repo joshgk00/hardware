@@ -165,3 +165,8 @@ test tree retains the previously checked software-only consumer; no physical
 boot of this AUX experiment has yet occurred. A bound holder alone does not
 prove the gate reached its requested hardware state: check the power-state
 register separately.
+`aux-power-probe.sh` combines the read-only checks for holder binding, AUX
+actual/target state, five DART register all-ones comparisons, and relevant boot
+messages. On the prior baseline boot it correctly reported no holder, AUX off,
+and all five DART reads as all ones. That baseline result does not test AUX-on
+behavior.
