@@ -201,3 +201,6 @@ As with the AUX-only test, DART probe happens before these holders bind; this
 experiment checks register access after both domains are requested, not the
 initial power-up ordering. Both domains may increase battery drain and can be
 released after observation. No PCIe host or storage endpoint is enabled.
+The observer also reports the reference holder and reference gate; on the
+AUX test after cleanup both gate targets and actual states were zero. Boot
+messages are historical, so current binding is reported separately.

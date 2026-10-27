@@ -3,15 +3,19 @@
 set -eu
 model=$(tr '\000' '\n' < /proc/device-tree/compatible | head -n 1)
 [ "$model" = apple,j71s ] || { echo 'Wrong device tree' >&2; exit 1; }
-node=/sys/bus/platform/devices/soc:j71s-pcie-aux-holder
-if [ -L "$node/driver" ]; then
-    driver=$(readlink "$node/driver")
-    printf 'aux_holder_driver=%s\n' "${driver##*/}"
-else
-    echo 'aux_holder_driver=none'
-fi
-reg=$(busybox devmem 0x20e080318 32)
-printf 'aux_actual=%s target=%s all_ones=%s\n' "$(((reg >> 4) & 15))" "$((reg & 15))" "$((reg == 0xffffffff))"
+for entry in aux:318 ref:148; do
+    name=${entry%:*}
+    offset=${entry#*:}
+    node=/sys/bus/platform/devices/soc:j71s-pcie-$name-holder
+    if [ -L "$node/driver" ]; then
+        driver=$(readlink "$node/driver")
+        printf '%s_holder_driver=%s\n' "$name" "${driver##*/}"
+    else
+        printf '%s_holder_driver=none\n' "$name"
+    fi
+    reg=$(busybox devmem "0x20e080$offset" 32)
+    printf '%s_actual=%s target=%s all_ones=%s\n' "$name" "$(((reg >> 4) & 15))" "$((reg & 15))" "$((reg == 0xffffffff))"
+done
 dart=/sys/bus/platform/devices/601008000.iommu
 if [ -L "$dart/driver" ]; then
     driver=$(readlink "$dart/driver")
