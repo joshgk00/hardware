@@ -1,15 +1,16 @@
-# Unverified J71s HDQ battery experiment
+# Experimental J71s HDQ battery bring-up
 
 This experiment targets only the S8000 iPad 5 Wi-Fi (`iPad6,11`, J71sAP).
-It has not been tested on hardware and is not part of the normal build or an
+It has been tested on one device but is not part of the normal build or an
 installer. It does not add touchscreen, internal storage, Wi-Fi or charging
 support. J71t and other boards need separate identification.
 
 The J71s Apple device tree reports `gas-gauge,bq27540` / `gas-gauge,hdq` on
 UART5. Address translation gives `0x20a0d4000`, with IRQ 197. The UART transmit
 and battery single-wire functions both have GPIO argument 2 and raw function
-argument 258. The overlay's pinmux function 2 is a hypothesis, not a confirmed
-electrical mapping. The same gauge family appears in the J71b work, but its
+argument 258. The first overlay's pinmux function 2 did not receive responses;
+the separate function 1 variant produced battery readings on the tested iPad.
+The same gauge family appears in the J71b work, but its
 interrupt and pin differ.
 
 `prepare-j71s-hdq.sh` selects the HDQ-related pieces of the pinned J71b kernel
@@ -29,8 +30,8 @@ status and receive-byte counts, not gauge values or private device data.
 The selected patch subset was applied and compiled against the pinned kernel.
 The overlay built successfully, its output properties were checked, and a
 J72s base tree was rejected. A RAM-only image containing the experimental
-kernel and overlay was assembled and its component hashes verified. None of
-these checks constitutes a physical boot or battery-gauge validation.
+kernel and overlay was assembled and its component hashes verified. Those
+offline checks alone did not establish that the gauge would work.
 
 On the first physical J71s RAM boot, Linux bound the S5L UART at
 `0x20a0d4000`, selected GPIO 2 peripheral function 2, and registered a 1-Wire
@@ -105,19 +106,24 @@ configuration; the actual pinctrl operation is unchanged. The resulting
 kernel was RAM-booted on one J71s and reported that before Linux applied the
 experimental function 2, GPIO 2 was already set to function 1, input enabled,
 and pull code 0. This is a boot-time observation, not proof that function 1 is
-the correct battery route. `j71s-battery-gauge-bootmux.dtso` is a separate,
-untested hypothesis that selects function 1. Pass `bootmux` as the fourth
-argument to the DTB builder to select that variant.
+the correct battery route. `j71s-battery-gauge-bootmux.dtso` is a separate
+variant that selects function 1. On the same J71s, a RAM boot with that variant
+and the UART bit-preservation change produced plausible battery status,
+capacity, voltage, current, temperature and charge readings in three repeated
+checks. It reported discharging while connected to the test host; the image
+has no working charger driver. Values have not been compared with iPadOS and
+the BQ27541 profile remains an approximation for this BQ27540-compatible gauge.
+Pass `bootmux` as the fourth argument to the DTB builder to select the variant.
 
 The reused HDQ driver's receive decoder treats bytes `>= 0xf0` as a one.
 TI's [HDQ UART application note](https://www.ti.com/lit/an/slua408/slua408.pdf)
 lists `0xf0` among possible zero encodings and uses a threshold above `0xf8`.
 Under those documented examples the current decoder would misinterpret
-`0xf0`. This may need a separate decoder fix if bytes are received; it cannot
-explain the present zero-byte timeout, and actual J71s timing is unverified.
+`0xf0`. This may need a separate decoder fix; it did not explain the function 2
+variant's zero-byte timeout, and actual J71s timing is unverified.
 
 The reused gauge driver provides only its read callback, not a gauge-write
 callback. Nevertheless, the experiment configures UART/pinctrl and transmits
-HDQ read commands. The electrical behavior, UART timing, gauge values and
-failure handling are unverified on J71s. Validate those separately before
-considering a normal device target or publishing a claim of battery support.
+HDQ read commands. The first function 1 test is encouraging, but UART timing,
+gauge accuracy, repeated boots, failure handling and charging are not fully
+validated. Validate those before considering a normal device target.
