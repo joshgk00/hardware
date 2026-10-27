@@ -35,6 +35,9 @@ errors. One dynamically enabled HDQ debug message reported a transfer timeout
 (`-ETIMEDOUT`). This does not identify whether the pin wiring, UART timing,
 echo, gauge response or another part of the transport is responsible. The
 experiment must not be presented as working battery support.
+After those reads, Linux UART counters showed 80 transmitted bytes and zero
+received bytes. This narrows the failure to the receive path or earlier
+electrical/transport behavior; it does not prove which component is at fault.
 
 The reused gauge driver provides only its read callback, not a gauge-write
 callback. Nevertheless, the experiment configures UART/pinctrl and transmits
