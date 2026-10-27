@@ -138,3 +138,13 @@ AUX, reference and link gates reported actual and target state 0. The register
 values were not all ones. This is a momentary PMGR report, not proof that all
 clocks or the DART are accessible, nor evidence that enabling another gate is
 safe or sufficient.
+
+A further RAM boot instrumented the same three DART register reads immediately
+before and after the driver's reset. All three read as `0xffffffff` at both
+points, before the software consumer's invalidate command. Thus the all-ones
+response was already present before that reset and command in this boot. The
+main PCIe PMGR gate again reported active afterward, while AUX, reference and
+link gates reported off. The evidence points to an availability or sequencing
+problem, but does not distinguish an inaccessible hardware block from another
+cause, and does not establish when before the driver's probe the state arose.
+No PCIe endpoint or DMA was enabled.
