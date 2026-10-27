@@ -7,10 +7,11 @@ write function retains only the selected old field and ORs the new value into
 the low byte. This can clear unrelated streams, retain bits intended to be
 cleared, and update the wrong field for streams 1–3.
 
-`fix-s5l-tcr-stream.patch` replaces only the selected field and rejects an
-out-of-range stream or value. `test-tcr.py` extracts the actual patched C
+`fix-s5l-tcr-stream.patch` replaces only the selected field under the DART
+spinlock and rejects an out-of-range stream or value. `test-tcr.py` extracts the actual patched C
 function and executes it with a mocked register; it checks enabling and
-disabling each stream, preservation of other fields, and no writes for invalid
+disabling each stream, preservation of other fields, locking around register
+access, and no writes for invalid
 arguments. It requires a host C compiler and a separately patched kernel tree.
 
 The J71s Apple tree identifies a 4 KiB-page S8000 PCIe DART; the kernel's

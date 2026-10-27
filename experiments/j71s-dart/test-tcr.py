@@ -32,15 +32,17 @@ typedef uint32_t u32;
 #define DART_S5L8960X_TCR_BITS_PER_STREAM 8
 #define WARN_ON(x) (x)
 struct hw { u32 tcr; };
-struct apple_dart { unsigned char *regs; struct hw *hw; };
-static int writes;
-static u32 readl(void *p) { return *(u32 *)p; }
-static void writel(u32 v, void *p) { *(u32 *)p = v; writes++; }
+struct apple_dart { unsigned char *regs; struct hw *hw; int lock; };
+static int writes, violations, locked;
+#define spin_lock_irqsave(lock, flags) do { (void)(lock); (flags) = 0; if (locked) violations++; locked = 1; } while (0)
+#define spin_unlock_irqrestore(lock, flags) do { (void)(lock); (void)(flags); if (!locked) violations++; locked = 0; } while (0)
+static u32 readl(void *p) { if (!locked) violations++; return *(u32 *)p; }
+static void writel(u32 v, void *p) { if (!locked) violations++; *(u32 *)p = v; writes++; }
 ''' + function(src) + r'''
 int main(void) {
     const u32 expected_enable[] = {0x44332280, 0x44338011, 0x44802211, 0x80332211};
     const u32 expected_disable[] = {0x44332200, 0x44330011, 0x44002211, 0x00332211};
-    struct hw hw = { 0 }; u32 reg; struct apple_dart dart = {(unsigned char *)&reg, &hw};
+    struct hw hw = { 0 }; u32 reg; struct apple_dart dart = {(unsigned char *)&reg, &hw, 0};
     for (u32 sid = 0; sid < 4; sid++) {
         reg = 0x44332211; writes = 0;
         apple_dart_s5l8960x_write_tcr(&dart, sid, 0x80);
@@ -52,7 +54,7 @@ int main(void) {
     reg = 0x44332211; writes = 0;
     apple_dart_s5l8960x_write_tcr(&dart, 4, 0x80);
     apple_dart_s5l8960x_write_tcr(&dart, 1, 0x100);
-    if (reg != 0x44332211 || writes) return 3;
+    if (reg != 0x44332211 || writes || violations || locked) return 3;
     puts("TCR stream updates preserve other streams; invalid arguments do not write");
     return 0;
 }
