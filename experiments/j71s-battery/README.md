@@ -70,6 +70,10 @@ registers already read by the Linux UART driver reported ULCON `0x07`, UCON
 differences are observations only: they are on different SoCs and support
 different interrupt strategies, so copying settings would not establish a
 safe or correct J71s configuration. No register values were changed.
+The GPIO controller's read-only configuration for pin 2 reported peripheral
+function 2, input-enable set, and pull code 0. This confirms what Linux
+programmed, not that function 2 is the correct electrical connection or that
+the battery line has a suitable external pull-up.
 
 The reused HDQ driver's receive decoder treats bytes `>= 0xf0` as a one.
 TI's [HDQ UART application note](https://www.ti.com/lit/an/slua408/slua408.pdf)
