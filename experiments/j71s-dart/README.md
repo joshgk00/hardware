@@ -129,3 +129,12 @@ reads; binding and reset return therefore do not establish working hardware.
 A future test must sample before the first command as well as afterward and
 should investigate power and availability without attaching a physical DMA
 consumer.
+
+`pcie-pmgr-observe.sh` reads the PCIe power-state registers without writing
+anything, after checking the device-tree model. On the all-stream boot, the
+main PCIe gate reported actual and target state 15 (active), with automatic
+power management enabled and neither reset nor device-disable asserted. The
+AUX, reference and link gates reported actual and target state 0. The register
+values were not all ones. This is a momentary PMGR report, not proof that all
+clocks or the DART are accessible, nor evidence that enabling another gate is
+safe or sufficient.
