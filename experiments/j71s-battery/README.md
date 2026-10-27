@@ -63,6 +63,12 @@ registers saw no RX-ready or RX-FIFO bits under the Linux driver's masks, and
 two samples showed TX-FIFO activity. The samples can miss short events, the
 mask interpretation is not independently verified for S8000, and no receive
 data register was read. `hdq-status-sample.sh` repeats this bounded experiment.
+The independently built `uart-sampler.c` makes 6,000 read-only status samples
+with a 100-microsecond requested sleep, checking the J71s compatible string
+and bound UART driver first. When run around a fresh battery request twice,
+it recorded zero RX-ready and RX-FIFO indications and nine TX-FIFO samples each
+time. Scheduling gaps and concurrent driver reads mean brief receive events
+can still be missed; the result does not establish an electrical cause.
 In the J71s diagnostic boot, read-only snapshots of the configuration
 registers already read by the Linux UART driver reported ULCON `0x07`, UCON
 `0x1885`, UFCON `0x31`, and UBRDIV `0x19`. The A5 polling example uses ULCON
