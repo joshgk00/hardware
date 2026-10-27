@@ -59,6 +59,13 @@ experiment uses the generic S5L UART driver's FIFO and interrupt path. This is
 a comparison to investigate, not evidence that the same difference applies to
 S8000 or that data reached the receive FIFO.
 
+The reused HDQ driver's receive decoder treats bytes `>= 0xf0` as a one.
+TI's [HDQ UART application note](https://www.ti.com/lit/an/slua408/slua408.pdf)
+lists `0xf0` among possible zero encodings and uses a threshold above `0xf8`.
+Under those documented examples the current decoder would misinterpret
+`0xf0`. This may need a separate decoder fix if bytes are received; it cannot
+explain the present zero-byte timeout, and actual J71s timing is unverified.
+
 The reused gauge driver provides only its read callback, not a gauge-write
 callback. Nevertheless, the experiment configures UART/pinctrl and transmits
 HDQ read commands. The electrical behavior, UART timing, gauge values and
