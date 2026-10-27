@@ -35,5 +35,11 @@ cp "$here/j71s-spi3-disabled.dtso" "$work/spi.dtso"
     [[ $(fdtget -t x "$ORCHARD_OUT/result.dtb" /soc/spi@20a08c000 interrupts) == "0 bf 4" ]]
     [[ $(fdtget -t u "$ORCHARD_OUT/result.dtb" /spi3-candidate-clock clock-frequency) == 61538461 ]]
     [[ -z $(fdtget -l "$ORCHARD_OUT/result.dtb" /soc/spi@20a08c000) ]]
+    spi_domain=$(fdtget -t s "$ORCHARD_OUT/result.dtb" /__symbols__ ps_spi3)
+    parent_domain=$(fdtget -t s "$ORCHARD_OUT/result.dtb" /__symbols__ ps_sio_p)
+    [[ $(fdtget -t x "$ORCHARD_OUT/result.dtb" "$spi_domain" reg) == "801d0 4" ]]
+    [[ $(fdtget -t x "$ORCHARD_OUT/result.dtb" "$parent_domain" reg) == "80158 4" ]]
+    [[ $(fdtget -t x "$ORCHARD_OUT/result.dtb" /soc/spi@20a08c000 power-domains) == $(fdtget -t x "$ORCHARD_OUT/result.dtb" "$spi_domain" phandle) ]]
+    [[ $(fdtget -t x "$ORCHARD_OUT/result.dtb" "$spi_domain" power-domains) == $(fdtget -t x "$ORCHARD_OUT/result.dtb" "$parent_domain" phandle) ]]
   '
 echo 'Offline disabled SPI3 structure check passed; no boot image was produced.'

@@ -20,8 +20,24 @@ installer or device support.
 
 `j71s-spi3-disabled.dtso` is an offline-only structure candidate. Both the
 controller and its tentative fixed clock are disabled; there is no pinmux or
-touch child. The clock rate and `ps_spi3` power-domain association require
-independent hardware validation. `check-disabled-dtb.sh` rejects non-J71s
+touch child. Offline decoding of the private J71s Apple tree with m1n1 maps
+SPI3 gate ID 77 to `0x20e0801d0` and its parent SIO_P to `0x20e080158`.
+Those addresses and the parent relationship match the S8000 Linux tree's
+`ps_spi3` and `ps_sio_p` descriptions. This is evidence for the association,
+not an active power test. The clock rate still requires independent hardware
+validation. `check-disabled-dtb.sh` rejects non-J71s
 trees and preexisting SPI3 nodes, compiles the overlay, verifies the relevant
 values and disabled states, and discards the result. Do not turn the nodes on
 or use this as a boot image based on the structural check alone.
+
+`build-controller-test-dtb.sh` builds a distinct controller-only RAM-test
+tree after the disabled check succeeds. Booting it powers the SPI3 domain and
+the driver writes controller initialization registers. It sets no SPI pinmux,
+instantiates no touch child, sends no SPI transfer, and does not implement
+touch. Its clock rate, interrupt behavior and register semantics remain
+unverified for J71s; a failed boot may require returning to DFU mode. The
+test tree must not be used as an installer or merged into normal support.
+`controller-probe.sh` inspects the platform binding, SPI master and related
+kernel messages after such a boot. It issues no transfer and does not touch
+the touchscreen power or pins. Controller registration alone does not prove
+that the clock, transfers, firmware or touchscreen work.
