@@ -1,5 +1,5 @@
 #!/bin/sh
-# Read the bound driver's command-status register; never issue a command.
+# Read the bound driver's command-status and stream-control registers; no writes.
 set -eu
 model=$(tr '\000' '\n' < /proc/device-tree/compatible | head -n 1)
 [ "$model" = apple,j71s ] || { echo 'Wrong device tree' >&2; exit 1; }
@@ -12,3 +12,5 @@ for i in 1 2 3; do
     printf 'sample=%s busy_bit=%s\n' "$i" "$(((reg >> 3) & 1))"
     [ "$i" = 3 ] || sleep 1
 done
+reg=$(busybox devmem 0x60100800c 32)
+printf 'stream0_translation_enable_bit=%s\n' "$(((reg >> 7) & 1))"

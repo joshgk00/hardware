@@ -102,3 +102,6 @@ busy, so it did not appear to clear within that sampling window. The bit's
 meaning on S8000 is not independently established. `busy-observe.sh` checks
 the J71s model and bound driver before repeating this read; it writes no
 registers and sends no commands.
+The stream-0 control register also had the driver's translation-enable bit
+set. That indicates the requested control bit was retained, not that the
+invalidate completed or an address translation succeeded.
