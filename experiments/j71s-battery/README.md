@@ -21,6 +21,11 @@ compatible and hypothesized pinmux. It expects the project's Python build
 module, and `ORCHARD_PYTHON` can select the interpreter containing it.
 `battery-probe.sh` reads battery status and relevant kernel messages in the
 RAM test; it intentionally avoids raw device trees and calibration data.
+After preparing a separate checkout, `build-kernel.sh` checks the kernel
+revision, selected source digests and other tracked changes before building
+the J71s image with Orchard's toolchain. The `--resume` path was tested against
+the existing build output and reproduced the tested kernel image hash. A fresh
+build has not been independently timed or validated.
 `add-hdq-debug.py` can add temporary, disabled-by-default dynamic-debug probes
 to an already prepared source checkout. On a kernel built with those probes,
 `hdq-debug-probe.sh` enables them briefly for one battery status request, then
@@ -127,3 +132,10 @@ callback. Nevertheless, the experiment configures UART/pinctrl and transmits
 HDQ read commands. The first function 1 test is encouraging, but UART timing,
 gauge accuracy, repeated boots, failure handling and charging are not fully
 validated. Validate those before considering a normal device target.
+
+For this tested debug configuration, prepare a separate checkout at the pinned
+kernel revision by running `prepare-j71s-hdq.sh`, `add-hdq-debug.py`,
+`preserve-ucon.py`, and `log-pin-before-mux.py` in that order. Then run
+`build-kernel.sh` with that checkout and a new output directory, and build the
+`bootmux` DTB variant as described above. These tools prepare components only;
+they do not create an installer or flash the iPad.
