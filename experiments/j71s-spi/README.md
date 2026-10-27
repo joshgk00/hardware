@@ -50,3 +50,6 @@ devices were present, and the controller's runtime status was suspended when
 checked. The battery gauge and USB serial remained available. This is one
 successful initialization on one iPad, not a test of IRQs, clock rate, pinmux,
 SPI transfers, touch power, firmware, or touchscreen input.
+Read-only pinctrl metadata also showed the identified touch IRQ, power, sync,
+reset and chip-select lines (65, 73, 74, 75 and 102) as unclaimed after the
+controller boot. "Unclaimed" does not reveal their electrical state.
