@@ -94,7 +94,9 @@ whether preserving it affects HDQ, was tested on a separate RAM boot. Before
 the UART reset, the boot log reported bit 10 set; the running driver retained
 it. A fresh HDQ request still timed out with zero received bytes. This confirms
 preservation on the tested J71s but does not identify the bit's purpose or
-establish functional battery communication.
+establish functional battery communication. A fast read-only sample during
+another request again found TX FIFO activity but no RX-ready or RX-FIFO bits;
+the sampling limitations above still apply.
 
 The reused HDQ driver's receive decoder treats bytes `>= 0xf0` as a one.
 TI's [HDQ UART application note](https://www.ti.com/lit/an/slua408/slua408.pdf)
