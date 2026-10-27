@@ -19,4 +19,7 @@ echo '=== serial and one-wire devices ==='
 for entry in /sys/bus/serdev/devices/* /sys/bus/w1/devices/*; do
     [ -e "$entry" ] && printf '%s\n' "$entry"
 done
+echo '=== UART counters and interrupt ==='
+[ ! -r /proc/tty/driver/s3c2410_serial ] || cat /proc/tty/driver/s3c2410_serial
+grep '20a0d4000.serial' /proc/interrupts || true
 true
