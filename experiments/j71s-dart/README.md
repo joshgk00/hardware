@@ -110,3 +110,11 @@ A further read-only sample reported the command register value was at least
 `0x1000` and bit 12 was set while bit 3 remained set. The meaning of bit 12
 and the reason for the stuck busy bit are not established. The observer now
 reports these fields without exposing the full register value.
+
+A subsequent isolated RAM boot tested an experimental kernel that requested
+invalidation of all four streams for the software-only stream-0 consumer.
+The diagnostic logged that the experimental path ran, but the same busy-bit
+timeout occurred. Three later read-only samples again showed bit 3 set, the
+command register value at least `0x1000`, and bit 12 set. The test did not
+instantiate a PCIe host, submit DMA, or access storage. Thus requesting all
+four streams alone did not resolve the timeout; the cause remains unknown.
