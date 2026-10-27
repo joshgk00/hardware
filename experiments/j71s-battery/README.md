@@ -129,6 +129,13 @@ lists `0xf0` among possible zero encodings and uses a threshold above `0xf8`.
 Under those documented examples the current decoder would misinterpret
 `0xf0`. This may need a separate decoder fix; it did not explain the function 2
 variant's zero-byte timeout, and actual J71s timing is unverified.
+`add-hdq-ambiguity.py` prepares a separate opt-in diagnostic that counts
+response symbols in the disputed range without changing decoding or logging
+raw gauge values. `hdq-ambiguity-probe.sh` enables the count briefly for a
+fresh battery request. This diagnostic has been built but has not been booted
+or used on hardware. Run `add-hdq-ambiguity.py` after the normal preparation
+steps and pass `--ambiguity` to `build-kernel.sh` to build that source variant;
+the `--resume --ambiguity` build reproduced the prepared diagnostic kernel.
 
 The reused gauge driver provides only its read callback, not a gauge-write
 callback. Nevertheless, the experiment configures UART/pinctrl and transmits
