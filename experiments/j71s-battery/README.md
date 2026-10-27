@@ -84,6 +84,14 @@ function 2, input-enable set, and pull code 0. This confirms what Linux
 programmed, not that function 2 is the correct electrical connection or that
 the battery line has a suitable external pull-up.
 
+The prior J71s UCON snapshot had bit 10 clear. A [Linux UART patch by Yureka
+Lilian](https://lists.openwall.net/linux-kernel/2026/10/02/2066) reports that
+the S5L driver can clear this undocumented bootloader-set bit and that keeping
+it matters on another Apple SoC. `preserve-ucon.py` prepares that published
+preservation change and a J71s-specific boot log of the bit before reset. It
+does not force the bit on. Whether the bootloader sets it on this iPad, or
+whether preserving it affects HDQ, has not yet been tested.
+
 The reused HDQ driver's receive decoder treats bytes `>= 0xf0` as a one.
 TI's [HDQ UART application note](https://www.ti.com/lit/an/slua408/slua408.pdf)
 lists `0xf0` among possible zero encodings and uses a threshold above `0xf8`.
