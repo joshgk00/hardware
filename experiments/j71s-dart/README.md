@@ -28,6 +28,12 @@ DART, does not enable a device tree node, and does not establish why another
 device hung during DART probe. Do not use it to access internal storage until
 the controller, DMA and recovery path have been separately validated.
 
+The J71s kernel uses 16 KiB CPU pages. In the pinned kernel, DART domain
+creation rejects a DART page size larger than `PAGE_SIZE`, not a smaller one;
+the IOMMU page allocator documents that sub-page allocations return a full
+CPU page. This supports the feasibility of 4 KiB DART tables on this build,
+but is a source-code observation, not a successful translation or DMA test.
+
 `build-dart0-test-dtb.sh` prepares a separate DART0-only probe tree. It checks
 the model, register range, IRQ, and hypothesized PCIe power domain and refuses
 a base containing the PCIe host or any IOMMU consumer. A [J81 investigation](https://github.com/mattonik/ipad-nixos/blob/b94d42f78e04c5465e290340a5b6879bbc5956b6/research/t7000-pcie-hardware-findings.md)
