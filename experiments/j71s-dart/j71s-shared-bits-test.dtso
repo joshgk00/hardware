@@ -1,0 +1,5 @@
+/dts-v1/;
+/plugin/;
+&{/soc/iommu@601008000} {
+	orchard,shared-bits-test;
+};

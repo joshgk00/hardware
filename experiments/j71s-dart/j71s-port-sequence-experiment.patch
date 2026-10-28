@@ -1,0 +1,199 @@
+--- a/drivers/iommu/apple-dart.c
++++ b/drivers/iommu/apple-dart.c
+@@ -15,6 +15,7 @@
+ #include <linux/bitfield.h>
+ #include <linux/clk.h>
+ #include <linux/dev_printk.h>
++#include <linux/delay.h>
+ #include <linux/dma-mapping.h>
+ #include <linux/err.h>
+ #include <linux/interrupt.h>
+@@ -29,6 +30,7 @@
+ #include <linux/of_platform.h>
+ #include <linux/pci.h>
+ #include <linux/platform_device.h>
++#include <linux/pm_domain.h>
+ #include <linux/slab.h>
+ #include <linux/swab.h>
+ #include <linux/types.h>
+@@ -367,12 +369,19 @@
+ 
+ static void apple_dart_s5l8960x_write_tcr(struct apple_dart *dart, u32 sid, u32 val)
+ {
+-	WARN_ON(sid >= 4);
+-	u32 tcr = readl(dart->regs + dart->hw->tcr);
++	unsigned long flags;
++	u32 shift, tcr;
+ 
+-	tcr &= 0xff << (sid * DART_S5L8960X_TCR_BITS_PER_STREAM);
+-	tcr |= val;
++	if (WARN_ON(sid >= 4 || val > 0xff))
++		return;
++
++	shift = sid * DART_S5L8960X_TCR_BITS_PER_STREAM;
++	spin_lock_irqsave(&dart->lock, flags);
++	tcr = readl(dart->regs + dart->hw->tcr);
++	tcr &= ~(0xffU << shift);
++	tcr |= val << shift;
+ 	writel(tcr, dart->regs + dart->hw->tcr);
++	spin_unlock_irqrestore(&dart->lock, flags);
+ }
+ 
+ static u32 apple_dart_t8020_read_tcr(struct apple_dart *dart, u32 sid)
+@@ -448,8 +457,18 @@
+ 
+ 	spin_lock_irqsave(&stream_map->dart->lock, flags);
+ 
+-	writel(stream_map->sidmap[0] << DART_S5L8960X_STREAM_COMMAND_SID_SHIFT |
+-	       command, stream_map->dart->regs + DART_S5L8960X_STREAM_COMMAND);
++	/* Isolated J71s test only; no physical DMA consumer is enabled. */
++	if (of_machine_is_compatible("apple,j71s") &&
++	    !strcmp(dev_name(stream_map->dart->dev), "601008000.iommu") &&
++	    command == DART_S5L8960X_STREAM_COMMAND_INVALIDATE &&
++	    stream_map->sidmap[0] == BIT(0)) {
++		dev_info(stream_map->dart->dev, "experimental DART0: invalidate all four streams\n");
++		writel(GENMASK(3, 0) << DART_S5L8960X_STREAM_COMMAND_SID_SHIFT |
++		       command, stream_map->dart->regs + DART_S5L8960X_STREAM_COMMAND);
++	} else {
++		writel(stream_map->sidmap[0] << DART_S5L8960X_STREAM_COMMAND_SID_SHIFT |
++		       command, stream_map->dart->regs + DART_S5L8960X_STREAM_COMMAND);
++	}
+ 
+ 	ret = readl_poll_timeout_atomic(
+ 		stream_map->dart->regs + DART_S5L8960X_STREAM_COMMAND, command_reg,
+@@ -1301,6 +1320,113 @@
+ 	struct resource *res;
+ 	struct apple_dart *dart;
+ 	struct device *dev = &pdev->dev;
++	struct dev_pm_domain_list *test_domains;
++	static const struct dev_pm_domain_attach_data test_pd_data = {
++		.pd_flags = PD_FLAG_DEV_LINK_ON,
++	};
++
++	/* Only the isolated J71s DT opts in to the multi-domain test. */
++	if (of_machine_is_compatible("apple,j71s") &&
++	    of_property_read_bool(dev->of_node, "orchard,early-power-test")) {
++		ret = devm_pm_domain_attach_list(dev, &test_pd_data, &test_domains);
++		if (ret < 0)
++			return ret;
++		if (ret != 4)
++			return -EINVAL;
++		void __iomem *test_pmgr;
++
++		test_pmgr = devm_ioremap(dev, 0x20e080000ULL, 0x400);
++		if (!test_pmgr)
++			return -ENOMEM;
++		dev_info(dev, "experimental DART0: early power actual pcie=%u aux=%u ref=%u link0=%u\n",
++			 (readl(test_pmgr + 0x310) >> 4) & 15,
++			 (readl(test_pmgr + 0x318) >> 4) & 15,
++			 (readl(test_pmgr + 0x148) >> 4) & 15,
++			 (readl(test_pmgr + 0x320) >> 4) & 15);
++		if (of_property_read_bool(dev->of_node, "orchard,shared-bits-test")) {
++			void __iomem *common, *port, *test_dart;
++			u32 a, b, c, port_status, dart_status;
++
++			if (((readl(test_pmgr + 0x310) >> 4) & 15) != 15 ||
++			    ((readl(test_pmgr + 0x318) >> 4) & 15) != 15 ||
++			    ((readl(test_pmgr + 0x148) >> 4) & 15) != 15 ||
++			    ((readl(test_pmgr + 0x320) >> 4) & 15) != 15)
++				return -EIO;
++			common = devm_ioremap(dev, 0x600000000ULL, 0x8000);
++			port = devm_ioremap(dev, 0x601000000ULL, 0x4000);
++			test_dart = devm_ioremap(dev, 0x601008000ULL, 0x4000);
++			if (!common || !port || !test_dart)
++				return -ENOMEM;
++			a = readl(common + 0x124);
++			b = readl(common + 0x114);
++			c = readl(common + 0x100);
++			if (a == U32_MAX || b == U32_MAX || c == U32_MAX ||
++			    (a & BIT(0)) || (b & BIT(0)) || (c & BIT(0))) {
++				dev_err(dev, "experimental shared bits: unexpected baseline; no writes\n");
++				return -EIO;
++			}
++			dev_info(dev, "experimental shared bits: about to modify bit zero\n");
++			writel(a & ~BIT(0), common + 0x124);
++			writel(b | BIT(0), common + 0x114);
++			{
++				u32 global;
++				int global_ret = readl_poll_timeout(common + 0x2c, global,
++					global != U32_MAX && (global & BIT(4)), 10, 250000);
++				dev_info(dev, "experimental global ready: ret=%d all-ones=%d bit4=%d\n",
++					 global_ret, global == U32_MAX, !!(global & BIT(4)));
++				if (global_ret)
++					goto restore_shared;
++			}
++			udelay(100);
++			writel(c | BIT(0), common + 0x100);
++			{
++				u32 ready;
++				int ready_ret = readl_poll_timeout(common + 0x12c, ready,
++					ready != U32_MAX && (ready & BIT(0)), 10, 250000);
++				dev_info(dev, "experimental port ready: ret=%d all-ones=%d bit0=%d\n",
++					 ready_ret, ready == U32_MAX, !!(ready & BIT(0)));
++				if (ready_ret)
++					goto restore_shared;
++			}
++			writel(a | BIT(0), common + 0x124);
++			port_status = readl(port + 0x210);
++			dart_status = readl(test_dart);
++			dev_info(dev, "experimental shared bits: port all-ones=%d dart all-ones=%d\n",
++				 port_status == U32_MAX, dart_status == U32_MAX);
++			/* Read-only samples while the previously inaccessible block responds. */
++			dev_info(dev, "experimental DART samples: tcr_all_ones=%d error_all_ones=%d ttbr0_all_ones=%d\n",
++				 readl(test_dart + 0xc) == U32_MAX,
++				 readl(test_dart + 0x10) == U32_MAX,
++				 readl(test_dart + 0x40) == U32_MAX);
++			/* Guarded cache invalidation; no IOMMU consumer or PCIe host. */
++			if (dart_status != U32_MAX && port_status != U32_MAX &&
++			    !(dart_status & DART_S5L8960X_STREAM_COMMAND_BUSY)) {
++				u32 final_command;
++				int invalidate_ret;
++
++				writel((GENMASK(3, 0) << DART_S5L8960X_STREAM_COMMAND_SID_SHIFT) |
++				       DART_S5L8960X_STREAM_COMMAND_INVALIDATE, test_dart);
++				invalidate_ret = readl_poll_timeout_atomic(test_dart, final_command,
++					!(final_command & DART_S5L8960X_STREAM_COMMAND_BUSY),
++					1, DART_STREAM_COMMAND_BUSY_TIMEOUT);
++				dev_info(dev, "experimental DART invalidate: ret=%d all-ones=%d busy=%d\n",
++					 invalidate_ret, final_command == U32_MAX,
++					 !!(final_command & DART_S5L8960X_STREAM_COMMAND_BUSY));
++			} else {
++				dev_info(dev, "experimental DART invalidate: skipped invalid or busy baseline\n");
++			}
++restore_shared:
++			/* Attempt to restore saved values before deliberately aborting. */
++			writel(c, common + 0x100);
++			writel(b, common + 0x114);
++			writel(a, common + 0x124);
++			dev_info(dev, "experimental shared bits: restore readback matches=%d\n",
++				 readl(common + 0x100) == c &&
++				 readl(common + 0x114) == b &&
++				 readl(common + 0x124) == a);
++			return -ENODEV;
++		}
++	}
+ 
+ 	dart = devm_kzalloc(dev, sizeof(*dart), GFP_KERNEL);
+ 	if (!dart)
+@@ -1374,9 +1500,21 @@
+ 		goto err_clk_disable;
+ 	}
+ 
++	if (of_machine_is_compatible("apple,j71s") &&
++	    !strcmp(dev_name(dev), "601008000.iommu"))
++		dev_info(dev, "experimental DART0: pre-reset all-ones command=%d tcr=%d config=%d\n",
++			 readl(dart->regs) == U32_MAX,
++			 readl(dart->regs + 0xc) == U32_MAX,
++			 readl(dart->regs + 0x30) == U32_MAX);
+ 	ret = apple_dart_hw_reset(dart);
+ 	if (ret)
+ 		goto err_clk_disable;
++	if (of_machine_is_compatible("apple,j71s") &&
++	    !strcmp(dev_name(dev), "601008000.iommu"))
++		dev_info(dev, "experimental DART0: post-reset all-ones command=%d tcr=%d config=%d\n",
++			 readl(dart->regs) == U32_MAX,
++			 readl(dart->regs + 0xc) == U32_MAX,
++			 readl(dart->regs + 0x30) == U32_MAX);
+ 
+ 	ret = request_irq(dart->irq, dart->hw->irq_handler, IRQF_SHARED,
+ 			  "apple-dart fault handler", dart);

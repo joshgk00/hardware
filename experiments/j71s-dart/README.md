@@ -376,3 +376,24 @@ out after 250 ms without an all-ones read. Saved controls read back as
 restored. This test narrows the behavior of the partial sequence; it does not
 establish the complete S8000 initialization path. It stopped before DART
 invalidation, host registration, physical DMA or storage access.
+
+`j71s-port-sequence-experiment.patch` preserves the exact `apple-dart.c`
+changes used for the last candidate-ordering test, as a single patch against
+Hoolock kernel `6831bc701a6ce059e71e5aaa9488c9195bea6927`. It is experimental
+bring-up code, not a production driver: in addition to the opt-in register
+experiment, it changes the J71s DART invalidate behavior even outside the
+opt-in probe. It must only be used in an isolated recovery-capable RAM test;
+it does not enable or validate a storage installation. The relevant opt-in
+properties and power-domain overlays are preserved in `j71s-dart-early-power.dtso`,
+`j71s-dart-early-link.dtso`, and `j71s-shared-bits-test.dtso`; they build on
+`j71s-dart0-test.dtso` and the required J71s power-domain definitions. These
+files preserve the diagnostic inputs rather than a complete boot image.
+
+For an offline control-flow check, apply the patch to a disposable copy of the
+pinned kernel and run `python3 experiments/j71s-dart/test-port-sequence.py
+/path/to/patched/drivers/iommu/apple-dart.c`. The test extracts the actual
+opt-in block and exercises a host MMIO mock, including prerequisite failures,
+write order, and restoration. It does not simulate timing, prove hardware
+safety, or verify physical DMA. A byte comparison confirmed that applying the
+saved patch to the pinned `apple-dart.c` reproduces the source file used for
+the physical candidate-ordering test.
