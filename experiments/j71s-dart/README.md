@@ -1006,3 +1006,13 @@ as written. An S8000 adaptation must use `of_reserved_mem_lookup()` (and
 validate base, size, alignment, ownership and cleanup), or explicitly supply a
 verified static reservation. Changing only the overlay would not make the
 existing driver work. No IOVA has been chosen and no DMA was tested.
+
+The dynamic reservation was subsequently tested on the physical J71s using
+a two-stage RAM-only kexec handoff. Linux's `of_reserved_mem_lookup()` found
+a nonzero 14 MiB region aligned to 1 MiB; the boot log marked it `nomap` and
+non-reusable, and it did not overlap System RAM resources in the observed
+`/proc/iomem`. As predicted, `of_address_to_resource()` returned `-EINVAL`.
+The existing controller-read diagnostic and PCI register restoration repeated,
+and the iPad remained responsive at 60%, discharging. This establishes one
+reservation and API lookup, not safe DMA or working storage. No IOVA, NVMMU
+mapping, bus mastering, scratch programming or storage command was used.
