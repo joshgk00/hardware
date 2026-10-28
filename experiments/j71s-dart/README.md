@@ -273,3 +273,14 @@ been physically booted. It powers a domain associated with the storage link,
 but adds no PCIe host, storage endpoint or physical DMA consumer. Turning on
 this additional domain can affect hardware and battery use, may hang, and may
 require a reboot or DFU recovery.
+
+On one J71s RAM boot with the four-domain link-0 experiment, PMGR reported main
+PCIe, AUX, reference and link 0 actual state 15 before the first DART read.
+The command, stream-control and configuration registers still read all ones
+before and after reset, and invalidation timed out. Thus these four requested
+power domains, in this ordering, were not sufficient to make DART0 respond.
+The other link domains remained off; this is not a test of them or of the
+complete controller initialization sequence. No PCIe host, physical DMA or
+storage endpoint was enabled. The gauge initially reported I/O errors, then
+reported 60% and approximately 396 mA discharge after brightness reduction.
+The test domains remain probe-owned until restart.
