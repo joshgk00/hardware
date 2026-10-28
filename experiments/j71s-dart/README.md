@@ -1176,3 +1176,16 @@ was bound and no DMA or storage command was issued. The iPad remained responsive
 at 56%, discharging. The host test covers invalid state, mapping failure and
 rejected decode enables; `driver-patch/j71s-pci-iomap.h` is experimental test
 code, not a persistent host or a complete failure-recovery implementation.
+
+A follow-up diagnostic moved the PCIe sequence into delayed work and held the
+PCI-core-discovered, assigned endpoint for a bounded 20-second window after
+Linux started. The PCI device appeared in sysfs with vendor/device `106b:2002`,
+a 16 KiB BAR at the expected CPU address and no bound driver. After the window,
+the host and PCI devices disappeared, BAR/bridge/tuning restoration checks
+passed, and extra PCIe power domains returned off; the iPad remained responsive
+at 56%, discharging. The diagnostic still does not call `pci_bus_add_devices()`,
+start a storage driver, enable bus mastering or issue disk commands. Its worker
+has a shutdown wakeup/cancel path, but shutdown during the active window has not
+yet been physically tested. `driver-patch/j71s-pci-held.h` captures the bounded
+scan variant, and `observe-pci-held.sh` is the observation script. This is not a
+persistent PCIe host or an I/O-ready driver.
