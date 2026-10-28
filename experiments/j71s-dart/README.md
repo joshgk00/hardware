@@ -496,3 +496,10 @@ shared controls read back as restored. The iPad remained responsive. This
 partial sequence did not apply PCIe tuning tables or register a PCIe host,
 and it issued no storage commands or physical DMA. The S8000 status semantics
 and reversal of all hardware effects remain unverified.
+
+After the tested global, port-ready and reference-clock sequence, an isolated
+read of the first captured PHY-tuning offset in the candidate PHY window
+completed but returned all ones. The nearby port control sample remained
+readable and the saved controls read back as restored. This result does not
+prove the candidate PHY mapping is wrong or that all of its registers behave
+alike. The test performed no PHY writes, link training or storage access.
