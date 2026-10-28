@@ -519,3 +519,12 @@ and controls read back as restored. The iPad remained responsive. This checks
 one record on one boot; it does not establish safety of the full table, a
 trained link or reversal of every side effect. It performed no link training,
 physical DMA or storage access. Device-specific tuning values are not included.
+
+A private guarded RAM diagnostic applied all 41 captured PHY tuning records
+under the tested initialization sequence. Each write read back as expected;
+reverse-order restoration reported zero readback errors, and the saved PHY
+gate and other controls also read back as restored. The iPad remained
+responsive. This is one register-readback test, not proof of a trained link,
+storage or reversal of every side effect. It did not start link training,
+register a host, perform physical DMA or access storage. Device-specific tuning
+values are not included here.
