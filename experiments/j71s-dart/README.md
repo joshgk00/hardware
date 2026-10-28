@@ -1314,3 +1314,16 @@ The experimental source and host failure/restore tests are
 `driver-patch/j71s-controller-scratch-test.h` and
 `test-j71s-controller-scratch.py`; raw device-derived mismatch logging is
 omitted from the public copy.
+
+A RAM-kernel diagnostic allocated five candidate controller support buffers
+through the PCI device's coherent DMA API, checked CPU-side patterns and DMA
+address alignment, freed the buffers, and restored the original DMA masks. On
+the iPad all five allocations and checks succeeded, with PCI bus mastering off
+and controller CC/CSTS zero. The diagnostic unbound and the tested PCI and
+tuning cleanup succeeded; battery reported 52% and discharging on recheck.
+Host mocks cover partial allocation failure, coherent-mask failure and the
+bus-master guard. No buffer addresses were given to the hardware and no DMA
+or storage command was issued. This validates software allocation only; it does
+not establish that the controller can access the buffers. The experimental
+source and host test are `driver-patch/j71s-dma-alloc-test.h` and
+`test-j71s-dma-alloc.py`.
