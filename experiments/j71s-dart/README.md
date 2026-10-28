@@ -251,3 +251,15 @@ fix. The kernel compiled and the device tree and assembled RAM image were
 checked. This requests hardware power, may hang, and can increase battery
 consumption while the diagnostic runs. It does not enable a PCIe host,
 physical DMA or storage endpoint. A restart may be needed to release power.
+
+On a physical J71s early-power RAM boot, the diagnostic logged main PCIe,
+AUX and reference actual state 15 before its first DART read. The command,
+stream-control and configuration registers all read `0xffffffff` both before
+and after reset; invalidate again timed out. Thus, these three domains being
+reported active before probe did not by itself make DART0 respond in this
+boot. This does not rule out other dependencies or a different initialization
+sequence. The software-only consumer joined an IOMMU group; no physical DMA,
+PCIe host or storage endpoint was enabled. The battery initially returned I/O
+errors but a later sample reported 61% and approximately 443 mA discharge
+with the test power domains active. Restarting is needed to release these
+probe-owned domains; the gauge's accuracy is unverified.
