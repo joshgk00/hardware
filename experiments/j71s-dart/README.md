@@ -1337,3 +1337,11 @@ remained off. The test host unbound with its cleanup checks passing, and the
 battery reported 51% and discharging. This does not compare the two devices'
 DMA address translations, prove either path can access memory, or validate
 NVMMU table contents; no hardware was given the allocated addresses.
+
+The source-level integration boundaries for the PCI host, DART and ANS
+translation paths are summarized in `storage-integration.md`. An executable
+policy check confirms the current diagnostic rejects the configuration writes
+and bus mastering needed by ANS preinitialization. The diagnostic therefore
+cannot run the unmodified storage driver merely by binding it; normal PCI
+configuration, DMA attachment and interrupts remain to be implemented and
+tested.
