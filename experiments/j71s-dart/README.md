@@ -631,3 +631,11 @@ a different Apple PCIe controller driver. Candidate state and high-byte fields
 and port `0x88` bits 0 and 6 were also zero. Rollback readbacks passed and the
 iPad remained responsive. The field meanings on S8000 remain unverified; no
 PCIe host, physical DMA or storage command was used.
+
+Static comparison identified a candidate post-ready operation that clears
+common `0x100` bit 8. In the existing test that bit was set. A guarded
+follow-up cleared it after port-ready and confirmed it stayed clear through
+tuning, but the candidate training poll still timed out with the status low
+byte zero. Tuning and saved controls reported successful restoration readbacks;
+the iPad remained responsive. The inferred operation alone was insufficient
+in this test. No PCIe host, physical DMA or storage command was used.
