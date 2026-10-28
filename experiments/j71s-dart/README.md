@@ -1040,3 +1040,21 @@ only the missing `CONFIG_CC_CAN_LINK=y`; therefore this is an object/link
 check, not a clean reproducible full kernel build or a J71s hardware test.
 The J71b PCIe driver matches T8010/J172 and contains SoC-specific common/PHY
 sequences and tuning, so adding an S8000 match alone would be insufficient.
+
+`extract-pcie-tunables.py` is an experimental, allocation-only host converter
+for a locally captured Apple device tree. With `orchard_cli` importable, it
+validates the common, PHY, port-0 and root-0 tables as 32-bit local records,
+checks offsets against candidate window bounds and masks, and creates a new
+mode-0600 DTS fragment. It refuses an existing destination; the generated
+fragment contains device-derived data and must remain private. It does not
+apply tuning or enable hardware. `test-pcie-tunables.py` covers synthetic valid
+and malformed records.
+
+On the private J71s tree the converter validated all four tables and the
+fragment compiled with `dtc`. Its common (34 records), PHY (41) and port-0
+(6) tables exactly match the values used by the previous successful physical
+link diagnostics; the comparison was local and no device-derived values were
+published. These `orchard,s8000-*` names are experimental handoff properties,
+not an established binding. A PCIe driver must still consume them with
+appropriate resources, sequencing, error handling and lifecycle; the root-0
+table's use and full port remain unverified.
