@@ -691,3 +691,14 @@ not log the field values or write them. Saved controls read back as restored
 and the iPad remained responsive. The nonzero values' meaning and provenance
 are unknown; they do not establish valid Linux DMA addresses or working
 storage. No MMU writes, PCIe host, physical DMA or storage commands were used.
+
+The related [Corellium iPhone PCIe driver](https://github.com/corellium/linux-sandcastle/blob/sandcastle-5.4/drivers/pci/controller/pcie-hx.c)
+sets port `0x140` bit 31 before link training, and the matching iPadOS
+controller contains a helper that controls the same bit. A guarded diagnostic
+set it and checked readback. The candidate link poll still timed out with
+port `0x208` state and low byte zero, but port `0x88` bit 0 was set; it had
+been clear in the comparable previous test without the enable write. Its
+exact S8000 meaning remains unverified and this is not evidence of a trained
+link. The saved port value and other tested controls and tuning read back as
+restored; the iPad remained responsive. No PCIe host, MMU address write,
+physical DMA or storage command was used.
