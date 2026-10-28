@@ -1,0 +1,26 @@
+diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
+index 8baeee2..2a55522 100644
+--- a/drivers/iommu/apple-dart.c
++++ b/drivers/iommu/apple-dart.c
+@@ -1330,17 +1330,18 @@ static int apple_dart_probe(struct platform_device *pdev)
+ 		ret = devm_pm_domain_attach_list(dev, &test_pd_data, &test_domains);
+ 		if (ret < 0)
+ 			return ret;
+-		if (ret != 3)
++		if (ret != 4)
+ 			return -EINVAL;
+ 		void __iomem *test_pmgr;
+ 
+ 		test_pmgr = devm_ioremap(dev, 0x20e080000ULL, 0x400);
+ 		if (!test_pmgr)
+ 			return -ENOMEM;
+-		dev_info(dev, "experimental DART0: early power actual pcie=%u aux=%u ref=%u\n",
++		dev_info(dev, "experimental DART0: early power actual pcie=%u aux=%u ref=%u link0=%u\n",
+ 			 (readl(test_pmgr + 0x310) >> 4) & 15,
+ 			 (readl(test_pmgr + 0x318) >> 4) & 15,
+-			 (readl(test_pmgr + 0x148) >> 4) & 15);
++			 (readl(test_pmgr + 0x148) >> 4) & 15,
++			 (readl(test_pmgr + 0x320) >> 4) & 15);
+ 	}
+ 
+ 	dart = devm_kzalloc(dev, sizeof(*dart), GFP_KERNEL);

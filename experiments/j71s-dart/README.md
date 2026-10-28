@@ -263,3 +263,13 @@ PCIe host or storage endpoint was enabled. The battery initially returned I/O
 errors but a later sample reported 61% and approximately 443 mA discharge
 with the test power domains active. Restarting is needed to release these
 probe-owned domains; the gauge's accuracy is unverified.
+
+`j71s-dart-early-link.dtso` and `j71s-dart-early-link.patch` build on the
+three-domain experiment with a fourth domain: PCIe link 0. The diagnostic
+requests it before DART probe and logs its power state, with an active minimum
+state. The kernel compiled, the new tree and image hashes were checked, and
+the patch was checked against the preceding diagnostic source. This has not
+been physically booted. It powers a domain associated with the storage link,
+but adds no PCIe host, storage endpoint or physical DMA consumer. Turning on
+this additional domain can affect hardware and battery use, may hang, and may
+require a reboot or DFU recovery.
