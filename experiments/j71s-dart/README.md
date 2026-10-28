@@ -437,3 +437,9 @@ port-only attempts, this test observed the candidate ready status. It stopped
 before DART-register accesses, host registration, tuning-table application,
 physical DMA or storage access. The observation does not establish a trained
 link, an endpoint, or reversal of every hardware side effect.
+
+A follow-up boot repeated both ready-status observations and then sampled
+port-window offset `0x210`. The read completed but still returned all ones;
+the saved global and port controls read back as restored. This isolates a
+remaining accessibility issue after the tested partial initialization. No
+DART-register access, host registration or storage command was attempted.
