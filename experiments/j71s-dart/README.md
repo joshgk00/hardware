@@ -1189,3 +1189,14 @@ has a shutdown wakeup/cancel path, but shutdown during the active window has not
 yet been physically tested. `driver-patch/j71s-pci-held.h` captures the bounded
 scan variant, and `observe-pci-held.sh` is the observation script. This is not a
 persistent PCIe host or an I/O-ready driver.
+
+The active-window cancellation path was exercised on the physical iPad. After
+unbinding and rebinding the diagnostic, the PCI endpoint became visible again;
+unbinding during the 20-second window returned in under one measured second,
+removed the PCI devices and reported successful BAR, bridge and tuning
+restoration. Extra link domains subsequently reported off, and the iPad
+remained responsive at 55%, discharging. The driver's remove and shutdown
+callbacks share the same wakeup-and-cancel function, but this test exercises
+remove via sysfs; a real reboot or kexec during the active window has not yet
+been tested. `test-active-pci-unbind.sh` records the device-side procedure.
+No storage driver or DMA was enabled.
