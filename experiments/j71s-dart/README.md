@@ -593,3 +593,11 @@ control and shared controls read back as restored. The iPad remained
 responsive. This checks one record under one sequence, not a trained link,
 storage or reversal of every side effect. No link training, PCIe host,
 physical DMA or storage command was used; device-specific values remain private.
+
+A follow-up diagnostic added the previously checked root tuning to the three
+other tables and attempted the bounded candidate reset and training sequence.
+All tuning readbacks passed, but candidate port `0x208` bit 3 stayed clear for
+250 ms. Root target and write-enable, the three tables, GPIO and shared
+controls reported matching restoration readbacks; the iPad remained responsive.
+No PCIe host, physical DMA or storage command was used. This does not establish
+S8000 link-status semantics or reversal of every side effect.
