@@ -1058,3 +1058,15 @@ published. These `orchard,s8000-*` names are experimental handoff properties,
 not an established binding. A PCIe driver must still consume them with
 appropriate resources, sequencing, error handling and lifecycle; the root-0
 table's use and full port remain unverified.
+
+`driver-patch/include/linux/apple-s8000-tunables.h` provides an experimental
+reader for the converter's three-cell offset/mask/value records. It requires
+an exact bounded record count and validates the full table's alignment,
+window bounds and mask/value relationship before a caller performs MMIO.
+`test-s8000-tunables.py` exercises valid, missing, truncated, unaligned,
+out-of-window, invalid-mask and read-failure cases. An isolated J71s test
+kernel is being built to replace the earlier embedded common, PHY and port
+arrays with these DT properties. Its private host MMIO mock passed the prior
+link/rollback checks and rejects absent tables before register writes. A
+private overlay injects the device-derived tables into the next RAM boot;
+physical behavior and integration into a PCIe host driver remain unverified.
