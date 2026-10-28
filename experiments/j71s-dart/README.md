@@ -875,3 +875,11 @@ sequence, not endpoint enumeration, working DMA or storage. Tested control and
 tuning restoration readbacks passed, the additional link domains returned off
 after cleanup, and the iPad remained responsive. No PCIe host, physical DMA or
 storage command was used.
+
+A read-only root-port bus-number sample during the active-link test reported
+primary, secondary and subordinate bus numbers all zero. The standard link
+status again reported speed 2, width 2 and data-link-active set. This shows
+that no secondary bus was assigned in that test; it does not identify or
+access the endpoint. Tested restoration readbacks passed, the extra domains
+returned off, and the iPad remained responsive. No PCIe host, physical DMA or
+storage command was used.
