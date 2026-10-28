@@ -839,3 +839,10 @@ and applied to the test DTB. Without `orchard,shared-bits-test`, the seven
 power domains would be requested but the link experiment would not run. The
 matching kernel must expect seven domains; neither the image nor cleanup has
 been physically tested.
+
+`test-all-link-domains.sh J71S_DIAGNOSTIC_DTB` compiles and applies the overlay
+in a temporary directory and checks the model, opt-in properties, ordered
+seven-domain phandles and absence of new minimum states on LINK1–LINK3. It
+requires `dtc`, `fdtoverlay` and `fdtget`; it does not boot a device. The test
+passed against the prepared J71s tree and rejected a tree with unexpected
+minimum states.
