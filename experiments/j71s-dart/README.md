@@ -537,3 +537,11 @@ PHY rollback reported zero readback errors. The device remained responsive.
 This partial test did not apply common-controller tuning, register a PCIe host,
 perform physical DMA or issue storage commands; it does not establish the
 S8000 status semantics or reversal of all hardware effects.
+
+A private guarded RAM diagnostic applied all 34 captured common-controller
+PCIe tuning records. Each write read back as expected; reverse-order rollback
+reported zero readback errors, and the PHY gate and other saved controls read
+back as restored. The iPad remained responsive. This is one register-readback
+test, not proof of safe link operation or reversal of every side effect. It
+performed no link training, host registration, physical DMA or storage access.
+Device-specific tuning values are not included here.
