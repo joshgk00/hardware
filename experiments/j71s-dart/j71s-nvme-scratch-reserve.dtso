@@ -1,0 +1,17 @@
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
+/dts-v1/;
+/plugin/;
+
+/* Allocation-only experiment: does not enable storage, PCIe, or DMA. */
+/ {
+	fragment@0 {
+		target-path = "/reserved-memory";
+		__overlay__ {
+			j71s_nvme_scratch: j71s-nvme-scratch {
+				size = <0 0x00e00000>;
+				alignment = <0 0x00100000>;
+				no-map;
+			};
+		};
+	};
+};

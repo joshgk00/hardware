@@ -988,3 +988,21 @@ interrupts and lifecycle before that implementation can be used. No scratch
 configuration writes, DMA or storage commands were performed; tested PCI
 configuration read back restored, and the iPad remained responsive at 60%,
 discharging.
+
+The allocation-only `j71s-nvme-scratch-reserve.dtso` requests a dynamically
+allocated, 1 MiB-aligned, 14 MiB `no-map` reservation. Its size is based on
+the observed candidate scratch request; the larger alignment matches the
+related H9P driver's SART window requirement. The overlay neither supplies an
+IOVA nor enables a controller or DMA. A synthetic-tree test and an offline
+application to a private copy of the J71s tree passed; no physical boot has
+used it yet, and real reservation, addressability and ownership remain
+unverified.
+
+The pinned kernel allocates dynamic reserved-memory nodes through memblock,
+but a node with only `size` and `alignment` has no `reg` property added by
+default. Consequently the existing J71b H9P and ANS paths, which call
+`of_address_to_resource()` on the HMB node, cannot consume this reservation
+as written. An S8000 adaptation must use `of_reserved_mem_lookup()` (and
+validate base, size, alignment, ownership and cleanup), or explicitly supply a
+verified static reservation. Changing only the overlay would not make the
+existing driver work. No IOVA has been chosen and no DMA was tested.
