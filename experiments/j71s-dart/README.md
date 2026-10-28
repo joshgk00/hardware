@@ -503,3 +503,11 @@ completed but returned all ones. The nearby port control sample remained
 readable and the saved controls read back as restored. This result does not
 prove the candidate PHY mapping is wrong or that all of its registers behave
 alike. The test performed no PHY writes, link training or storage access.
+
+A guarded follow-up observed common `0x38` at zero, wrote 1 and sampled the
+same candidate PHY register. It returned a nonzero, non-all-ones value, unlike
+the previous all-ones observation. The test wrote `0x38` back to zero, with
+matching readback, and restored the previously saved controls. This shows a
+change in accessibility for one PHY register in one sequence, not proof that
+all PHY tuning is safe, the link is trained or all effects were reversed. No
+PHY tuning writes, host registration or storage access occurred.
