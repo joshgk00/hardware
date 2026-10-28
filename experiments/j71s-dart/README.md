@@ -883,3 +883,12 @@ that no secondary bus was assigned in that test; it does not identify or
 access the endpoint. Tested restoration readbacks passed, the extra domains
 returned off, and the iPad remained responsive. No PCIe host, physical DMA or
 storage command was used.
+
+With the root link reporting active and its bus numbers initially zero, a
+guarded test temporarily assigned secondary and subordinate bus 1. The new
+value and restored original value both matched on readback. The root link
+again reported speed 2, width 2 and data-link-active. Other tested control and
+tuning restoration readbacks passed; the extra domains returned off and the
+iPad remained responsive. This checks routing-register readback only, not
+endpoint discovery or reversal of all effects. No endpoint read, PCIe host,
+physical DMA or storage command was used.
