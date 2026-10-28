@@ -917,3 +917,11 @@ other tested controls/tuning read back as restored; extra domains returned off
 and the iPad remained responsive. The BAR size and controller behavior remain
 unverified. No BAR sizing or assignment, endpoint write, physical DMA or
 storage command was performed.
+
+A guarded PCI BAR sizing operation, performed with memory decoding and bus
+mastering disabled, reported a valid 16,384-byte 64-bit BAR. Both BAR words,
+the bus register and other tested controls/tuning read back as restored; the
+extra domains returned off and the iPad remained responsive. This is a BAR mask
+measurement, not an assigned window, controller register access or proof of
+complete side-effect reversal. No PCIe host, physical DMA or storage command
+was used.
