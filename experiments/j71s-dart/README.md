@@ -864,3 +864,14 @@ reported active during the test and off after cleanup; reported control and
 tuning restoration checks passed. This transition does not establish a
 working link, endpoint discovery or DMA. No PCIe host, physical DMA or storage
 command was used.
+
+A further RAM diagnostic read the root port's standard PCIe link-status
+fields around training. Beforeward they reported speed 1, width 1, training
+clear and data-link-active clear. The bounded port `0x88` bit-0 poll succeeded;
+a later standard status sample reported speed 2, width 2, training clear and
+data-link-active set. The related driver's `0x208` state poll still timed out
+at zero. This is evidence of a negotiated, active root-port link in the tested
+sequence, not endpoint enumeration, working DMA or storage. Tested control and
+tuning restoration readbacks passed, the additional link domains returned off
+after cleanup, and the iPad remained responsive. No PCIe host, physical DMA or
+storage command was used.
