@@ -317,17 +317,18 @@ control sequence and confirmed that DART command, TCR, error and first TTBR
 samples were not all ones. With no physical DMA or PCIe host enabled, an
 all-four-stream DART invalidate returned success with its busy bit clear in a
 bounded poll. The same command had timed out during an earlier inaccessible
-state. The saved shared-control registers read back as restored. This is
-physical evidence of command completion in that test, not verification of DMA
-translation, a PCIe link, internal storage or complete reversal of hardware
-side effects. The test image was reached by a successful single-CPU kexec
+state. The saved shared-control registers read back as restored. This verifies only that the tested busy-bit poll returned success. Later
+experiments found that the command register could retain the written value
+without meeting an additional condition seen in the original driver, so this
+is not proof the invalidation executed, DMA translation works, or hardware
+side effects were completely reversed. The test image was reached by a successful single-CPU kexec
 handoff; this does not establish general-purpose warm-boot support.
 
 A follow-up single-CPU RAM-to-RAM test retained the experimental shared
 controller settings while the actual DART driver initialized. Its register
 samples remained accessible before and after driver reset. The existing
 software-only consumer entered IOMMU group 0, the driver's all-four-stream
-invalidation completed without the earlier timeout, and the consumer reported
+invalidation busy-bit poll returned without the earlier timeout, and the consumer reported
 a DMA domain. The test did not allocate or submit physical DMA, register a
 PCIe host, or access internal storage. The experimental cleanup is intended
 for probe failure and shutdown; hardware shutdown restoration and actual
