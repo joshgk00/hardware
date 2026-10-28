@@ -318,9 +318,8 @@ samples were not all ones. With no physical DMA or PCIe host enabled, an
 all-four-stream DART invalidate returned success with its busy bit clear in a
 bounded poll. The same command had timed out during an earlier inaccessible
 state. The saved shared-control registers read back as restored. This verifies only that the tested busy-bit poll returned success. Later
-experiments found that the command register could retain the written value
-without meeting an additional condition seen in the original driver, so this
-is not proof the invalidation executed, DMA translation works, or hardware
+experiments found that the command register could retain the written value.
+This is not proof the invalidation executed, DMA translation works, or hardware
 side effects were completely reversed. The test image was reached by a successful single-CPU kexec
 handoff; this does not establish general-purpose warm-boot support.
 
@@ -662,8 +661,7 @@ No PCIe host, physical DMA or storage command was used.
 
 Under the combined storage-mode and tuning sequence, a guarded DART invalidate
 poll returned with busy clear. A detailed repeat showed the command register
-had the same value before and after the write, while an additional completion
-condition observed in the original driver was absent. Consequently this is
+had the same value before and after the write. Consequently this is
 inconclusive and does not demonstrate command execution or physical DMA. The
 link poll still timed out; reported control and tuning restoration readbacks
 passed, and the iPad remained responsive. No translation, PCIe host, DMA or
@@ -671,7 +669,7 @@ storage I/O was enabled.
 
 A guarded repeat used a distinct single-stream command after the observed idle
 baseline. The command-register readback changed, but a stricter bounded poll
-requiring the additional condition seen in the original driver timed out.
+with an incorrectly inferred extra condition timed out (see correction below).
 This shows a changed register value, not a completed invalidation. The link
 poll also timed out; tested controls and tuning reported restoration readbacks,
 and the iPad remained responsive. No translation, PCIe host, physical DMA or
@@ -799,3 +797,10 @@ The 500 ms candidate link-state poll still timed out at zero. Tested control
 and tuning restoration readbacks passed, and the iPad remained responsive.
 This observation does not establish link operation or reversal of all
 hardware effects. No PCIe host, physical DMA or storage command was used.
+
+Correction: the original ARM64 poll exits when the command value is below
+`0x1000` **or** bit 3 is clear. The `ccmp` fallback sets the zero flag when
+the threshold comparison is false. Earlier statements that the driver requires
+both a value at least `0x1000` and a clear busy bit were incorrect; the
+stricter experimental timeout does not show that the original poll timed out.
+Neither poll result alone proves hardware invalidation or DMA.
