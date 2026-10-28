@@ -1165,3 +1165,14 @@ This tests PCI resource assignment, not persistent host operation, DMA or
 storage I/O. `driver-patch/j71s-pci-assign.h` and its guard test capture the
 experimental implementation; it retains the allocation if resource release
 fails to avoid leaving a dangling resource pointer.
+
+A follow-up RAM-only test used `pci_iomap()` on the PCI-core-assigned endpoint
+BAR. After confirming the expected resource and BAR readbacks, it temporarily
+enabled root and endpoint memory decoding, with bus mastering disabled, and
+read the controller version through the PCI mapping. The physical read returned
+`0x10001`, the root and endpoint command words, BAR and bridge window read
+back restored, and the link-tuning cleanup reported zero errors. No PCI driver
+was bound and no DMA or storage command was issued. The iPad remained responsive
+at 56%, discharging. The host test covers invalid state, mapping failure and
+rejected decode enables; `driver-patch/j71s-pci-iomap.h` is experimental test
+code, not a persistent host or a complete failure-recovery implementation.
