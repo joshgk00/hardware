@@ -1272,3 +1272,15 @@ discharging. These two observations are consistent with a forced or retained
 high bit, but do not establish all writable bits, the meaning of the field,
 or the address-translation format. The underlying register samples remain
 private; no DMA or disk command was issued.
+
+A guarded follow-up checked the remaining candidate NVMMU fields with control
+and PCI bus mastering still off. The first two range registers read back as the
+requested H9P-formula values with bit 31 set; the third candidate physical
+field read back the requested Linux scratch-region value. All three saved
+fields restored with zero reported errors and the control remained zero. The
+readback and restore behavior does not establish address translation, register
+semantics, or safe DMA. The PCI diagnostic unbound and its tested settings
+restored. A first battery read returned I/O errors, then the battery reported
+53% and discharging on recheck. `driver-patch/j71s-nvmmu-three-fields.h` and
+its host test capture the experiment; the public copy omits the private raw
+mismatch logging used for local analysis.
