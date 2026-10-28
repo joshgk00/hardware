@@ -311,3 +311,14 @@ accessibility; it does not prove that all hardware effects were reversed, that
 the PCIe link or address translation works, or that storage is accessible. The
 test enabled no PCIe host, physical DMA or storage endpoint and issued no
 storage commands.
+
+In a later single-CPU RAM-to-RAM boot, a guarded follow-up repeated the shared
+control sequence and confirmed that DART command, TCR, error and first TTBR
+samples were not all ones. With no physical DMA or PCIe host enabled, an
+all-four-stream DART invalidate returned success with its busy bit clear in a
+bounded poll. The same command had timed out during an earlier inaccessible
+state. The saved shared-control registers read back as restored. This is
+physical evidence of command completion in that test, not verification of DMA
+translation, a PCIe link, internal storage or complete reversal of hardware
+side effects. The test image was reached by a successful single-CPU kexec
+handoff; this does not establish general-purpose warm-boot support.
