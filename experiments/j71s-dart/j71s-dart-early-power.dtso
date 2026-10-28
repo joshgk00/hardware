@@ -1,0 +1,9 @@
+/dts-v1/;
+/plugin/;
+&{/soc/iommu@601008000} {
+	power-domains = <&ps_pcie>, <&ps_pcie_aux>, <&ps_pcie_ref>;
+	orchard,early-power-test;
+};
+&ps_pcie_ref {
+	apple,min-state = <15>;
+};

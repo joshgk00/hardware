@@ -240,3 +240,14 @@ and reference actual/target states returned to 0; the reference minimum field
 remained 15 while auto-PM was disabled. The reported battery capacity was 62%
 after cleanup, with sampled discharge current about 262 mA. No PCIe host,
 physical DMA or storage endpoint was enabled.
+
+`j71s-dart-early-power.dtso` and `j71s-dart-early-power.patch` prepare a
+separate, untested ordering experiment on the existing availability-test
+kernel: the J71s DART driver attaches three power domains before its first
+DART register read and logs their reported actual states. The overlay requests
+an active reference minimum state. The code is specific to the experimental
+J71s tree and opts in through a test-only property; it is not a general driver
+fix. The kernel compiled and the device tree and assembled RAM image were
+checked. This requests hardware power, may hang, and can increase battery
+consumption while the diagnostic runs. It does not enable a PCIe host,
+physical DMA or storage endpoint. A restart may be needed to release power.

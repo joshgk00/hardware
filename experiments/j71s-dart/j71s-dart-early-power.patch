@@ -1,0 +1,42 @@
+diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
+index 2cf7e7c..8baeee2 100644
+--- a/drivers/iommu/apple-dart.c
++++ b/drivers/iommu/apple-dart.c
+@@ -29,6 +29,7 @@
+ #include <linux/of_platform.h>
+ #include <linux/pci.h>
+ #include <linux/platform_device.h>
++#include <linux/pm_domain.h>
+ #include <linux/slab.h>
+ #include <linux/swab.h>
+ #include <linux/types.h>
+@@ -1318,6 +1319,29 @@ static int apple_dart_probe(struct platform_device *pdev)
+ 	struct resource *res;
+ 	struct apple_dart *dart;
+ 	struct device *dev = &pdev->dev;
++	struct dev_pm_domain_list *test_domains;
++	static const struct dev_pm_domain_attach_data test_pd_data = {
++		.pd_flags = PD_FLAG_DEV_LINK_ON,
++	};
++
++	/* Only the isolated J71s DT opts in to the multi-domain test. */
++	if (of_machine_is_compatible("apple,j71s") &&
++	    of_property_read_bool(dev->of_node, "orchard,early-power-test")) {
++		ret = devm_pm_domain_attach_list(dev, &test_pd_data, &test_domains);
++		if (ret < 0)
++			return ret;
++		if (ret != 3)
++			return -EINVAL;
++		void __iomem *test_pmgr;
++
++		test_pmgr = devm_ioremap(dev, 0x20e080000ULL, 0x400);
++		if (!test_pmgr)
++			return -ENOMEM;
++		dev_info(dev, "experimental DART0: early power actual pcie=%u aux=%u ref=%u\n",
++			 (readl(test_pmgr + 0x310) >> 4) & 15,
++			 (readl(test_pmgr + 0x318) >> 4) & 15,
++			 (readl(test_pmgr + 0x148) >> 4) & 15);
++	}
+ 
+ 	dart = devm_kzalloc(dev, sizeof(*dart), GFP_KERNEL);
+ 	if (!dart)
