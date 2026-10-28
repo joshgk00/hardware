@@ -753,3 +753,11 @@ reported zero readback errors; the gate, reset and saved controls read back as
 restored, and the iPad remained responsive. This verifies the tested ordering
 and readbacks, not link operation or reversal of all effects. No PCIe host,
 physical DMA or storage command was used; tuning values remain private.
+
+A further guarded test cleared candidate common clock-control `0x114` bit 8
+after port readiness; it was initially set and read back clear during the
+test. Port enable read back as set, but the 500 ms candidate link-state poll
+still timed out at zero. Tested tuning, reset and shared controls reported
+restoration readbacks, and the iPad remained responsive. The runtime branch
+and hardware side effects remain unverified. No PCIe host, physical DMA or
+storage command was used.
