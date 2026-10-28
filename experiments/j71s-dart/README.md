@@ -804,3 +804,11 @@ the threshold comparison is false. Earlier statements that the driver requires
 both a value at least `0x1000` and a clear busy bit were incorrect; the
 stricter experimental timeout does not show that the original poll timed out.
 Neither poll result alone proves hardware invalidation or DMA.
+
+A standalone ARM64 user-space check, `ccmp-check.S`, executes the relevant
+comparison and conditional comparison for values `0`, `8`, `0x1000`, and
+`0x1008`. On the connected iPad it exited with bit mask `7`, meaning the first
+three cases take the exit branch and the fourth does not. This confirms the
+instruction-level interpretation on that CPU; it does not validate hardware
+register semantics or an actual DART invalidation. The program performs no
+MMIO and makes only the process-exit system call.
