@@ -1200,3 +1200,19 @@ callbacks share the same wakeup-and-cancel function, but this test exercises
 remove via sysfs; a real reboot or kexec during the active window has not yet
 been tested. `test-active-pci-unbind.sh` records the device-side procedure.
 No storage driver or DMA was enabled.
+
+The worker experiment was extended to keep the assigned but unbound PCI
+endpoint present until an explicit stop, releasing the global PCI rescan/remove
+lock while waiting. On the physical iPad, sysfs still showed `106b:2002`, the
+expected 16 KiB resource and no driver after 25 seconds. A checksum-verified
+RAM-to-RAM kexec was then initiated with the host active; a fresh kernel came
+up and successfully rediscovered and mapped the endpoint. A subsequent active
+unbind returned, removed the PCI devices and reported successful BAR, bridge
+and tuning restoration. This is evidence that one active-host kexec and
+reinitialization worked; the previous kernel's shutdown messages were not
+captured and complete reversal of hardware side effects remains unproven.
+The iPad was at 55%, discharging. No PCI driver, bus mastering, DMA or disk
+commands were enabled. `driver-patch/j71s-pci-persistent.h` and the observation
+and stop scripts are experimental; the workqueue-owned host is not yet a
+production driver and its behavior under unrelated concurrent PCI removal has
+not been validated.
