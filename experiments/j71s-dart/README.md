@@ -601,3 +601,9 @@ All tuning readbacks passed, but candidate port `0x208` bit 3 stayed clear for
 controls reported matching restoration readbacks; the iPad remained responsive.
 No PCIe host, physical DMA or storage command was used. This does not establish
 S8000 link-status semantics or reversal of every side effect.
+
+An additional bounded training diagnostic sampled candidate state bits and the
+high byte of port `0x208`, and bits 0 and 6 of port `0x88`. All were zero after
+the 250 ms poll timed out. The reads completed, rollback readbacks passed, and
+the iPad remained responsive. The fields' S8000 meanings remain unverified;
+no PCIe host, physical DMA or storage command was used.
