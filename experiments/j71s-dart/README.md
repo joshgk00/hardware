@@ -478,3 +478,12 @@ asserts it before port initialization, then deasserts it after reference-clock
 setup. That is useful comparative evidence but does not by itself establish
 the J71s platform-function encoding, pin polarity, timing units or complete
 S8000 initialization order. No J71s reset GPIO drive has been attempted.
+
+A guarded RAM-only experiment tested the candidate active-low reset GPIO 160
+under the successful global and port-control sequence. After checking its
+input/peripheral baseline, the diagnostic drove the pin low then high; the
+high output configuration read back, and its original mode and peripheral
+bits read back as restored. The candidate port link-status sample remained
+zero. This establishes GPIO register behavior, not electrical reset polarity,
+endpoint behavior or a trained link. It issued no storage commands or physical
+DMA and did not register a PCIe host.
