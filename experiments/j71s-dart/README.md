@@ -675,3 +675,12 @@ This shows a changed register value, not a completed invalidation. The link
 poll also timed out; tested controls and tuning reported restoration readbacks,
 and the iPad remained responsive. No translation, PCIe host, physical DMA or
 storage I/O was enabled.
+
+Static investigation of the storage bridge's separate NVMe MMU activation
+function points to initialization of a candidate MMU window, including
+address-like fields and a control/status bit. A read-only diagnostic sampled
+candidate window `0x601004000` offset `0x04` after the tested port-ready
+sequence; it returned zero, saved controls read back as restored, and the
+iPad remained responsive. The mapping, address-field provenance and complete
+activation sequence remain unverified. No MMU write, PCIe host, physical DMA
+or storage command was used.
