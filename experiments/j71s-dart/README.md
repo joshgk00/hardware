@@ -577,3 +577,11 @@ returned a nonzero, non-all-ones value. Saved controls read back as restored,
 and the iPad remained responsive. This demonstrates a responding candidate
 root-window read, not endpoint enumeration, link training or storage. No root
 tuning, host registration, physical DMA or storage command occurred.
+
+A read-only follow-up sampled both candidate root-tuning offsets `0x98` and
+`0x154` after the root-window guard. Both reads completed without all-ones
+values; the first returned zero and the second a nonzero value. Saved controls
+read back as restored and the iPad remained responsive. No root tuning writes,
+link training, host registration, physical DMA or storage access occurred.
+Related drivers enable certain configuration writes before tuning; whether
+that is required and safe on J71s remains unverified.
