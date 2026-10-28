@@ -831,3 +831,5 @@ power-domain links; the existing kernel explicitly requires four and will
 reject this overlay until adapted. This avoids introducing new persistent
 minimum-state settings for LINK1–LINK3, but successful attachment and cleanup
 still require physical verification.
+The revised overlay was compiled and applied to the local test DTB: it has
+seven domain phandles and no `apple,min-state` property on LINK1–LINK3.
