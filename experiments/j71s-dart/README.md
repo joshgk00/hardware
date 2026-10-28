@@ -976,3 +976,15 @@ not independently verified S8000 definitions or a working scratch setup. No
 controller registers were written, DMA enabled or storage commands issued;
 the tested PCI configuration read back restored, and the iPad remained
 responsive at 61% battery, discharging.
+
+A guarded read of the candidate Hx initialization and scratch configuration
+registers found initialization zero, scratch address zero and scratch size
+zero; the candidate boot state was neither all ones nor the Hx magic value.
+This is consistent with no configured scratch region at those offsets during
+this boot, but their S8000 meanings are not independently established. The
+existing J71b branch includes an Apple ANS FlatDMA/NVMMU implementation;
+S8000 still needs verified reserved-memory ownership, address translation,
+interrupts and lifecycle before that implementation can be used. No scratch
+configuration writes, DMA or storage commands were performed; tested PCI
+configuration read back restored, and the iPad remained responsive at 60%,
+discharging.
