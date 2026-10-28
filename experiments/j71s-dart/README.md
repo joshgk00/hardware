@@ -299,3 +299,15 @@ window had returned other values. Main PCIe, AUX, reference and link-0 PMGR
 states were reported active immediately before this check. The meaning of the
 all-ones response remains unknown; this is not a PCIe link, DMA or storage
 access test. The port register was not written.
+
+A later J71s RAM-only shared-controller diagnostic requested the same four
+PCIe power domains, then briefly changed a small guarded subset of controller
+control bits. During the sequence, a port-0 register and a DART0 register
+both returned values other than all ones; both had returned all ones during the
+previous four-domain power-only test. The three saved shared-control registers
+read back as restored afterward, and a later observation found the four power
+domains off. This is evidence that controller setup can affect register
+accessibility; it does not prove that all hardware effects were reversed, that
+the PCIe link or address translation works, or that storage is accessible. The
+test enabled no PCIe host, physical DMA or storage endpoint and issued no
+storage commands.
