@@ -892,3 +892,11 @@ tuning restoration readbacks passed; the extra domains returned off and the
 iPad remained responsive. This checks routing-register readback only, not
 endpoint discovery or reversal of all effects. No endpoint read, PCIe host,
 physical DMA or storage command was used.
+
+A guarded follow-up temporarily routed bus 1 and performed one read of its
+candidate device-0/function-0 PCI configuration ID. The endpoint responded with
+vendor/device `106b:2002`. The original bus value and other tested controls
+and tuning read back as restored, extra domains returned off, and the iPad
+remained responsive. This identifies a responding PCI endpoint; its class,
+functional DMA and storage access are not yet verified. No endpoint write,
+PCIe host, physical DMA or storage command was used.
