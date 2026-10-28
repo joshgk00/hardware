@@ -554,3 +554,11 @@ training, GPIO and shared controls read back as restored. The iPad remained
 responsive. Per-port tuning was not applied, and no PCIe host, physical DMA or
 storage command was used. This does not establish the precise S8000 status
 semantics or reversal of every hardware effect.
+
+A private guarded diagnostic applied all six captured per-port configuration
+records to the candidate port window. Each write read back as expected and
+reverse-order rollback reported zero readback errors; the saved controls also
+read back as restored. The iPad remained responsive. The separate root-complex
+table was not tested, and no link training, host registration, physical DMA or
+storage access occurred. This does not prove a working link or reversal of all
+hardware effects; device-specific tuning values are not included.
