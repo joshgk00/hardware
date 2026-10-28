@@ -570,3 +570,10 @@ passed write-readback, but candidate port `0x208` bit 3 stayed clear for
 read back as restored. The iPad remained responsive. The root-complex table was
 not applied, and no host, physical DMA or storage command was used. This does
 not establish the exact S8000 link semantics or reversal of every side effect.
+
+An isolated read of offset zero in the candidate root configuration window
+completed after the tested global, port-ready and reference-clock steps and
+returned a nonzero, non-all-ones value. Saved controls read back as restored,
+and the iPad remained responsive. This demonstrates a responding candidate
+root-window read, not endpoint enumeration, link training or storage. No root
+tuning, host registration, physical DMA or storage command occurred.
