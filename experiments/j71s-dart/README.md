@@ -769,3 +769,10 @@ readback errors, and the gate and saved controls read back as restored; the
 iPad remained responsive. This was insufficient in the tested sequence and
 does not prove reversal of all effects. No PCIe host, physical DMA or storage
 command was used.
+
+A bounded read-only walk of the root PCI Express capability list found a
+capability whose target-link-speed field was already set to 2 before training.
+The 500 ms candidate link-state poll still timed out at zero; reported tuning
+and control restoration readbacks passed, and the iPad remained responsive.
+This observation does not establish link operation or reversal of all effects.
+No PCIe host, physical DMA or storage command was used.
