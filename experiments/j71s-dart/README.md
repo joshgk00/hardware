@@ -607,3 +607,12 @@ high byte of port `0x208`, and bits 0 and 6 of port `0x88`. All were zero after
 the 250 ms poll timed out. The reads completed, rollback readbacks passed, and
 the iPad remained responsive. The fields' S8000 meanings remain unverified;
 no PCIe host, physical DMA or storage command was used.
+
+After the tested global and port-ready sequence, a read of candidate common
+link-rate offset `0x4020` returned zero. A guarded follow-up wrote 3 only from
+that zero baseline; the full register readback did not equal 3. Restoring the
+saved zero and shared controls read back as matching. The iPad remained
+responsive. This mismatch may reflect register semantics, prerequisites or
+ordering; it does not establish that the write had no effect or that all side
+effects were reversed. No link training, host, physical DMA or storage command
+was used in these tests.
