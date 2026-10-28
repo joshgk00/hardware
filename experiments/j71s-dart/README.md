@@ -585,3 +585,11 @@ read back as restored and the iPad remained responsive. No root tuning writes,
 link training, host registration, physical DMA or storage access occurred.
 Related drivers enable certain configuration writes before tuning; whether
 that is required and safe on J71s remains unverified.
+
+A guarded root-tuning diagnostic found the first captured record already
+matched its register. With the candidate configuration write-enable bit set,
+the second record wrote and read back as expected; its saved value, the enable
+control and shared controls read back as restored. The iPad remained
+responsive. This checks one record under one sequence, not a trained link,
+storage or reversal of every side effect. No link training, PCIe host,
+physical DMA or storage command was used; device-specific values remain private.
