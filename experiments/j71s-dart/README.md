@@ -347,3 +347,14 @@ allocation and mapping failure, first/last lookup mismatches, unmap, and page
 cleanup. Run `python3 experiments/j71s-dart/test-software-map.py` from the
 repository root. The mock checks software control flow only; the physical
 observation above checks the software page tables, not hardware DMA.
+
+After DFU recovery, the software-only mapping result repeated. With the test
+DART bound and the four power domains active, separately guarded read-only
+checks of common-window offsets `0x2c` and `0x12c` and port offset `0x088`
+returned values other than all ones. Common `0x12c` read as zero; bit 0 was
+clear in each sample. Candidate field names from S8003 are not established
+semantics on S8000. A separate streaming check logged a marker immediately
+before reading port offset `0x804` and then stopped responding and timed out.
+The exact cause is unconfirmed, but this isolates the observed stall to that
+access or its immediate execution. Avoid repeated reads of that candidate.
+The checks issued no register writes, hardware DMA or storage commands.
