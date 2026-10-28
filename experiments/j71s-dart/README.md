@@ -1284,3 +1284,18 @@ restored. A first battery read returned I/O errors, then the battery reported
 53% and discharging on recheck. `driver-patch/j71s-nvmmu-three-fields.h` and
 its host test capture the experiment; the public copy omits the private raw
 mismatch logging used for local analysis.
+
+A guarded follow-up programmed the three candidate window fields using the
+observed readback rules, then briefly wrote `1` and `0` to candidate control
+`0x20`. It required the NVMe controller CC/CSTS and candidate TCB control to
+be zero, bus mastering off, a validated reserved scratch region, and matching
+window readbacks. The iPad read back control enabled and then disabled; all
+three window fields restored with zero reported errors. The diagnostic PCI
+driver then unbound and the tested PCI/tuning state restored; the iPad remained
+responsive at 52%, discharging. Host tests include a simulated control-disable
+failure, in which the code deliberately leaves the fields in place rather than
+rewriting them while control appears enabled. This is control/register
+readback only, not evidence that translation works or DMA is safe. No PCI bus
+mastering or storage command was enabled. The experimental implementation is
+`driver-patch/j71s-nvmmu-enable-test.h`; its public copy omits private raw
+mismatch logging.
