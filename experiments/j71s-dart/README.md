@@ -562,3 +562,11 @@ read back as restored. The iPad remained responsive. The separate root-complex
 table was not tested, and no link training, host registration, physical DMA or
 storage access occurred. This does not prove a working link or reversal of all
 hardware effects; device-specific tuning values are not included.
+
+A further diagnostic applied all 41 PHY, 34 common and six port records,
+then ran the bounded candidate reset and link-training sequence. All records
+passed write-readback, but candidate port `0x208` bit 3 stayed clear for
+250 ms. All three table rollbacks reported zero errors and the tested controls
+read back as restored. The iPad remained responsive. The root-complex table was
+not applied, and no host, physical DMA or storage command was used. This does
+not establish the exact S8000 link semantics or reversal of every side effect.
