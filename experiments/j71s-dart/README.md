@@ -846,3 +846,12 @@ seven-domain phandles and absence of new minimum states on LINK1–LINK3. It
 requires `dtc`, `fdtoverlay` and `fdtget`; it does not boot a device. The test
 passed against the prepared J71s tree and rejected a tree with unexpected
 minimum states.
+
+A software-only single-CPU handoff applied the seven-domain overlay to the
+next boot's FDT and ran the diagnostic on J71s without DFU. All three extra
+link domains reported active during the test; the 500 ms candidate link-state
+poll still timed out at zero. Tested tuning and control restoration readbacks
+passed. After probe cleanup, LINK1–LINK3 each reported actual, target and
+minimum state zero, consistent with managed detach. The iPad remained
+responsive. This does not prove a working link, hardware DMA or reversal of all
+hardware effects. No PCIe host, physical DMA or storage command was used.
