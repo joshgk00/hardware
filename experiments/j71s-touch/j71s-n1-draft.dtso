@@ -1,0 +1,86 @@
+// SPDX-License-Identifier: GPL-2.0-only OR MIT
+/* Offline draft adapted from Orchard hardware PR 6, commit f764d95f.
+ * Do not boot as a touchscreen test: reset/power sequencing, PMIC behavior,
+ * pin polarity and the driver personality remain unverified on J71s.
+ * Both controller and touchscreen are deliberately disabled.
+ */
+/dts-v1/;
+/plugin/;
+#include <dt-bindings/interrupt-controller/apple-aic.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/apple.h>
+
+&{/} {
+ j71s_spi3_nclk: clock-spi3-n1 {
+  compatible = "fixed-clock";
+  #clock-cells = <0>;
+  clock-frequency = <61538461>;
+ };
+};
+
+&pmgr {
+ #address-cells = <1>;
+ #size-cells = <1>;
+ j71s_touch_clk: clock-controller@78000 {
+  compatible = "apple,s8000-touch-clock";
+  reg = <0x78000 4>;
+  #clock-cells = <0>;
+  clocks = <&clkref>;
+  status = "disabled";
+ };
+};
+
+&{/soc/i2c@20a110000/pmic@3c} {
+ #address-cells = <1>;
+ #size-cells = <1>;
+ j71s_touch_analog: regulator@31c {
+  compatible = "apple,d2365-touch-analog";
+  reg = <0x31c 1>;
+  regulator-name = "touch-analog";
+  status = "disabled";
+ };
+};
+
+&pinctrl_ap {
+ j71s_touch_sync_on: touch-sync-on-pins { pinmux = <APPLE_PINMUX(74, 2)>; };
+ j71s_touch_sync_off: touch-sync-off-pins { pinmux = <APPLE_PINMUX(74, 0)>; };
+};
+
+&{/soc} {
+ #address-cells = <2>;
+ #size-cells = <2>;
+ spi@20a08c000 {
+  compatible = "apple,s8000-spi";
+  reg = <0x2 0x0a08c000 0 0x4000>;
+  #address-cells = <1>;
+  #size-cells = <0>;
+  interrupt-parent = <&aic>;
+  interrupts = <AIC_IRQ 191 IRQ_TYPE_LEVEL_HIGH>;
+  clocks = <&j71s_spi3_nclk>;
+  power-domains = <&ps_spi3>;
+  cs-gpios = <&pinctrl_ap 102 GPIO_ACTIVE_LOW>;
+  status = "disabled";
+  touchscreen@0 {
+   compatible = "apple,j71s-n1";
+   reg = <0>;
+   touchscreen-inverted-y;
+   spi-max-frequency = <12048192>;
+   spi-cs-setup-delay-ns = <5000>;
+   spi-cs-hold-delay-ns = <10000>;
+   interrupt-parent = <&pinctrl_ap>;
+   interrupts = <65 IRQ_TYPE_EDGE_FALLING>;
+   attn-gpios = <&pinctrl_ap 65 GPIO_ACTIVE_LOW>;
+   reset-gpios = <&pinctrl_ap 75 GPIO_ACTIVE_LOW>;
+   ldo-gpios = <&pinctrl_ap 73 GPIO_ACTIVE_HIGH>;
+   vdd-supply = <&j71s_touch_analog>;
+   clocks = <&j71s_touch_clk>;
+   pinctrl-names = "sync-on", "sync-off";
+   pinctrl-0 = <&j71s_touch_sync_on>;
+   pinctrl-1 = <&j71s_touch_sync_off>;
+   firmware-name = "apple/j71s-n1.bin";
+   apple,calibration-firmware = "apple/j71s-n1-calibration.bin";
+   status = "disabled";
+  };
+ };
+};

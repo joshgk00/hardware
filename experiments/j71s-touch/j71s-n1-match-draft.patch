@@ -1,0 +1,20 @@
+--- a/drivers/input/touchscreen/apple_n1.c
++++ b/drivers/input/touchscreen/apple_n1.c
+@@ -891,6 +891,9 @@
+ 	unsigned int stage = READ_ONCE(boot_stage);
+ 	int ret, count, i;
+ 
++	/* J71s bring-up is restricted to identification until validated. */
++	if (device_is_compatible(dev, "apple,j71s-n1"))
++		stage = 1;
+ 	dev_info(dev, "N1 probe begin stage=%u\n", stage);
+ 	if (stage < 1 || stage > 3)
+ 		return -EINVAL;
+@@ -1158,6 +1161,7 @@
+ 
+ static const struct of_device_id n1_of_match[] = {
+ 	{ .compatible = "apple,j71t-n1" },
++	{ .compatible = "apple,j71s-n1" },
+ 	{ }
+ };
+ MODULE_DEVICE_TABLE(of, n1_of_match);

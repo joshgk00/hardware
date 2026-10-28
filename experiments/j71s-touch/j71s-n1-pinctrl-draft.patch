@@ -1,0 +1,31 @@
+--- a/drivers/pinctrl/pinctrl-apple-gpio.c
++++ b/drivers/pinctrl/pinctrl-apple-gpio.c
+@@ -191,9 +191,25 @@
+ 			 (unsigned int)FIELD_GET(REG_GPIOx_PULL, before));
+ 	}
+ 
+-	apple_gpio_set_reg(
+-		pctl, group, REG_GPIOx_PERIPH | REG_GPIOx_INPUT_ENABLE,
+-		FIELD_PREP(REG_GPIOx_PERIPH, func) | REG_GPIOx_INPUT_ENABLE);
++	/* J71s N1 display-sync experiment, adapted from Orchard J71t.
++	 * Only the captured AP GPIO 74 is changed; keep HDQ and all other
++	 * pins on the previously tested path. Hardware validation is pending.
++	 */
++	if (of_machine_is_compatible("apple,j71s") && group == 74 &&
++	    !strcmp(dev_name(pctl->dev), "20f100000.pinctrl")) {
++		u32 mask = REG_GPIOx_PERIPH | REG_GPIOx_INPUT_ENABLE | BIT(4);
++		u32 value = FIELD_PREP(REG_GPIOx_PERIPH, func) | REG_GPIOx_INPUT_ENABLE;
++
++		if (!func) {
++			mask |= REG_GPIOx_MODE;
++			value |= FIELD_PREP(REG_GPIOx_MODE, REG_GPIOx_OUT);
++		}
++		apple_gpio_set_reg(pctl, group, mask, value);
++	} else {
++		apple_gpio_set_reg(pctl, group,
++			REG_GPIOx_PERIPH | REG_GPIOx_INPUT_ENABLE,
++			FIELD_PREP(REG_GPIOx_PERIPH, func) | REG_GPIOx_INPUT_ENABLE);
++	}
+ 
+ 	return 0;
+ }
