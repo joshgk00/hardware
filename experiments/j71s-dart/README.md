@@ -292,3 +292,10 @@ still returned all ones. These observations show that some shared-window
 reads responded under this configuration, not that PCIe or storage works.
 The selected shared registers were not written, no host was registered, and
 no physical DMA or storage command was issued.
+
+A later read-only check of one port-0 register in the PCIe/NVMe-MMU-overlapping
+window returned `0xffffffff`, while the previously tested shared-controller
+window had returned other values. Main PCIe, AUX, reference and link-0 PMGR
+states were reported active immediately before this check. The meaning of the
+all-ones response remains unknown; this is not a PCIe link, DMA or storage
+access test. The port register was not written.
