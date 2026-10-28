@@ -936,3 +936,12 @@ PCI address `0xc0000000` to CPU address `0x7c0000000`, consistent with the J71s
 captured controller ranges; actual J71s address routing remains unverified.
 No BAR assignment, controller register access, DMA, or storage commands were
 performed. The device remained responsive with 62% battery, discharging.
+
+A guarded RAM-only diagnostic temporarily assigned the candidate PCI memory
+window and the endpoint BAR with both memory decoding and bus mastering
+still disabled. The bridge window and BAR values read back as written; both
+BAR words, the bridge window, and the bus-number register subsequently read
+back as restored. This confirms configuration-register readback, not working
+CPU-to-PCI routing, controller MMIO, DMA, storage, or reversal of all side
+effects. No controller registers or storage commands were accessed. The iPad
+remained responsive at 61% battery, discharging.
