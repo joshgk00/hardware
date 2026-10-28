@@ -419,3 +419,12 @@ On a separate DART-bound boot, a guarded read of common controller offset
 power domains active and no PCIe devices present. It was read-only; no global
 initialization write or tuning operation was attempted. The meaning and
 hardware side effects of any future write remain to be established.
+
+An isolated J71s RAM boot tested a candidate global initialization operation.
+After checking the four power domains and a common `0x04` baseline of 1, the
+test set bit 4 and observed common `0x2c` bit 0 set in its bounded poll.
+It wrote back the saved control value, which read back as matching. The test
+then aborted before DART initialization, PCIe host registration, tuning-table
+application, physical DMA or storage access. This demonstrates a global
+status transition on one device, not a working PCIe link or proof that every
+hardware side effect was reversed.
