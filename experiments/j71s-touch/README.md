@@ -6,7 +6,7 @@ This is bring-up research, not an installer or a supported device profile. It ta
 
 On one J71s, the stage-1 RAM test initialized SPI3 and read touchscreen bootloader identity `0x434d15c1`. A subsequent stage-2 RAM test loaded that device's firmware and 1024-byte calibration, received calibration transport status `0x4969`, executed the firmware, and discovered interface 1, packet limit 2454, family 21, 40x30 sensor, firmware version 0x210, and 14745x19657 surface. Stage 2 powered down before creating an input device. This is not evidence that calibration is correct, touch events work, orientation is correct, or an installed system runs.
 
-The stage-3 RAM image booted on this J71s and registered the N1 input device. During user taps and drags a bounded capture reached 512 events, 72 frames, six contact starts, five contact ends and zero SYN_DROPPED reports; the limit may truncate the final contact. The GPIO 65 interrupt counter was 297 afterward. This verifies physical touch events on one unit, not corner mapping, desktop integration or long-term stability. The test tree inherits the J71t Y inversion, which needs physical corner testing. Firmware and device calibration are private inputs and must not be committed, published, or copied from another iPad.
+The stage-3 RAM image booted on this J71s and registered the N1 input device. During user taps and drags a bounded capture reached 512 events, 72 frames, six contact starts, five contact ends and zero SYN_DROPPED reports; the limit may truncate the final contact. The GPIO 65 interrupt counter was 297 afterward. This verifies physical touch events on one unit, not corner mapping, desktop integration or long-term stability. The inherited J71t Y inversion passed the four-corner check described below. Firmware and device calibration are private inputs and must not be committed, published, or copied from another iPad.
 
 ## Draft artifacts
 
@@ -17,3 +17,5 @@ The stage-3 RAM image booted on this J71s and registered the N1 input device. Du
 - `j71s-touch-capture.sh` and `j71s-touch-report.py`: bounded input capture and host-side ARM64 evdev summary. The missing-device and BusyBox timeout paths were checked; one real input capture produced the event counts above.
 
 Neither stage proves storage, Wi-Fi, charging or a persistent Omarchy installation. In particular, J71s PCIe remains unresolved; the J71t host driver and device tree cannot be assumed to support S8000.
+
+A subsequent four-corner test on the same unit captured approximately (204,198), (14362,408), (14535,19440), and (130,19341). The user confirmed tapping top-left, top-right, bottom-right, bottom-left in that order. With the inherited inverted-Y setting, these samples confirm the expected axis orientation on this unit; they do not establish full accuracy or gesture behavior.
