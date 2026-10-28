@@ -1260,3 +1260,15 @@ semantics cannot be assumed for S8000; this result does not prove why the
 readback differs, or that translation is functional. Host mocks cover disabled
 control, DMA guards, mismatch and reverse restore. The experimental test is
 `driver-patch/j71s-nvmmu-window-test.h`.
+
+A private follow-up examined the first candidate NVMMU window field (`0x24`)
+without enabling its control. In the prior candidate write, the observed
+value equaled the requested value OR the previously set bit 31; the other
+requested set bits appeared in readback. A second test wrote zero to this
+field only, and readback still had bit 31 set and equaled the saved baseline.
+Both tests reported control off and successful restoration, followed by
+successful PCI and tuning cleanup. The iPad remained responsive at 53%,
+discharging. These two observations are consistent with a forced or retained
+high bit, but do not establish all writable bits, the meaning of the field,
+or the address-translation format. The underlying register samples remain
+private; no DMA or disk command was issued.
