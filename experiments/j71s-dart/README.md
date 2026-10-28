@@ -406,3 +406,10 @@ same offset `0x100` as the diagnostic but does not mask either tested bit 0
 or bit 8. The diagnostic did not apply these tables. Their presence is a
 configuration difference to investigate, not evidence that replaying them is
 safe or sufficient to establish PCIe or storage.
+
+A follow-up boot reported both bits from the same already-existing common
+`0x2c` sample during the candidate ordering test. Bit 4 was set and bit 0
+was clear; the `0x12c` port-status bit again remained clear for 250 ms, and
+the saved controls read back as restored. This adds no hardware access to
+the prior diagnostic and narrows the observed state; it does not establish
+what is required to set the global bit or bring up the link.
