@@ -966,3 +966,13 @@ independently of the kernel's 16 KiB CPU pages. All tested configuration
 registers read back restored and the iPad remained responsive at 61%,
 discharging. This does not prove controller initialization, hardware DMA,
 scratch-memory setup or storage access.
+
+A follow-up guarded read of BAR offsets `0x1808`, `0x180c`, `0x1824`, and
+`0x1828` returned `0xe00000`, `0x1000`, `0x3`, and `0xff`, respectively.
+If the definitions in the related [Corellium Hx driver](https://github.com/corellium/linux-sandcastle/blob/sandcastle-5.4/drivers/nvme/host/hx.c)
+apply to S8000, these correspond to 14 MiB scratch, 4 KiB alignment, core mask
+3 and a log-size field of 255. These are plausible candidate requirements,
+not independently verified S8000 definitions or a working scratch setup. No
+controller registers were written, DMA enabled or storage commands issued;
+the tested PCI configuration read back restored, and the iPad remained
+responsive at 61% battery, discharging.
