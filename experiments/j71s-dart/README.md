@@ -443,3 +443,11 @@ port-window offset `0x210`. The read completed but still returned all ones;
 the saved global and port controls read back as restored. This isolates a
 remaining accessibility issue after the tested partial initialization. No
 DART-register access, host registration or storage command was attempted.
+
+In a follow-up RAM boot, the same global and port-ready checks succeeded. The
+experiment then set common `0x124` bit 0 and waited 100 microseconds before
+reading port offset `0x210`; this time the read returned zero rather than all
+ones. Both sets of saved controls read back as restored. This is evidence of
+a register-accessibility change in one physical test, not a trained link,
+endpoint, DMA or storage result. No DART-register access, PCIe host or storage
+command was attempted.
