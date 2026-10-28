@@ -545,3 +545,12 @@ back as restored. The iPad remained responsive. This is one register-readback
 test, not proof of safe link operation or reversal of every side effect. It
 performed no link training, host registration, physical DMA or storage access.
 Device-specific tuning values are not included here.
+
+A dual-tuned diagnostic applied all 41 PHY and 34 common-controller records,
+then attempted the bounded candidate reset and training sequence. Both tables
+passed write-readback, but candidate port `0x208` bit 3 remained clear for
+250 ms. Both tables reported zero rollback readback errors, and the tested
+training, GPIO and shared controls read back as restored. The iPad remained
+responsive. Per-port tuning was not applied, and no PCIe host, physical DMA or
+storage command was used. This does not establish the precise S8000 status
+semantics or reversal of every hardware effect.
