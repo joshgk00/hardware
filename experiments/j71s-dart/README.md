@@ -925,3 +925,14 @@ extra domains returned off and the iPad remained responsive. This is a BAR mask
 measurement, not an assigned window, controller register access or proof of
 complete side-effect reversal. No PCIe host, physical DMA or storage command
 was used.
+
+A subsequent read of the root bridge configuration found command `0x0000`,
+non-prefetchable memory-window register `0x00000000`, and prefetch window
+register `0x00010001`; root memory decoding was disabled. The endpoint BAR
+sizing result repeated, and the diagnostic restored the tested registers. The
+live Linux resource map showed no claimed resource at the candidate CPU
+window, but unclaimed does not mean safe to access. The related J71b tree maps
+PCI address `0xc0000000` to CPU address `0x7c0000000`, consistent with the J71s
+captured controller ranges; actual J71s address routing remains unverified.
+No BAR assignment, controller register access, DMA, or storage commands were
+performed. The device remained responsive with 62% battery, discharging.
