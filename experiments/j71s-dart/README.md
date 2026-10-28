@@ -727,3 +727,11 @@ tuning reported restoration readbacks; the iPad remained responsive. This
 ordering alone was insufficient in this partial sequence. Reset polarity and
 reversal of hardware side effects remain unverified. No PCIe host, physical DMA
 or storage command was used.
+
+A guarded follow-up applied both candidate storage-mode writes before port
+setup, with a 5 ms interval and candidate reset held low, then ran the bounded
+500 ms link-state test. Both writes read back as expected, but the candidate
+state remained zero and the poll timed out. Reset mode, tested controls and
+tuning reported restoration readbacks; the iPad remained responsive. This
+partial ordering and timing change alone was insufficient. No PCIe host,
+physical DMA or storage command was used.
