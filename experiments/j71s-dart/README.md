@@ -428,3 +428,12 @@ then aborted before DART initialization, PCIe host registration, tuning-table
 application, physical DMA or storage access. This demonstrates a global
 status transition on one device, not a working PCIe link or proof that every
 hardware side effect was reversed.
+
+A later guarded RAM boot combined the candidate global initialization with
+the previous port sequence. Common `0x2c` bit 0 became set, and the subsequent
+common `0x12c` bit-0 port-status poll also succeeded without all-ones reads.
+The saved global and port controls read back as restored. Unlike the earlier
+port-only attempts, this test observed the candidate ready status. It stopped
+before DART-register accesses, host registration, tuning-table application,
+physical DMA or storage access. The observation does not establish a trained
+link, an endpoint, or reversal of every hardware side effect.
