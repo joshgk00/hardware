@@ -815,13 +815,19 @@ MMIO and makes only the process-exit system call.
 
 `j71s-all-link-domains.dtso` prepares a RAM-only experiment requesting the
 PCIe parent, auxiliary, reference, and all four link domains through the
-existing Linux power-domain driver. It sets a minimum active state for each
-link. The generic m1n1 `pmgr_adt_devices_set_mode` helper iterates a node's
+existing Linux power-domain driver. It preserves the existing LINK0 minimum state without setting minimums for
+the other three links. The generic m1n1 `pmgr_adt_devices_set_mode` helper iterates a node's
 entire `clock-gates` list, providing a reason to test the full list; this does
 not establish the iPadOS driver's policy or that unrelated links are required
-for storage. The overlay compiled and applied to a local J71s test DTB; all
-four link nodes had minimum state 15 and the DART node contained seven domain
-phandles. It has not been booted or tested for cleanup. The current kexec
+for storage. The overlay compiled and applied to a local J71s test DTB; the original version set four link minimums and the DART node contained seven
+domain phandles. The revised overlay must be validated separately. It has not been booted or tested for cleanup. The current kexec
 loader retains its existing device tree, so this overlay is not applied merely
 by building a new kernel. Power-domain activation may affect other peripherals;
 restore and shutdown behavior must be validated before using it.
+
+Update: the overlay now leaves the extra links' minimum-state fields alone.
+The diagnostic driver must attach all seven listed domains using managed
+power-domain links; the existing kernel explicitly requires four and will
+reject this overlay until adapted. This avoids introducing new persistent
+minimum-state settings for LINK1–LINK3, but successful attachment and cleanup
+still require physical verification.

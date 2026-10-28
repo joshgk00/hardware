@@ -8,6 +8,3 @@
 			<&ps_pcie_link2>, <&ps_pcie_link3>;
 };
 &ps_pcie_link0 { apple,min-state = <15>; };
-&ps_pcie_link1 { apple,min-state = <15>; };
-&ps_pcie_link2 { apple,min-state = <15>; };
-&ps_pcie_link3 { apple,min-state = <15>; };
