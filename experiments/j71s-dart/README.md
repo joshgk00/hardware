@@ -624,3 +624,10 @@ and the iPad remained responsive. This does not determine whether the register
 is write-only, self-clearing, gated or otherwise behaves differently; write
 side effects cannot be excluded. No reset pulse, link training, host, physical
 DMA or storage command was used.
+
+During another bounded training attempt, port `0x80` control bit 0 read as set,
+but the low byte of port `0x208` was zero, including the bit named link-up in
+a different Apple PCIe controller driver. Candidate state and high-byte fields
+and port `0x88` bits 0 and 6 were also zero. Rollback readbacks passed and the
+iPad remained responsive. The field meanings on S8000 remain unverified; no
+PCIe host, physical DMA or storage command was used.
