@@ -1070,3 +1070,15 @@ arrays with these DT properties. Its private host MMIO mock passed the prior
 link/rollback checks and rejects absent tables before register writes. A
 private overlay injects the device-derived tables into the next RAM boot;
 physical behavior and integration into a PCIe host driver remain unverified.
+
+The DT-tunable reader was physically tested in an isolated RAM diagnostic.
+A private overlay supplied this iPad's three tables to the diagnostic node;
+the reader validated 34 common, 41 PHY and 6 port records before MMIO. The
+root link then reported active at speed 2, width 2, PCI endpoint `106b:2002`
+responded, and controller version read `0x10001`. The tested tuning-table and
+early rollback paths reported zero errors, the scratch reservation remained
+available, and the iPad remained responsive at 59%, discharging. A host mock
+also verified that missing table input causes no diagnostic MMIO writes.
+This checks the experimental DART-probe sequence using DT-supplied values,
+not a finished PCIe host, physical DMA or usable storage. The device-derived
+overlay and resulting handoff image remain private.
