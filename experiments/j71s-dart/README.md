@@ -339,3 +339,11 @@ the lookup disappeared. On the J71s, all three checks passed and the DART
 invalidation log showed no timeout. These lookups examine software page
 tables; no hardware DMA transaction, PCIe host or storage command was issued.
 The result therefore does not establish hardware translation or storage.
+
+`software-map-consumer.c` preserves the experimental page-mapping probe; it
+is not part of a production kernel configuration. `test-software-map.py`
+extracts the actual probe and checks a host DMA/IOMMU mock for success,
+allocation and mapping failure, first/last lookup mismatches, unmap, and page
+cleanup. Run `python3 experiments/j71s-dart/test-software-map.py` from the
+repository root. The mock checks software control flow only; the physical
+observation above checks the software page tables, not hardware DMA.
