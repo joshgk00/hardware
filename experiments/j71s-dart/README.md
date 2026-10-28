@@ -1149,3 +1149,19 @@ and the iPad remained responsive at 57%, discharging. This confirms PCI core
 can size the resource, not that it can assign a working host window or perform
 DMA or disk I/O. `driver-patch/j71s-pci-bar-scan.h` and its host guard test
 capture this diagnostic policy; they are not a production driver.
+
+A temporary resource-assignment test extended the PCI-core scan. It claimed a
+1 MiB CPU memory window corresponding to the candidate PCI bus window, set
+the root bridge memory aperture with decoding disabled, scanned without driver
+binding, then asked `pci_assign_resource()` to assign the 16 KiB endpoint BAR.
+The PCI write policy permitted only the known BAR sizing, restoration and
+candidate address values while endpoint memory decoding and bus mastering were
+off. On the physical J71s, PCI assignment returned 0, the resource's CPU start
+and the endpoint BAR read back as expected, the upper BAR was zero and bus
+mastering remained off. The temporary host, BAR and bridge window were removed
+or restored; a subsequent controller read and the diagnostic's bus/tuning
+restoration checks succeeded. The iPad remained responsive at 56%, discharging.
+This tests PCI resource assignment, not persistent host operation, DMA or
+storage I/O. `driver-patch/j71s-pci-assign.h` and its guard test capture the
+experimental implementation; it retains the allocation if resource release
+fails to avoid leaving a dangling resource pointer.
