@@ -719,3 +719,11 @@ clock-request GPIO data bit was low after reset release. Tested controls and
 tuning reported restoration readbacks and the iPad remained responsive. The
 state field's S8000 semantics remain unverified. No PCIe host, physical DMA or
 storage command was used.
+
+A guarded follow-up held the candidate storage reset low during port setup
+and released it before the 500 ms state-based training poll. The candidate
+state remained zero and the poll timed out. Reset mode, tested controls and
+tuning reported restoration readbacks; the iPad remained responsive. This
+ordering alone was insufficient in this partial sequence. Reset polarity and
+reversal of hardware side effects remain unverified. No PCIe host, physical DMA
+or storage command was used.
