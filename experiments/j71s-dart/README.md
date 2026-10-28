@@ -1327,3 +1327,13 @@ or storage command was issued. This validates software allocation only; it does
 not establish that the controller can access the buffers. The experimental
 source and host test are `driver-patch/j71s-dma-alloc-test.h` and
 `test-j71s-dma-alloc.py`.
+
+The H9P implementation allocates its NVMMU translation tables for the PCI
+host platform device, whereas the first allocation experiment used the PCI
+endpoint. A follow-up ran the same software-only allocation test for both
+separately. On the iPad each device allocated all five buffers, passed CPU
+pattern and alignment checks and restored its DMA masks; PCI bus mastering
+remained off. The test host unbound with its cleanup checks passing, and the
+battery reported 51% and discharging. This does not compare the two devices'
+DMA address translations, prove either path can access memory, or validate
+NVMMU table contents; no hardware was given the allocated addresses.

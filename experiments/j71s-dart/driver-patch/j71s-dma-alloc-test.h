@@ -3,9 +3,8 @@
 #include <linux/dma-mapping.h>
 #include <linux/sizes.h>
 
-static void j71s_test_dma_allocations(struct pci_dev *pdev, void __iomem *bar)
+static void j71s_test_dma_allocations(struct pci_dev *pdev, void __iomem *bar, struct device *dev)
 {
-	struct device *dev = &pdev->dev;
 	const size_t sizes[5] = {
 		PAGE_ALIGN(36 * 0x80), PAGE_SIZE * 16,
 		PAGE_ALIGN(36 * 256 * sizeof(u32)), PAGE_SIZE, PAGE_SIZE,

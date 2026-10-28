@@ -35,10 +35,10 @@ static void dev_info(struct device*d,const char*fmt,...){(void)d;if(!strstr(fmt,
 t=r'''
 static void reset(void){command=allocs=frees=fail_coherent=report_alloc=report_aligned=report_pattern=report_restore=0;fail_at=-1;}
 int main(void){u64 mask=0xffffffff;struct pci_dev p={{&mask,0xffffffff}};unsigned char bar[0x100]={0};
- reset();j71s_test_dma_allocations(&p,bar);if(allocs!=5||frees!=5||report_alloc!=5||!report_aligned||!report_pattern||!report_restore||mask!=0xffffffff||p.dev.coherent_dma_mask!=0xffffffff)abort();
- reset();fail_at=2;j71s_test_dma_allocations(&p,bar);if(allocs!=3||frees!=2||report_alloc!=2||!report_restore)abort();
- reset();fail_coherent=1;j71s_test_dma_allocations(&p,bar);if(allocs||frees||mask!=0xffffffff)abort();
- reset();command=4;j71s_test_dma_allocations(&p,bar);if(allocs)abort();
+ reset();j71s_test_dma_allocations(&p,bar,&p.dev);if(allocs!=5||frees!=5||report_alloc!=5||!report_aligned||!report_pattern||!report_restore||mask!=0xffffffff||p.dev.coherent_dma_mask!=0xffffffff)abort();
+ reset();fail_at=2;j71s_test_dma_allocations(&p,bar,&p.dev);if(allocs!=3||frees!=2||report_alloc!=2||!report_restore)abort();
+ reset();fail_coherent=1;j71s_test_dma_allocations(&p,bar,&p.dev);if(allocs||frees||mask!=0xffffffff)abort();
+ reset();command=4;j71s_test_dma_allocations(&p,bar,&p.dev);if(allocs)abort();
 }
 '''
 with tempfile.TemporaryDirectory() as d:
