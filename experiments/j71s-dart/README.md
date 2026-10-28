@@ -284,3 +284,11 @@ complete controller initialization sequence. No PCIe host, physical DMA or
 storage endpoint was enabled. The gauge initially reported I/O errors, then
 reported 60% and approximately 396 mA discharge after brightness reduction.
 The test domains remain probe-owned until restart.
+
+On the four-domain boot, three selected 32-bit registers in the PCIe shared
+controller window returned values other than all ones in a read-only test.
+The first read returned zero; the other two were nonzero. DART0 registers
+still returned all ones. These observations show that some shared-window
+reads responded under this configuration, not that PCIe or storage works.
+The selected shared registers were not written, no host was registered, and
+no physical DMA or storage command was issued.
