@@ -684,3 +684,10 @@ sequence; it returned zero, saved controls read back as restored, and the
 iPad remained responsive. The mapping, address-field provenance and complete
 activation sequence remain unverified. No MMU write, PCIe host, physical DMA
 or storage command was used.
+
+A read-only follow-up classified candidate NVMe MMU offsets `0x08`, `0x0c`
+and `0x20` as zero, and `0x10` and `0x14` as nonzero and not all ones. It did
+not log the field values or write them. Saved controls read back as restored
+and the iPad remained responsive. The nonzero values' meaning and provenance
+are unknown; they do not establish valid Linux DMA addresses or working
+storage. No MMU writes, PCIe host, physical DMA or storage commands were used.
