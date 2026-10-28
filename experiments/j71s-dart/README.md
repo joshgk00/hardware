@@ -472,3 +472,9 @@ pin 164 reported mode 0, peripheral selector 1 and input enabled. The values
 matched the post-restoration observations. No GPIO was written and link
 training was not started, so reset polarity and the necessary drive sequence
 remain unverified.
+
+The related J71b Linux driver defines its PCIe PERST GPIO as active low and
+asserts it before port initialization, then deasserts it after reference-clock
+setup. That is useful comparative evidence but does not by itself establish
+the J71s platform-function encoding, pin polarity, timing units or complete
+S8000 initialization order. No J71s reset GPIO drive has been attempted.
