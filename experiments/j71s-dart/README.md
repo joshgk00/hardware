@@ -855,3 +855,12 @@ passed. After probe cleanup, LINK1–LINK3 each reported actual, target and
 minimum state zero, consistent with managed detach. The iPad remained
 responsive. This does not prove a working link, hardware DMA or reversal of all
 hardware effects. No PCIe host, physical DMA or storage command was used.
+
+A follow-up sampled candidate port `0x88` before reset release, before
+training, and after the bounded training attempt. Bit 0 was clear at the first
+two samples and set afterward; bit 6 remained clear. The related driver's
+candidate `0x208` state poll still timed out at zero. Extra link domains
+reported active during the test and off after cleanup; reported control and
+tuning restoration checks passed. This transition does not establish a
+working link, endpoint discovery or DMA. No PCIe host, physical DMA or storage
+command was used.
