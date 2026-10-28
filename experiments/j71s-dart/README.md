@@ -1030,3 +1030,13 @@ physical dynamic reservation: it returned success, the expected size and the
 same base as `of_reserved_mem_lookup()`. The iPad remained responsive at 60%,
 discharging. The full modified PCIe/NVMe drivers have not been built or run
 on J71s; this is a lookup component, not proof of DMA or storage support.
+
+The follow-up patch was additionally applied after **all** current J71b kernel
+patches to the pinned Orchard Linux revision. With the J71b configuration run
+through `olddefconfig`, the H9P PCIe object and both NVMe PCI/Apple ANS
+objects compiled, and the NVMe objects linked into the combined `nvme.o`.
+The resulting configuration differed from the checked-in configuration by
+only the missing `CONFIG_CC_CAN_LINK=y`; therefore this is an object/link
+check, not a clean reproducible full kernel build or a J71s hardware test.
+The J71b PCIe driver matches T8010/J172 and contains SoC-specific common/PHY
+sequences and tuning, so adding an S8000 match alone would be insufficient.
