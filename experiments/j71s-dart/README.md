@@ -528,3 +528,12 @@ responsive. This is one register-readback test, not proof of a trained link,
 storage or reversal of every side effect. It did not start link training,
 register a host, perform physical DMA or access storage. Device-specific tuning
 values are not included here.
+
+A follow-up diagnostic applied all 41 private PHY records, then performed the
+bounded candidate reset and link-training sequence while they remained active.
+All tuning writes read back, but candidate port `0x208` bit 3 remained clear
+for 250 ms. The training, GPIO and shared controls read back as restored, and
+PHY rollback reported zero readback errors. The device remained responsive.
+This partial test did not apply common-controller tuning, register a PCIe host,
+perform physical DMA or issue storage commands; it does not establish the
+S8000 status semantics or reversal of all hardware effects.
