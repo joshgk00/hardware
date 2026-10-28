@@ -1118,3 +1118,22 @@ same physical checks passed. The iPad remained responsive at 57%, discharging.
 This is a diagnostic platform driver and deliberately returns without
 registering a PCI bus; it is not an I/O-ready host driver. Its experimental
 source and device-derived data remain private while the source is audited.
+
+A temporary PCI-core discovery test was integrated into the separate J71s PCIe
+diagnostic. While the already-tested code held the link up and temporarily
+routed bus 1, the test registered a short-lived host bridge with config reads
+limited to bus 0/device 0 and bus 1/device 0, and rejected all PCI-core config
+writes. It used `pci_scan_root_bus_bridge()` without `pci_bus_add_devices()`,
+so normal PCI driver binding was not enabled, and removed the root bus before
+the existing diagnostic restored its bus route and other settings. On the
+physical iPad, the PCI core found endpoint `106b:2002`, reported no bound
+driver, and removed the temporary host successfully. The subsequent controller
+read worked, the BAR/bridge/bus and tuning restoration checks passed, and the
+extra link domains returned off. The iPad remained responsive at 57%,
+discharging. The diagnostic's own guarded bus/bridge/BAR writes are separate
+from the scan's write-denial policy. This demonstrates PCI-core discovery, not
+resource assignment, a persistent host, hardware DMA or disk I/O.
+
+The experimental `driver-patch/j71s-pci-scan.h` contains the scan code;
+`test-j71s-scan-policy.py` checks its address limits and write-denial callback.
+The source is an isolated experiment, not a production PCI host driver.
