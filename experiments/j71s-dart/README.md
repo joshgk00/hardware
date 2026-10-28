@@ -397,3 +397,12 @@ write order, and restoration. It does not simulate timing, prove hardware
 safety, or verify physical DMA. A byte comparison confirmed that applying the
 saved patch to the pinned `apple-dart.c` reproduces the source file used for
 the physical candidate-ordering test.
+
+The tested device's captured tree also contains common and PHY PCIe tuning
+properties. An offline shape check found 34 common and 41 PHY records, all
+with aligned 32-bit accesses fitting the sizes of candidate register windows;
+the PHY window mapping remains unverified. One common-table entry targets the
+same offset `0x100` as the diagnostic but does not mask either tested bit 0
+or bit 8. The diagnostic did not apply these tables. Their presence is a
+configuration difference to investigate, not evidence that replaying them is
+safe or sufficient to establish PCIe or storage.
