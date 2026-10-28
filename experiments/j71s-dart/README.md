@@ -957,3 +957,12 @@ controller initialization or disk access. No DMA or storage command was issued.
 The Linux definitions for [PCI command bits](https://github.com/torvalds/linux/blob/master/include/uapi/linux/pci_regs.h)
 and [NVMe registers](https://github.com/torvalds/linux/blob/master/include/linux/nvme.h)
 document the meanings used in this diagnostic.
+
+The same guarded RAM diagnostic read controller CAP `0x00000020f00103ff`,
+CC `0`, and CSTS `0`. Interpreted using the NVMe definitions, the controller
+reports 4 KiB minimum and maximum controller page sizes and is not enabled or
+ready at that point. The pinned Linux NVMe driver uses 4 KiB controller pages
+independently of the kernel's 16 KiB CPU pages. All tested configuration
+registers read back restored and the iPad remained responsive at 61%,
+discharging. This does not prove controller initialization, hardware DMA,
+scratch-memory setup or storage access.
