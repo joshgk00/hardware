@@ -1245,3 +1245,18 @@ the tested PCI cleanup succeeded. The iPad remained responsive at 54%,
 discharging. No translation registers were written, bus mastering enabled or
 storage command issued. The code and host guards are in
 `driver-patch/j71s-scratch-test.h` and `test-j71s-scratch-ram.py`.
+
+An isolated test attempted to write three candidate NVMMU window fields using
+address formulas from the related H9P driver and the Linux-owned scratch region.
+It required controller CC/CSTS zero, PCI bus mastering off, a valid no-map
+scratch reservation and candidate control offset `0x20` equal to zero; it did
+not write the control register or issue DMA. On the iPad the first field at
+`0x24` changed, but did not read back the requested value; it was neither zero,
+unchanged nor all ones. The test stopped before writing the other two fields,
+reported control still zero and restored the saved field with zero restoration
+errors. The subsequent PCI driver removal and register cleanup succeeded, and
+the iPad remained responsive at 54%, discharging. The H9P formula or register
+semantics cannot be assumed for S8000; this result does not prove why the
+readback differs, or that translation is functional. Host mocks cover disabled
+control, DMA guards, mismatch and reverse restore. The experimental test is
+`driver-patch/j71s-nvmmu-window-test.h`.
