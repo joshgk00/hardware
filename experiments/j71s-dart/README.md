@@ -776,3 +776,11 @@ The 500 ms candidate link-state poll still timed out at zero; reported tuning
 and control restoration readbacks passed, and the iPad remained responsive.
 This observation does not establish link operation or reversal of all effects.
 No PCIe host, physical DMA or storage command was used.
+
+A guarded follow-up set candidate common control `0x134` bit 0 after the
+reference-clock delay and verified readback. The 500 ms candidate link-state
+poll still timed out at zero. The control and other saved registers read back
+as restored, tuning rollback reported zero errors, and the iPad remained
+responsive. This step was insufficient in the tested partial sequence and
+readback does not establish reversal of all hardware effects. No PCIe host,
+physical DMA or storage command was used.
