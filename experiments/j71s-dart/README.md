@@ -230,3 +230,13 @@ No storage endpoint or physical DMA is enabled.
 The power-state observer reports each gate's minimum auto-PM state. Before the
 minimum-state experiment, the reference gate's minimum field read 0. This is a
 single read-only baseline, not evidence the later setting will take effect.
+
+On one physical J71s RAM boot with the minimum-state overlay, PMGR reported
+reference actual/target/minimum 15 with auto-PM enabled, and AUX actual/target
+15. All five observed DART registers still read `0xffffffff` after both
+holders bound. DART probe occurred earlier, so this does not test either gate
+being active before the initial reset. After both holders were unbound, AUX
+and reference actual/target states returned to 0; the reference minimum field
+remained 15 while auto-PM was disabled. The reported battery capacity was 62%
+after cleanup, with sampled discharge current about 262 mA. No PCIe host,
+physical DMA or storage endpoint was enabled.
