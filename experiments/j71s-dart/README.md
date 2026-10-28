@@ -833,3 +833,9 @@ minimum-state settings for LINK1–LINK3, but successful attachment and cleanup
 still require physical verification.
 The revised overlay was compiled and applied to the local test DTB: it has
 seven domain phandles and no `apple,min-state` property on LINK1–LINK3.
+
+The overlay was updated to include both diagnostic opt-in properties, compiled
+and applied to the test DTB. Without `orchard,shared-bits-test`, the seven
+power domains would be requested but the link experiment would not run. The
+matching kernel must expect seven domains; neither the image nor cleanup has
+been physically tested.
