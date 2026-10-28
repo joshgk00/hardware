@@ -511,3 +511,11 @@ matching readback, and restored the previously saved controls. This shows a
 change in accessibility for one PHY register in one sequence, not proof that
 all PHY tuning is safe, the link is trained or all effects were reversed. No
 PHY tuning writes, host registration or storage access occurred.
+
+A private, isolated diagnostic applied the first captured PHY tuning record
+under the tested global and PHY-control sequence. The accessible register's
+value changed, the written value read back as matching, and the saved register
+and controls read back as restored. The iPad remained responsive. This checks
+one record on one boot; it does not establish safety of the full table, a
+trained link or reversal of every side effect. It performed no link training,
+physical DMA or storage access. Device-specific tuning values are not included.
