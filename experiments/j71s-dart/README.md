@@ -735,3 +735,12 @@ state remained zero and the poll timed out. Reset mode, tested controls and
 tuning reported restoration readbacks; the iPad remained responsive. This
 partial ordering and timing change alone was insufficient. No PCIe host,
 physical DMA or storage command was used.
+
+A private follow-up applied the 41 previously checked PHY tuning records
+before storage-mode and port setup. All were accessible and passed immediate
+write-readback, but the subsequent 500 ms candidate link-state poll remained at
+zero and timed out. Both tuning rollbacks reported no readback errors, and the
+gate and saved controls read back as restored; the iPad remained responsive.
+This establishes early accessibility under one sequence, not a working link
+or reversal of all effects. No PCIe host, physical DMA or storage command was
+used. Device-specific tuning values remain private.
