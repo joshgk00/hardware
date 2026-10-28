@@ -1231,3 +1231,17 @@ diagnostic register-read driver, not an NVMe storage driver; no DMA or disk
 command was issued. The experimental implementation and host config-policy
 test are `driver-patch/j71s-pci-driver-test.h` and
 `test-j71s-driver-policy.py`.
+
+A diagnostic PCI-driver follow-up checked the dynamically reserved scratch
+region through a CPU mapping. After verifying the `no-map`, non-reusable,
+14 MiB, aligned reservation and absence from System RAM resources, it saved,
+pattern-tested and restored three 64-bit locations. On the physical iPad all
+three patterns and restorations matched. While the PCI link was active it also
+read candidate NVMMU offsets `0x20`, `0x24`, `0x28`, and `0x2c`: control and
+physical fields were zero, the two candidate range fields were nonzero, and
+none was all ones. These fields may contain retained state; their S8000
+semantics are not proven and their values were not reused. Driver removal and
+the tested PCI cleanup succeeded. The iPad remained responsive at 54%,
+discharging. No translation registers were written, bus mastering enabled or
+storage command issued. The code and host guards are in
+`driver-patch/j71s-scratch-test.h` and `test-j71s-scratch-ram.py`.
