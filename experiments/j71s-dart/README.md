@@ -784,3 +784,10 @@ as restored, tuning rollback reported zero errors, and the iPad remained
 responsive. This step was insufficient in the tested partial sequence and
 readback does not establish reversal of all hardware effects. No PCIe host,
 physical DMA or storage command was used.
+
+A follow-up issued the previously tested candidate link-rate command after the
+reference-control step and before reset release. Its register read zero
+immediately; the 500 ms candidate link-state poll still timed out at zero.
+Reported control and tuning restoration readbacks passed, and the iPad remained
+responsive. Command semantics and reversal of hardware side effects remain
+unproven. No PCIe host, physical DMA or storage command was used.
