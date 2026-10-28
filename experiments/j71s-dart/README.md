@@ -761,3 +761,11 @@ still timed out at zero. Tested tuning, reset and shared controls reported
 restoration readbacks, and the iPad remained responsive. The runtime branch
 and hardware side effects remain unverified. No PCIe host, physical DMA or
 storage command was used.
+
+A private follow-up kept the candidate PHY gate enabled through early tuning,
+port setup and link training instead of closing and reopening it. The 500 ms
+candidate link-state poll still timed out at zero. Tuning rollbacks reported no
+readback errors, and the gate and saved controls read back as restored; the
+iPad remained responsive. This was insufficient in the tested sequence and
+does not prove reversal of all effects. No PCIe host, physical DMA or storage
+command was used.
