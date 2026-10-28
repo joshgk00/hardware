@@ -1,0 +1,13 @@
+/dts-v1/;
+/plugin/;
+
+/* RAM-only experiment: request the controller's listed PCIe link domains. */
+&{/soc/iommu@601008000} {
+	power-domains = <&ps_pcie>, <&ps_pcie_aux>, <&ps_pcie_ref>,
+			<&ps_pcie_link0>, <&ps_pcie_link1>,
+			<&ps_pcie_link2>, <&ps_pcie_link3>;
+};
+&ps_pcie_link0 { apple,min-state = <15>; };
+&ps_pcie_link1 { apple,min-state = <15>; };
+&ps_pcie_link2 { apple,min-state = <15>; };
+&ps_pcie_link3 { apple,min-state = <15>; };
