@@ -1094,3 +1094,13 @@ reported speed 2/width 2/active, endpoint `106b:2002` and controller version
 `0x10001` responded, and both helper rollback paths reported zero errors.
 The iPad remained responsive at 58%, discharging. This validates the helper
 in the isolated probe sequence, not a complete PCIe host or physical DMA.
+
+A further RAM-only physical test used the same reusable masked-write helper
+for **all five** early and later tuning stages. It applied the 41-entry PHY,
+34-entry common and 6-entry port stages successfully, in addition to the
+early 41/34 stages. The link reported active at speed 2/width 2, the PCI
+endpoint and controller version responded, and all five reverse-restoration
+paths reported zero errors. The full private MMIO mock passed its failure and
+rollback cases, and the iPad remained responsive at 58%, discharging. This
+confirms reusable tuning operations in the isolated diagnostic; a Linux PCIe
+host, DMA translation and disk I/O are still unimplemented on J71s.
