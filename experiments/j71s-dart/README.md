@@ -909,3 +909,11 @@ controller or DMA behavior. The link was active during the read, tested
 control and tuning restoration readbacks passed, extra domains returned off,
 and the iPad remained responsive. No endpoint write, PCIe host, physical DMA
 or storage command was used.
+
+The endpoint's PCI command and BAR reads showed memory decoding and bus
+mastering disabled, and BAR0 described a 64-bit, non-prefetchable memory
+window with both address portions zero. The link was active and the bus and
+other tested controls/tuning read back as restored; extra domains returned off
+and the iPad remained responsive. The BAR size and controller behavior remain
+unverified. No BAR sizing or assignment, endpoint write, physical DMA or
+storage command was performed.
