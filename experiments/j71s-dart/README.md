@@ -1299,3 +1299,18 @@ readback only, not evidence that translation works or DMA is safe. No PCI bus
 mastering or storage command was enabled. The experimental implementation is
 `driver-patch/j71s-nvmmu-enable-test.h`; its public copy omits private raw
 mismatch logging.
+
+A guarded integration test configured the candidate NVMMU window from the
+Linux-owned scratch reservation, enabled candidate control, and temporarily
+wrote the corresponding candidate IOVA and size to the controller's scratch
+registers. It required CC/CSTS zero, PCI bus mastering off and zero scratch
+register baselines; it issued no NVMe commands. On the iPad all three scratch
+registers read back as written and restored with zero errors. NVMMU control
+read back enabled then disabled, its three window fields restored, and the PCI
+driver and host cleanup checks passed. Battery reads initially failed, then
+reported 52% and discharging. This demonstrates configuration-register
+readback, not that the controller can translate or access scratch memory.
+The experimental source and host failure/restore tests are
+`driver-patch/j71s-controller-scratch-test.h` and
+`test-j71s-controller-scratch.py`; raw device-derived mismatch logging is
+omitted from the public copy.
