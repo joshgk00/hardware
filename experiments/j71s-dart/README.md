@@ -413,3 +413,9 @@ was clear; the `0x12c` port-status bit again remained clear for 250 ms, and
 the saved controls read back as restored. This adds no hardware access to
 the prior diagnostic and narrows the observed state; it does not establish
 what is required to set the global bit or bring up the link.
+
+On a separate DART-bound boot, a guarded read of common controller offset
+`0x04` returned 1, with bit 4 clear. This read completed with the four tested
+power domains active and no PCIe devices present. It was read-only; no global
+initialization write or tuning operation was attempted. The meaning and
+hardware side effects of any future write remain to be established.
