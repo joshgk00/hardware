@@ -1016,3 +1016,17 @@ The existing controller-read diagnostic and PCI register restoration repeated,
 and the iPad remained responsive at 60%, discharging. This establishes one
 reservation and API lookup, not safe DMA or working storage. No IOVA, NVMMU
 mapping, bus mastering, scratch programming or storage command was used.
+
+`dynamic-hmb-driver.patch` is an experimental follow-up to the J71b driver
+patch. It preserves the existing `reg`-based lookup and adds a shared helper
+for a dynamic reserved-memory node only if it is `no-map`, non-reusable,
+present, nonempty, and representable as a resource. Existing caller checks
+still enforce their size, alignment, IOVA and ownership constraints. The
+standalone `test-dynamic-hmb.py` compiles the actual patch helper and exercises
+fixed lookup success/failure, dynamic lookup, missing/unsafe regions, and
+address overflow; the follow-up patch applies cleanly to both extracted J71b
+driver files. A J71s test kernel compiled the helper and called it on the
+physical dynamic reservation: it returned success, the expected size and the
+same base as `of_reserved_mem_lookup()`. The iPad remained responsive at 60%,
+discharging. The full modified PCIe/NVMe drivers have not been built or run
+on J71s; this is a lookup component, not proof of DMA or storage support.
