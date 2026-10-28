@@ -616,3 +616,11 @@ responsive. This mismatch may reflect register semantics, prerequisites or
 ordering; it does not establish that the write had no effect or that all side
 effects were reversed. No link training, host, physical DMA or storage command
 was used in these tests.
+
+Repeating the guarded `0x4020` write after the checked PHY, common, port and
+root tuning sequences again started from zero and immediately read back zero
+after writing 3. Saved controls and tuning rollbacks read back as restored,
+and the iPad remained responsive. This does not determine whether the register
+is write-only, self-clearing, gated or otherwise behaves differently; write
+side effects cannot be excluded. No reset pulse, link training, host, physical
+DMA or storage command was used.
