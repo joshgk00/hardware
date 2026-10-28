@@ -19,3 +19,5 @@ The stage-3 RAM image booted on this J71s and registered the N1 input device. Du
 Neither stage proves storage, Wi-Fi, charging or a persistent Omarchy installation. In particular, J71s PCIe remains unresolved; the J71t host driver and device tree cannot be assumed to support S8000.
 
 A subsequent four-corner test on the same unit captured approximately (204,198), (14362,408), (14535,19440), and (130,19341). The user confirmed tapping top-left, top-right, bottom-right, bottom-left in that order. With the inherited inverted-Y setting, these samples confirm the expected axis orientation on this unit; they do not establish full accuracy or gesture behavior.
+
+A temporary desktop was visible on the iPad using a read-only host-served root. A DRM-only compositor session had no input backend; another with libinput lacked udev device discovery and the user observed no typed character. With both libinput and temporary udev discovery enabled, the compositor logged adding and configuring `Apple N1 Touchscreen` as `event0`. This establishes desktop device discovery only; a successful visible control interaction is not yet confirmed.
