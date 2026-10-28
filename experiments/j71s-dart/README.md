@@ -457,3 +457,10 @@ isolated read of candidate port link-status offset `0x208` completed and
 returned zero, with bit 3 clear. Saved controls read back as restored. Related
 hardware uses this offset for link status, but the S8000 field meaning is not
 established, and the test did not start link training or access storage.
+
+Separate read-only observations after the diagnostic restored its controls
+found the candidate storage reset GPIO 160 in mode 0, peripheral selector 0,
+with input enabled; candidate clock-request GPIO 164 was in mode 0, peripheral
+selector 1, with input enabled. Under the Linux Apple GPIO driver's direction
+logic, mode 0 is treated as input. These samples do not establish reset
+polarity or its state during the enabled-port sequence; neither pin was changed.
