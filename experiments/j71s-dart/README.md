@@ -744,3 +744,12 @@ gate and saved controls read back as restored; the iPad remained responsive.
 This establishes early accessibility under one sequence, not a working link
 or reversal of all effects. No PCIe host, physical DMA or storage command was
 used. Device-specific tuning values remain private.
+
+A private follow-up applied all 41 PHY and 34 common tuning records before
+storage-mode and port setup, preserving the tuned bits in the overlapping port
+control. All records passed immediate readback, but the 500 ms candidate link
+state poll stayed at zero and timed out. Early and later tuning rollbacks
+reported zero readback errors; the gate, reset and saved controls read back as
+restored, and the iPad remained responsive. This verifies the tested ordering
+and readbacks, not link operation or reversal of all effects. No PCIe host,
+physical DMA or storage command was used; tuning values remain private.
