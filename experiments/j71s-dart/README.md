@@ -711,3 +711,11 @@ routing and electrical interpretation remain unverified. The candidate link
 state remained zero, saved controls reported restoration readbacks and the
 iPad remained responsive. An earlier observation of bit 9 alone measured
 input-enable, not the signal level.
+
+A further bounded poll used the related Sandcastle driver's candidate link
+state range `0x11`–`0x14` for 500 ms. The observed state remained zero and the
+poll timed out; the port-enable indication remained set. The candidate
+clock-request GPIO data bit was low after reset release. Tested controls and
+tuning reported restoration readbacks and the iPad remained responsive. The
+state field's S8000 semantics remain unverified. No PCIe host, physical DMA or
+storage command was used.
