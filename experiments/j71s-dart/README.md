@@ -358,3 +358,13 @@ before reading port offset `0x804` and then stopped responding and timed out.
 The exact cause is unconfirmed, but this isolates the observed stall to that
 access or its immediate execution. Avoid repeated reads of that candidate.
 The checks issued no register writes, hardware DMA or storage commands.
+
+A guarded experiment added a candidate port-power bit from a related S8003
+sequence and polled common offset `0x12c` for readiness before proceeding.
+On J71s, both a 1 ms poll and a later 250 ms poll timed out with bit 0 clear
+and without all-ones reads. The saved shared controls read back as restored
+in both tests. Neither test accessed port offset `0x804`; both stopped before
+DART invalidation or PCIe host registration. The longer wait rules out a
+simple delay up to 250 ms for this partial sequence, but other prerequisites
+and the S8000 register semantics remain unknown. No physical DMA or storage
+access was attempted.
