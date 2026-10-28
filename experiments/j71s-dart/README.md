@@ -1104,3 +1104,17 @@ paths reported zero errors. The full private MMIO mock passed its failure and
 rollback cases, and the iPad remained responsive at 58%, discharging. This
 confirms reusable tuning operations in the isolated diagnostic; a Linux PCIe
 host, DMA translation and disk I/O are still unimplemented on J71s.
+
+The complete isolated sequence was moved from the DART probe into a separate
+J71s PCIe diagnostic platform driver in a private test kernel. Its DT overlay
+disabled the test DART and software-only consumer, supplied the seven power
+domains and private tuning properties to the PCIe node, and left DMA and PCI
+host registration disabled. The host mock passed, and a two-stage RAM boot
+physically repeated the active speed-2/width-2 link, endpoint and controller
+reads, and zero-error tuning restoration with PCIe as the device owner. A
+follow-up moved the two root-port settings from embedded values to the
+validated private DT table, with their register offsets constrained; the
+same physical checks passed. The iPad remained responsive at 57%, discharging.
+This is a diagnostic platform driver and deliberately returns without
+registering a PCI bus; it is not an I/O-ready host driver. Its experimental
+source and device-derived data remain private while the source is audited.
