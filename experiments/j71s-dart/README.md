@@ -791,3 +791,10 @@ immediately; the 500 ms candidate link-state poll still timed out at zero.
 Reported control and tuning restoration readbacks passed, and the iPad remained
 responsive. Command semantics and reversal of hardware side effects remain
 unproven. No PCIe host, physical DMA or storage command was used.
+
+An additional read of port `0x210` immediately after the candidate rate
+command and before reset release returned zero, as did the later sample.
+The 500 ms candidate link-state poll still timed out at zero. Tested control
+and tuning restoration readbacks passed, and the iPad remained responsive.
+This observation does not establish link operation or reversal of all
+hardware effects. No PCIe host, physical DMA or storage command was used.
