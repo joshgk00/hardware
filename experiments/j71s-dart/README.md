@@ -945,3 +945,15 @@ back as restored. This confirms configuration-register readback, not working
 CPU-to-PCI routing, controller MMIO, DMA, storage, or reversal of all side
 effects. No controller registers or storage commands were accessed. The iPad
 remained responsive at 61% battery, discharging.
+
+A follow-up RAM-only diagnostic temporarily enabled PCI memory decoding on
+the bridge and endpoint, with bus mastering disabled, and read the word at
+controller offset `0x08`. It returned `0x00010001`, consistent with the NVMe
+version register indicating version 1.0.1. Command words, BAR words, bridge
+window and bus numbers all read back as restored, and the iPad remained
+responsive at 61% battery, discharging. This supports controller MMIO access
+for the tested read; it does not prove full NVMe compatibility, hardware DMA,
+controller initialization or disk access. No DMA or storage command was issued.
+The Linux definitions for [PCI command bits](https://github.com/torvalds/linux/blob/master/include/uapi/linux/pci_regs.h)
+and [NVMe registers](https://github.com/torvalds/linux/blob/master/include/linux/nvme.h)
+document the meanings used in this diagnostic.
