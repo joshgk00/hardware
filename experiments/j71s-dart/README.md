@@ -487,3 +487,12 @@ bits read back as restored. The candidate port link-status sample remained
 zero. This establishes GPIO register behavior, not electrical reset polarity,
 endpoint behavior or a trained link. It issued no storage commands or physical
 DMA and did not register a PCIe host.
+
+A bounded diagnostic combined the tested initialization and candidate GPIO
+reset pulse with a candidate link-training operation: it set port `0x80`
+bit 0, then polled port `0x208` bit 3 for 250 ms. The poll timed out without
+all-ones reads; the training control, GPIO mode/peripheral bits and saved
+shared controls read back as restored. The iPad remained responsive. This
+partial sequence did not apply PCIe tuning tables or register a PCIe host,
+and it issued no storage commands or physical DMA. The S8000 status semantics
+and reversal of all hardware effects remain unverified.
