@@ -1082,3 +1082,15 @@ also verified that missing table input causes no diagnostic MMIO writes.
 This checks the experimental DART-probe sequence using DT-supplied values,
 not a finished PCIe host, physical DMA or usable storage. The device-derived
 overlay and resulting handoff image remain private.
+
+The reusable `apple-s8000-tunable-mmio.h` helper applies validated masked
+register tables and restores saved registers in reverse order, including a
+record whose write readback failed. Its host test covers successful updates,
+inaccessible reads, mismatches, duplicate offsets, restoration failures and
+invalid initial state; the full private diagnostic MMIO mock also passed.
+The helper compiled into the J71s RAM diagnostic and physically applied all
+41 early PHY and 34 common entries from the private DT data. The link again
+reported speed 2/width 2/active, endpoint `106b:2002` and controller version
+`0x10001` responded, and both helper rollback paths reported zero errors.
+The iPad remained responsive at 58%, discharging. This validates the helper
+in the isolated probe sequence, not a complete PCIe host or physical DMA.
