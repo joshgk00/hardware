@@ -639,3 +639,12 @@ tuning, but the candidate training poll still timed out with the status low
 byte zero. Tuning and saved controls reported successful restoration readbacks;
 the iPad remained responsive. The inferred operation alone was insufficient
 in this test. No PCIe host, physical DMA or storage command was used.
+
+A further bounded training test combined the post-ready bit clear with a
+zero-baseline-guarded write of 3 to candidate common `0x4020` immediately
+before training. The immediate readback was zero; the poll timed out with the
+status low byte zero and training-control bit 0 set. A subsequent zero write
+read back as zero, and saved controls and tuning reported restoration
+readbacks. The iPad remained responsive. The command's effects and complete
+startup ordering remain unverified. No PCIe host, physical DMA or storage
+command was used.
