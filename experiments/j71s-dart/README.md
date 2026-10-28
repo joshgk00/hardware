@@ -900,3 +900,12 @@ and tuning read back as restored, extra domains returned off, and the iPad
 remained responsive. This identifies a responding PCI endpoint; its class,
 functional DMA and storage access are not yet verified. No endpoint write,
 PCIe host, physical DMA or storage command was used.
+
+A guarded follow-up read the responding endpoint's PCI class/revision and
+header type: `018002`, revision `11`, header `00`. The current kernel's NVMe
+PCI ID table has no explicit `106b:2002` entry and its generic NVMe class
+match does not match `018002`; adding an ID alone would not establish safe
+controller or DMA behavior. The link was active during the read, tested
+control and tuning restoration readbacks passed, extra domains returned off,
+and the iPad remained responsive. No endpoint write, PCIe host, physical DMA
+or storage command was used.
