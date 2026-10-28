@@ -451,3 +451,9 @@ ones. Both sets of saved controls read back as restored. This is evidence of
 a register-accessibility change in one physical test, not a trained link,
 endpoint, DMA or storage result. No DART-register access, PCIe host or storage
 command was attempted.
+
+With the same guarded global, port-ready and reference-clock sequence, an
+isolated read of candidate port link-status offset `0x208` completed and
+returned zero, with bit 3 clear. Saved controls read back as restored. Related
+hardware uses this offset for link status, but the S8000 field meaning is not
+established, and the test did not start link training or access storage.
