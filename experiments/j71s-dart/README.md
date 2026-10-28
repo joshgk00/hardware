@@ -658,3 +658,12 @@ still timed out with the status low byte zero. Mode and other tested controls
 and tuning reported restoration readbacks; the iPad remained responsive.
 These partial tests do not establish a link or prove reversal of all effects.
 No PCIe host, physical DMA or storage command was used.
+
+Under the combined storage-mode and tuning sequence, a guarded DART invalidate
+poll returned with busy clear. A detailed repeat showed the command register
+had the same value before and after the write, while an additional completion
+condition observed in the original driver was absent. Consequently this is
+inconclusive and does not demonstrate command execution or physical DMA. The
+link poll still timed out; reported control and tuning restoration readbacks
+passed, and the iPad remained responsive. No translation, PCIe host, DMA or
+storage I/O was enabled.
