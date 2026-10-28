@@ -368,3 +368,11 @@ DART invalidation or PCIe host registration. The longer wait rules out a
 simple delay up to 250 ms for this partial sequence, but other prerequisites
 and the S8000 register semantics remain unknown. No physical DMA or storage
 access was attempted.
+
+A further guarded test omitted the additional bit 8 from the earlier control
+write and checked common `0x2c` bit 4 before enabling the next candidate
+control. That prerequisite was set, but the `0x12c` bit-0 check still timed
+out after 250 ms without an all-ones read. Saved controls read back as
+restored. This test narrows the behavior of the partial sequence; it does not
+establish the complete S8000 initialization path. It stopped before DART
+invalidation, host registration, physical DMA or storage access.
