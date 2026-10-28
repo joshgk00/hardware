@@ -667,3 +667,11 @@ inconclusive and does not demonstrate command execution or physical DMA. The
 link poll still timed out; reported control and tuning restoration readbacks
 passed, and the iPad remained responsive. No translation, PCIe host, DMA or
 storage I/O was enabled.
+
+A guarded repeat used a distinct single-stream command after the observed idle
+baseline. The command-register readback changed, but a stricter bounded poll
+requiring the additional condition seen in the original driver timed out.
+This shows a changed register value, not a completed invalidation. The link
+poll also timed out; tested controls and tuning reported restoration readbacks,
+and the iPad remained responsive. No translation, PCIe host, physical DMA or
+storage I/O was enabled.
