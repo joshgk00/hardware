@@ -464,3 +464,11 @@ with input enabled; candidate clock-request GPIO 164 was in mode 0, peripheral
 selector 1, with input enabled. Under the Linux Apple GPIO driver's direction
 logic, mode 0 is treated as input. These samples do not establish reset
 polarity or its state during the enabled-port sequence; neither pin was changed.
+
+A follow-up RAM diagnostic sampled the same candidate GPIOs while the tested
+global, port-ready and reference-clock controls were active. Reset pin 160
+again reported mode 0, peripheral selector 0 and input enabled; clock-request
+pin 164 reported mode 0, peripheral selector 1 and input enabled. The values
+matched the post-restoration observations. No GPIO was written and link
+training was not started, so reset polarity and the necessary drive sequence
+remain unverified.
