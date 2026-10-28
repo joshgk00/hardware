@@ -702,3 +702,12 @@ exact S8000 meaning remains unverified and this is not evidence of a trained
 link. The saved port value and other tested controls and tuning read back as
 restored; the iPad remained responsive. No PCIe host, MMU address write,
 physical DMA or storage command was used.
+
+With port-enable set, a corrected GPIO observation sampled the candidate
+clock-request pin's data bit as 1 during reset-low and 0 after reset-high and
+after training; input-enable remained set. The related driver's active-low
+convention makes this consistent with a request after reset, but J71s pin
+routing and electrical interpretation remain unverified. The candidate link
+state remained zero, saved controls reported restoration readbacks and the
+iPad remained responsive. An earlier observation of bit 9 alone measured
+input-enable, not the signal level.
