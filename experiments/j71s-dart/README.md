@@ -1137,3 +1137,15 @@ resource assignment, a persistent host, hardware DMA or disk I/O.
 The experimental `driver-patch/j71s-pci-scan.h` contains the scan code;
 `test-j71s-scan-policy.py` checks its address limits and write-denial callback.
 The source is an isolated experiment, not a production PCI host driver.
+
+A subsequent short-lived PCI-core scan permitted only guarded BAR0/BAR1
+sizing writes to the known `106b:2002` endpoint. It required an unassigned
+BAR and disabled endpoint/root memory decoding and bus mastering before
+starting, denied other PCI-core writes, and did not bind drivers. On the iPad,
+PCI core reported a 16,384-byte memory BAR, four permitted sizing/restoration
+writes, and both BAR words restored. Host removal and the surrounding
+PCIe diagnostic's restoration checks passed; the controller still responded
+and the iPad remained responsive at 57%, discharging. This confirms PCI core
+can size the resource, not that it can assign a working host window or perform
+DMA or disk I/O. `driver-patch/j71s-pci-bar-scan.h` and its host guard test
+capture this diagnostic policy; they are not a production driver.
