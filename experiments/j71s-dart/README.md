@@ -1216,3 +1216,18 @@ commands were enabled. `driver-patch/j71s-pci-persistent.h` and the observation
 and stop scripts are experimental; the workqueue-owned host is not yet a
 production driver and its behavior under unrelated concurrent PCI removal has
 not been validated.
+
+The persistent host experiment was extended with an isolated diagnostic PCI
+driver matching the iPad's storage endpoint only when attached to the J71s
+test host. The host permits the endpoint's memory-enable/disable command but
+rejects bus-mastering and unrelated configuration writes. On the iPad,
+`pci_bus_add_devices()` bound `j71s-nvme-readonly-test` to `106b:2002`; the
+driver used `pci_enable_device_mem()` and `pci_iomap()` and read controller
+version `0x10001`, with bus mastering off. Active platform-driver unbind then
+invoked PCI driver removal, restored its command register, removed the PCI
+devices, restored root command/BAR/bridge state, and reported zero tuning
+rollback errors. The iPad remained responsive at 54%, discharging. This is a
+diagnostic register-read driver, not an NVMe storage driver; no DMA or disk
+command was issued. The experimental implementation and host config-policy
+test are `driver-patch/j71s-pci-driver-test.h` and
+`test-j71s-driver-policy.py`.
