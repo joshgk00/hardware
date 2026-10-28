@@ -332,3 +332,10 @@ a DMA domain. The test did not allocate or submit physical DMA, register a
 PCIe host, or access internal storage. The experimental cleanup is intended
 for probe failure and shutdown; hardware shutdown restoration and actual
 address translation remain to be verified.
+
+A later RAM-only software-consumer test allocated and mapped one page with the
+DMA API, checked both ends with `iommu_iova_to_phys`, unmapped it, and verified
+the lookup disappeared. On the J71s, all three checks passed and the DART
+invalidation log showed no timeout. These lookups examine software page
+tables; no hardware DMA transaction, PCIe host or storage command was issued.
+The result therefore does not establish hardware translation or storage.
