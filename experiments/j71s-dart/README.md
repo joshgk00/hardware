@@ -1856,3 +1856,16 @@ an error. A fake-MMIO test covers guard rejection, a write with side effects,
 and the expected transition; the diagnostic object compiled. It is not enabled
 in the current image, has not been tested on the iPad, and does not establish
 that the bridge bit or physical DMA routing behaves as expected on S8000.
+
+`j71s-identify-coordinator-candidate.patch` connects the prepared descriptor,
+reserved scratch, candidate bridge transition, endpoint bus-master policy and
+one-shot Identify sequence under an explicit `orchard,identify-once` device-tree
+opt-in. The opt-in is absent from the current image. The diagnostic's PCI remove
+callback retains its private context once a descriptor or hardware setup has
+been published. The combined diagnostic object compiles, and individual mock
+suites cover the command, scratch, bridge and endpoint policies; they do not
+exercise the integration or real hardware. In particular, retained callback data
+does not by itself prove the PCI core, host, DART domain or power state cannot be
+removed. The device tree, physical DMA stream, bridge semantics, controller and
+NVMMU lifetime still require validation before the opt-in is used. No storage
+command has been issued, and the prepared DFU image predates this coordinator.

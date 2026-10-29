@@ -1,0 +1,53 @@
+--- a/drivers/pci/controller/j71s-scan-private.h
++++ b/drivers/pci/controller/j71s-scan-private.h
+@@ -119,6 +119,8 @@
+ 	u16 saved_command;
+ 	struct j71s_identify_preparation prepared;
+ 	struct j71s_identify_descriptor descriptor;
++	struct j71s_identify_scratch scratch;
++	bool root_master_attempted;
+ };
+ 
+ static void j71s_pci_test_remove(struct pci_dev *pdev)
+@@ -129,6 +131,11 @@
+ 
+ 	if (!data)
+ 		return;
++	if (data->prepared.descriptor_published || data->scratch.retained ||
++	    data->root_master_attempted || data->prepared.armed) {
++		dev_crit(&pdev->dev, "J71s one-shot resources retained until physical reset\n");
++		return;
++	}
+ 	pci_set_drvdata(pdev, NULL);
+ 	pci_iounmap(pdev, data->bar);
+ 	pci_disable_device(pdev);
+@@ -191,6 +198,29 @@
+ 			dev_info(&pdev->dev, "J71s Identify descriptor: ret=%d published=%d controller-disabled=%d\n",
+ 				 descriptor_ret, data->descriptor.published,
+ 				 !readl(data->bar + 0x14) && !readl(data->bar + 0x1c));
++			if (!descriptor_ret && of_property_read_bool(host->dev.parent->of_node,
++							     "orchard,identify-once")) {
++				struct j71s_scan_state *state = pdev->bus->sysdata;
++				u16 nvme_status = U16_MAX;
++				int test_ret;
++
++				test_ret = j71s_identify_setup_scratch(pdev, data->bar, &data->scratch);
++				if (!test_ret)
++					test_ret = j71s_identify_root_master(state->ecam, data->bar,
++						&data->prepared, &data->scratch, &data->root_master_attempted);
++				if (!test_ret) {
++					state->identify_owner = &data->prepared;
++					state->identify_scratch = &data->scratch;
++					state->identify_opted_in = true;
++					test_ret = j71s_identify_once(pdev, data->bar, &data->prepared,
++						data->descriptor.tcb, data->descriptor.sgl,
++						data->descriptor.sgl_dma, J71S_SCRATCH_IOVA,
++						J71S_SCRATCH_BYTES, true, &nvme_status);
++					state->identify_opted_in = false;
++				}
++				dev_info(&pdev->dev, "J71s Identify once: ret=%d status-valid=%d status=%u retained=1\n",
++					 test_ret, nvme_status != U16_MAX, nvme_status);
++			}
+ 			if (!data->descriptor.published)
+ 				j71s_identify_release_unarmed(&pdev->dev, &data->prepared);
+ 		}
