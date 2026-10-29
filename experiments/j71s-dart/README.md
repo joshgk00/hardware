@@ -2036,3 +2036,14 @@ then gives the observer another short window before polling. The simulated test
 checks both delays and the existing timeout and response paths, and the object
 compiled. A returned MMIO write may still be posted; the second marker would
 not prove command delivery or DMA. This adjustment has not been run on J71s.
+
+A comparison after the lost-USB Identify attempt found two differences from the
+related J71t ANS driver worth investigating before changing test behavior.
+The J71t driver explicitly writes zero to its controller INIT register before
+programming HMB; the J71s candidate checked a zero baseline but did not issue
+that write. J71t also configures LTR/L1SS before controller enable. Three
+candidate J71s LTR/L1SS values were previously written, read back and restored
+with the controller disabled, but were not kept active during the failed
+Identify attempt. J71t additionally checks host link and fault state around
+endpoint MMIO. These are hypotheses and debugging leads, not evidence that any
+one difference caused the disconnect or that S8003 semantics apply to S8000.
