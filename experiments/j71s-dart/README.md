@@ -1844,3 +1844,15 @@ policy mock and diagnostic object compile passed. No code currently enables
 the opt-in or invokes the Identify helper. Root-bridge forwarding, physical DMA,
 resource ownership, and cleanup are not established, and the current boot
 image predates this policy.
+
+Linux's PCI core normally enables bus mastering on an upstream bridge while
+enabling a device. The temporary J71s diagnostic sets only the root bridge's
+memory-enable bit, so endpoint master enable alone may not permit DMA
+forwarding. `driver-patch/j71s-identify-root-master.h` is an unconnected,
+one-shot candidate for the root command transition, guarded by the retained
+request and scratch state, controller-off and endpoint-master-off checks, and
+kexec lockdown. It records an attempt before writing and refuses a retry after
+an error. A fake-MMIO test covers guard rejection, a write with side effects,
+and the expected transition; the diagnostic object compiled. It is not enabled
+in the current image, has not been tested on the iPad, and does not establish
+that the bridge bit or physical DMA routing behaves as expected on S8000.
