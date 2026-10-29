@@ -1,0 +1,68 @@
+--- a/include/linux/apple-ans.h
++++ b/include/linux/apple-ans.h
+@@ -16,11 +16,11 @@
+ #if IS_REACHABLE(CONFIG_PCIE_APPLE_H9P)
+ int apple_ans_nvmmu_map(struct device *dev, unsigned int tag,
+ 			const u64 *pages, unsigned int npages,
+-			dma_addr_t *iova);
++			bool to_memory, dma_addr_t *iova);
+ #else
+ static inline int apple_ans_nvmmu_map(struct device *dev, unsigned int tag,
+ 				      const u64 *pages, unsigned int npages,
+-				      dma_addr_t *iova)
++				      bool to_memory, dma_addr_t *iova)
+ {
+ 	return -EOPNOTSUPP;
+ }
+--- a/drivers/pci/controller/pcie-apple-h9p.c
++++ b/drivers/pci/controller/pcie-apple-h9p.c
+@@ -1285,7 +1285,7 @@
+ 
+ int apple_ans_nvmmu_map(struct device *dev, unsigned int tag,
+ 			const u64 *pages, unsigned int npages,
+-			dma_addr_t *iova)
++			bool to_memory, dma_addr_t *iova)
+ {
+ 	struct apple_h9p_nvmmu *nvmmu;
+ 	struct apple_h9p_pcie *pcie;
+@@ -1326,7 +1326,9 @@
+ 	if (npages) {
+ 		ret = apple_ans_build_tcb(tcb, sgl, nvmmu->tcb_sgl_dma,
+ 					  tag, pages, npages,
+-					  H9P_NVMMU_TCB_READ | H9P_NVMMU_TCB_WRITE, iova);
++					  of_machine_is_compatible("apple,j71s") ?
++						(to_memory ? H9P_NVMMU_TCB_WRITE : H9P_NVMMU_TCB_READ) :
++						(H9P_NVMMU_TCB_READ | H9P_NVMMU_TCB_WRITE), iova);
+ 		if (ret)
+ 			return ret;
+ 	} else {
+--- a/drivers/nvme/host/pci-apple-ans.c
++++ b/drivers/nvme/host/pci-apple-ans.c
+@@ -144,7 +144,7 @@
+ 	int ret;
+ 
+ 	for (tag = 0; tag < APPLE_ANS_NVMMU_MAX_REQS; tag++) {
+-		ret = apple_ans_nvmmu_map(dev->dev, tag, NULL, 0, NULL);
++		ret = apple_ans_nvmmu_map(dev->dev, tag, NULL, 0, false, NULL);
+ 		if (ret)
+ 			return ret;
+ 	}
+@@ -286,7 +286,7 @@
+ 	if (tag >= APPLE_ANS_NVMMU_MAX_REQS)
+ 		return -EINVAL;
+ 
+-	ret = apple_ans_nvmmu_map(dev->dev, tag, NULL, 0, NULL);
++	ret = apple_ans_nvmmu_map(dev->dev, tag, NULL, 0, false, NULL);
+ 	if (ret)
+ 		return ret; /* No slot reuse or data unmapping without retirement. */
+ 
+@@ -445,7 +445,8 @@
+ 		goto out_unmap;
+ 	}
+ 
+-	ret = apple_ans_nvmmu_map(dev->dev, tag, areq->pages, npages, &flatdma);
++	ret = apple_ans_nvmmu_map(dev->dev, tag, areq->pages, npages,
++				   rq_dma_dir(req) == DMA_FROM_DEVICE, &flatdma);
+ 	if (ret) {
+ 		status = errno_to_blk_status(ret);
+ 		if (status == BLK_STS_NOTSUPP)

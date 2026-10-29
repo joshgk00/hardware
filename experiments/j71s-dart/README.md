@@ -1591,6 +1591,15 @@ both single-direction encodings, legacy encoding, publication ordering and
 failure atomicity, and the modified H9P object compiled. The S8000 hardware
 semantics and safe slot retirement remain unverified.
 
+`j71s-tcb-direction.patch` builds on that integration and passes the NVMe
+request DMA direction to the descriptor builder. For the experimental J71s
+path, a device-to-memory request selects the J71t-derived write flag and a
+memory-to-device request selects the read flag. Other machines retain the
+existing bidirectional behavior. Both modified kernel objects compile and the
+builder tests cover the individual flags. This remains a candidate: neither
+J71s DMA nor descriptor retirement has been validated on hardware, and this
+patch alone does not make storage access safe.
+
 The current J71t driver constrains one-cell PCI DART consumers to a DMA IOVA
 window distinct from the FlatDMA, scratch and MSI ranges. Without a comparable
 constraint, our earlier software-only endpoint mappings could use addresses
