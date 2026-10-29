@@ -1950,3 +1950,15 @@ mappings, invalid payload pages, successful direction/count/page publication,
 and refusal to reuse the published descriptor. This is a software failure-path
 test; the physical preflight and unresolved hardware DMA limitations above
 remain unchanged.
+
+`j71s-identify-observer-gate.patch` adds a separate, default-false runtime
+start parameter in addition to the Identify device-tree opt-in. The candidate
+skips the command if that parameter is not set when the diagnostic reaches its
+one-shot branch. `observe-and-start-j71s-identify.sh` opens `/dev/kmsg`, starts
+its bounded filtered reader, then sets the parameter if available. On the
+previous RAM diagnostic, a shortened version captured the earlier preflight
+messages and reported the absent gate without requesting a command. The updated
+coordinator simulation covers a false start parameter, and the kernel object
+compiled. This reduces the chance of an unobserved test; it does not guarantee
+log delivery, and any privileged process could set the parameter. The gate
+and new observer have not yet been tested with physical storage DMA.

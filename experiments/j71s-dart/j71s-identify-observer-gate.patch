@@ -1,0 +1,37 @@
+--- a/drivers/pci/controller/pcie-j71s-diagnostic.c
++++ b/drivers/pci/controller/pcie-j71s-diagnostic.c
+@@ -12,6 +12,10 @@
+ #include <linux/pci.h>
+ #include <linux/workqueue.h>
+ #include <linux/wait.h>
++
++/* Separate runtime start gate for the opt-in experiment. */
++static bool j71s_identify_start;
++module_param_named(identify_start, j71s_identify_start, bool, 0600);
+ 
+ struct j71s_diag_work {
+ 	struct delayed_work work;
+--- a/drivers/pci/controller/j71s-scan-private.h
++++ b/drivers/pci/controller/j71s-scan-private.h
+@@ -198,8 +198,9 @@
+ 			dev_info(&pdev->dev, "J71s Identify descriptor: ret=%d published=%d controller-disabled=%d\n",
+ 				 descriptor_ret, data->descriptor.published,
+ 				 !readl(data->bar + 0x14) && !readl(data->bar + 0x1c));
+-			if (!descriptor_ret && of_property_read_bool(host->dev.parent->of_node,
+-							     "orchard,identify-once")) {
++			if (!descriptor_ret && READ_ONCE(j71s_identify_start) &&
++			    of_property_read_bool(host->dev.parent->of_node,
++						  "orchard,identify-once")) {
+ 				struct j71s_scan_state *state = pdev->bus->sysdata;
+ 				u16 nvme_status = U16_MAX;
+ 				int test_ret;
+@@ -223,6 +224,9 @@
+ 				}
+ 				dev_info(&pdev->dev, "J71s Identify once: ret=%d status-valid=%d status=%u retained=1\n",
+ 					 test_ret, nvme_status != U16_MAX, nvme_status);
++			} else if (!descriptor_ret &&
++				   of_property_read_bool(host->dev.parent->of_node, "orchard,identify-once")) {
++				dev_info(&pdev->dev, "J71s Identify stage: start-gate-not-set; test skipped\n");
+ 			}
+ 			if (!data->descriptor.published)
+ 				j71s_identify_release_unarmed(&pdev->dev, &data->prepared);
