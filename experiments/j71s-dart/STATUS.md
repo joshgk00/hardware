@@ -36,8 +36,9 @@ The controller-only comparison reached controller-ready and remained responsive
 for approximately 10.4 seconds with the candidate host-link indicator up, without
 a submission-doorbell write. This is not proof of successful DMA or storage.
 Physically restart the iPad before the next diagnostic, because the controller
-and buffers were left armed. A command-path candidate adds a ten-second warmup
-before submission; it remains untested on the device. A successful Identify
+and buffers were left armed. A subsequent command-path test completed the same warmup but lost its USB
+connection after the pre-submission marker, without a captured completion. This
+does not establish whether the doorbell was written or DMA occurred. A successful Identify
 response would still not prove reliable storage or a safe installer.
 
 Device-specific captures, boot artifacts, serial output and generated Apple

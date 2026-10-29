@@ -2101,3 +2101,12 @@ whether a longer settling interval changes the behavior; it does not establish
 the cause of the prior disconnects. Resources remain retained until a physical
 reset. The actual-function mock covers the warmup and link loss before the
 doorbell. This candidate has not yet been tested on the device.
+
+
+A subsequent physical command-path test completed the approximately 10.4-second
+warmup and logged `submitting-command`, after which the diagnostic USB connection
+disappeared without the subsequent host-link or doorbell-return markers. No
+completion or response was captured. The delay did not change the observed failure;
+missing asynchronous log output cannot establish whether the write was executed
+or whether DMA occurred. Preserve the private capture and physically reset before
+any further diagnostic.
