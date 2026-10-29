@@ -2148,3 +2148,15 @@ captured the pre-doorbell marker, waited approximately one second, and recorded
 This strengthens the comparison with the command-path disconnect, but does not
 prove the earlier write was reached or that DMA succeeded. Controller enable may
 still cause DMA and resources remain armed until physical reset.
+
+
+The maintainer's `feature/j71t-integration` branch at `c51cd22a381b` documents
+the S8003 initialization sequence and awaits its own physical device test. Its
+PCI patch 0015 polls the port invalidate FIFO before NVMMU initialization and
+explicitly writes zero to SART control before programming the scratch-page and
+TCB addresses. The current J71s diagnostic checks that SART control is zero
+before initialization but does not explicitly write zero there; its FIFO
+experiment runs after initialization. These are concrete sequence differences
+to investigate, not proof of a J71s defect or permission to assume S8003
+register semantics on S8000. The previous command-failure captures do not
+isolate either difference.
