@@ -1826,7 +1826,9 @@ Identify attempt. It validates the reservation and controller-disabled state,
 zeros the reserved memory, programs candidate values, and reads them back. It
 retains the mapping from the first window write onward, including error paths;
 there is deliberately no teardown. The diagnostic object compiles with the
-header, but this code has not been unit tested, wired into probe, or run on the
+header. A fake-MMIO test exercises initial guard failures, all seven register
+write/readback failures and success, and verifies that memory remains retained
+after the first write. The code has not been wired into probe or run on the
 iPad. Earlier controller-disabled tests verified individual register readbacks,
 not DMA through this window. The current DFU image does not include or execute
 the new setup.
