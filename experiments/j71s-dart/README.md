@@ -1525,3 +1525,11 @@ kernel compiled locally, but this experiment has not been run on an iPad and
 is not a production safety or teardown mechanism. The one-shot helper and
 mock are `driver-patch/j71s-tcb-init-test.h` and `test-j71s-tcb-init.py`; the
 helper depends on the special local kernel's kexec guard.
+
+Before physical use, the prepared test was updated to zero both retained
+buffers explicitly and report whether either changed after the initialization
+command. A host mock verifies that the reports detect simulated changes, in
+addition to the earlier guards. These observations do not establish that the
+controller read either buffer: a DMA read leaves no changed bytes. Both normal
+and file-based kexec load paths were checked against the special kernel's
+startup lock. The revised kernel is built but remains unbooted.

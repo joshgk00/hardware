@@ -31,6 +31,7 @@ static void j71s_test_tcb_init(struct pci_dev *pdev, void __iomem *bar,
  u16 cmd;
  unsigned int i, written = 0, errors = 0;
  bool armed = false, identity = false, retained = false;
+ bool tcb_changed, table_changed;
  int ret;
 
  if (!j71s_test_kexec_locked() || !host->dma_mask ||
@@ -60,6 +61,8 @@ static void j71s_test_tcb_init(struct pci_dev *pdev, void __iomem *bar,
             j71s_dma_is_identity(host, table, table_dma, table_size);
  if (!identity)
   goto out;
+ memset(tcb, 0, tcb_size);
+ memset(table, 0, table_size);
  mmu = ioremap(0x601004000ULL, 0x1000);
  if (!mmu || readl(mmu + 0x04) != 0 || readl(mmu + 0x20) != 0)
   goto out;
@@ -91,8 +94,12 @@ static void j71s_test_tcb_init(struct pci_dev *pdev, void __iomem *bar,
  ret = readl_poll_timeout(mmu + 0x04, ctrl,
                           ctrl != U32_MAX && !(ctrl & (0x10000 | 0x10)),
                           10, 250000);
- dev_info(host, "TCB init experiment: armed=1 poll=%d bit16=%d bit4=%d all-ones=%d buffers-retained=1\n",
-          ret, !!(ctrl & 0x10000), !!(ctrl & 0x10), ctrl == U32_MAX);
+ dma_rmb();
+ tcb_changed = memchr_inv(tcb, 0, tcb_size) != NULL;
+ table_changed = memchr_inv(table, 0, table_size) != NULL;
+ dev_info(host, "TCB init experiment: armed=1 poll=%d ctrl-zero=%d bit16=%d bit4=%d all-ones=%d tcb-changed=%d table-changed=%d buffers-retained=1\n",
+          ret, ctrl == 0, !!(ctrl & 0x10000), !!(ctrl & 0x10), ctrl == U32_MAX,
+          tcb_changed, table_changed);
  goto out;
 restore:
  if (readl(mmu + 0x04) || readl(mmu + 0x20)) {
