@@ -2028,3 +2028,11 @@ was isolated; absence of a captured fault after the disconnect is not evidence
 that none occurred. Resources were intended to remain retained until physical
 reset. Preserve the partial log privately and inspect the device before any
 further test; do not retry automatically.
+
+After the first one-shot attempt lost USB immediately after the pre-doorbell
+marker, the candidate now gives the observer a short scheduling window before
+that write and logs a second marker if the CPU returns from it. The function
+then gives the observer another short window before polling. The simulated test
+checks both delays and the existing timeout and response paths, and the object
+compiled. A returned MMIO write may still be posted; the second marker would
+not prove command delivery or DMA. This adjustment has not been run on J71s.

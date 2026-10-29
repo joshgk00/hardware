@@ -72,7 +72,12 @@ static int __maybe_unused j71s_identify_once(struct pci_dev *pdev, void __iomem 
  pr_info("J71s Identify stage: controller-ready\n");
  dma_wmb();
  pr_info("J71s Identify stage: submitting-command\n");
+ /* Give the USB observer time to drain the last marker before the write. */
+ msleep(100);
  writel(1, bar + NVME_REG_DBS);
+ /* A returned MMIO write can still be posted; this is not a completion. */
+ pr_info("J71s Identify stage: doorbell-write-returned\n");
+ msleep(100);
  for (i = 0; i < 5000; i++) {
   status = le16_to_cpu(READ_ONCE(p->cq[0].status));
   if (status & 1) {
