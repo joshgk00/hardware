@@ -16,6 +16,7 @@ struct j71s_identify_preparation {
  void *payload;
  dma_addr_t sq_dma, cq_dma, payload_dma;
  phys_addr_t payload_phys;
+ bool armed; /* Irreversible in this experiment: physical reset required. */
 };
 
 static bool j71s_identify_window_contains(dma_addr_t addr, size_t size)
@@ -35,13 +36,16 @@ static void j71s_identify_build_command(struct nvme_command *cmd)
 }
 
 /* Call only before any of these addresses have been given to hardware. */
-static void __maybe_unused j71s_identify_release_unarmed(struct device *dev,
+static int __maybe_unused j71s_identify_release_unarmed(struct device *dev,
                                                    struct j71s_identify_preparation *p)
 {
+ if (p->armed)
+  return -EBUSY;
  if (p->payload) dma_free_coherent(dev, PAGE_SIZE, p->payload, p->payload_dma);
  if (p->cq) dma_free_coherent(dev, PAGE_SIZE, p->cq, p->cq_dma);
  if (p->sq) dma_free_coherent(dev, PAGE_SIZE, p->sq, p->sq_dma);
  memset(p, 0, sizeof(*p));
+ return 0;
 }
 
 static int __maybe_unused j71s_identify_prepare(struct device *dev,

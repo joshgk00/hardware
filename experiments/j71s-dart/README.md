@@ -1776,3 +1776,21 @@ of the kernel. This establishes package consistency, not boot or hardware
 behavior. The image retains the one-shot test's kexec lockdown; a physical
 restart is required after the currently running one-shot diagnostic before
 booting it, and another restart would be required after a successful TCB arm.
+
+`driver-patch/j71s-identify-once.h` is an unconnected experimental sequence
+for one Identify Controller request. It checks the exact command and descriptor,
+queue state, candidate scratch configuration, controller capabilities, PCI
+state, kexec lock and an explicit caller-supplied ownership condition. It then
+marks the preparation armed before writing queue registers, requests PCI bus
+mastering, enables the controller, submits the command, and polls the first
+completion. It deliberately does not disable the device, retire translations or
+free memory; buffers must remain retained until physical reset on every path
+after arming. The preparation release function now rejects an armed allocation.
+
+The helper compiled in the ARM64 diagnostic build, and a fake controller test
+exercises guard rejection, bus-master failure after arming, completion, and
+command timeout. It is not wired into probe and has not been run on the iPad.
+The caller's ownership flag is not proof: the actual host, DART mapping, SART,
+TCB/SGL allocation, lifetime and PCI write-policy integration remain unfinished,
+and physical DMA and invalidation are unverified. The currently packaged boot
+image predates this helper and does not submit any storage command.
