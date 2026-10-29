@@ -1,0 +1,64 @@
+diff --git a/drivers/nvme/host/pci-apple-ans.c b/drivers/nvme/host/pci-apple-ans.c
+index b4152e0..75e116f 100644
+--- a/drivers/nvme/host/pci-apple-ans.c
++++ b/drivers/nvme/host/pci-apple-ans.c
+@@ -30,11 +30,9 @@
+ #define APPLE_ANS_REG_HMB_SIZE		0x1818
+ #define APPLE_ANS_REG_CORE_MASK		0x1824
+ #define APPLE_ANS_REG_LOG_SIZE		0x1828
+-#define APPLE_ANS_PCI_CFG_17C		0x17c
+-#define APPLE_ANS_PCI_CFG_17C_VALUE	0x10081008
+-#define APPLE_ANS_PCI_CFG_188		0x188
+-#define APPLE_ANS_PCI_CFG_188_VALUE	0x40550000
+-#define APPLE_ANS_PCI_CFG_18C		0x18c
++#define APPLE_ANS_LTR_VALUE             0x10081008
++#define APPLE_ANS_L1SS_T8010            0x40550000
++#define APPLE_ANS_L1SS_S8000_CANDIDATE  0x40440000
+ #define APPLE_ANS_NVME_MAX_SECTORS \
+ 	(APPLE_ANS_NVMMU_MAX_PAGES * APPLE_ANS_NVMMU_PAGE_SIZE >> SECTOR_SHIFT)
+ 
+@@ -158,6 +156,23 @@ static int nvme_pci_apple_ans_reset_dma(struct nvme_dev *dev)
+ 	return 0;
+ }
+ 
++/* The S8000 value follows the related J71t driver; not hardware-validated. */
++static int apple_ans_configure_pci(struct pci_dev *pdev, bool s8000)
++{
++ u16 ltr = pci_find_ext_capability(pdev, PCI_EXT_CAP_ID_LTR);
++ u16 l1ss = pci_find_ext_capability(pdev, PCI_EXT_CAP_ID_L1SS);
++ u32 ctl1 = s8000 ? APPLE_ANS_L1SS_S8000_CANDIDATE : APPLE_ANS_L1SS_T8010;
++
++ if (!ltr || !l1ss)
++  return -ENODEV;
++ if (pci_write_config_byte(pdev, PCI_LATENCY_TIMER, 0x40) != PCIBIOS_SUCCESSFUL ||
++     pci_write_config_dword(pdev, ltr + PCI_LTR_MAX_SNOOP_LAT, APPLE_ANS_LTR_VALUE) != PCIBIOS_SUCCESSFUL ||
++     pci_write_config_dword(pdev, l1ss + PCI_L1SS_CTL2, 0) != PCIBIOS_SUCCESSFUL ||
++     pci_write_config_dword(pdev, l1ss + PCI_L1SS_CTL1, ctl1) != PCIBIOS_SUCCESSFUL)
++  return -EIO;
++ return 0;
++}
++
+ static int nvme_pci_apple_ans_preinit(struct nvme_dev *dev)
+ {
+ 	struct apple_ans_nvme *ans = nvme_pci_apple_ans(dev);
+@@ -169,17 +184,9 @@ static int nvme_pci_apple_ans_preinit(struct nvme_dev *dev)
+ 	if (!ans)
+ 		return 0;
+ 
+-	if (pci_write_config_byte(pdev, PCI_LATENCY_TIMER, 0x40) !=
+-	    PCIBIOS_SUCCESSFUL ||
+-	    pci_write_config_dword(pdev, APPLE_ANS_PCI_CFG_17C,
+-				   APPLE_ANS_PCI_CFG_17C_VALUE) !=
+-	    PCIBIOS_SUCCESSFUL ||
+-	    pci_write_config_dword(pdev, APPLE_ANS_PCI_CFG_18C, 0) !=
+-	    PCIBIOS_SUCCESSFUL ||
+-	    pci_write_config_dword(pdev, APPLE_ANS_PCI_CFG_188,
+-				   APPLE_ANS_PCI_CFG_188_VALUE) !=
+-	    PCIBIOS_SUCCESSFUL)
+-		return -EIO;
++	ret = apple_ans_configure_pci(pdev, of_machine_is_compatible("apple,j71s"));
++	if (ret)
++		return ret;
+ 
+ 	core_mask = readl(dev->bar + APPLE_ANS_REG_CORE_MASK);
+ 	log_size = readl(dev->bar + APPLE_ANS_REG_LOG_SIZE);

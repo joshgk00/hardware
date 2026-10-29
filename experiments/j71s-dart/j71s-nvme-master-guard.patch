@@ -1,0 +1,34 @@
+diff --git a/drivers/nvme/host/pci.c b/drivers/nvme/host/pci.c
+index 674b4ea..43831f9 100644
+--- a/drivers/nvme/host/pci.c
++++ b/drivers/nvme/host/pci.c
+@@ -3190,6 +3190,17 @@ static bool nvme_pci_update_nr_queues(struct nvme_dev *dev)
+ 	return true;
+ }
+ 
++/* Refuse inherited controller activity before allowing J71s PCI DMA. */
++static int nvme_j71s_master_guard(struct pci_dev *pdev, void __iomem *bar)
++{
++ u16 command;
++ if (pci_read_config_word(pdev, PCI_COMMAND, &command) ||
++     (command & PCI_COMMAND_MASTER) ||
++     readl(bar + NVME_REG_CC) != 0 || readl(bar + NVME_REG_CSTS) != 0)
++  return -EBUSY;
++ return 0;
++}
++
+ static int nvme_pci_enable(struct nvme_dev *dev)
+ {
+ 	int result = -ENOMEM;
+@@ -3199,6 +3210,11 @@ static int nvme_pci_enable(struct nvme_dev *dev)
+ 	if (pci_enable_device_mem(pdev))
+ 		return result;
+ 
++	if (of_machine_is_compatible("apple,j71s")) {
++		result = nvme_j71s_master_guard(pdev, dev->bar);
++		if (result)
++			goto disable;
++	}
+ 	pci_set_master(pdev);
+ 
+ 	if (readl(dev->bar + NVME_REG_CSTS) == -1) {

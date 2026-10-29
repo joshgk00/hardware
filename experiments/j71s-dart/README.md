@@ -1627,3 +1627,25 @@ private test's generic changeset and observation integration, relative to the
 preceding diagnostic source; it also needs a private header containing the
 candidate values and the separately supplied DART window patch. This is test
 infrastructure, not a standalone driver or proposed production binding.
+
+A read-only PCI extended-capability scan of the iPad storage endpoint found
+LTR at offset `0x178` and L1 PM substates at `0x180`; its current L1SS control
+values matched neither the J71b setting nor the candidate S8000/J71t setting.
+No capability was written during this scan. `j71s-ans-pci-config.patch`
+changes the extracted J71b-based ANS glue to discover those capabilities
+rather than assuming fixed offsets, and chooses the related J71t driver's
+S8000 candidate control value only on J71s. Missing capabilities and config
+write failures return errors; the patch does not roll back earlier successful
+writes after a later failure. Host mocks cover capability locations, both
+model settings and each failure position. The candidate is not validated on
+S8000 hardware.
+
+Source review also found that the inherited NVMe PCI code enabled bus
+mastering before checking controller state. The separate experimental
+`j71s-nvme-master-guard.patch` requires J71s PCI bus mastering already off and
+CC/CSTS both zero before enabling it. Host tests exercise config-read failure,
+preexisting mastering and active/nonzero controller states. This guard does
+not prove an inherited active device is safely stopped, protect against every
+race or replace a complete host isolation and teardown design. Both changes
+compiled together as `nvme.o`; neither was run on hardware. The raw captured
+PCI configuration remains private.
