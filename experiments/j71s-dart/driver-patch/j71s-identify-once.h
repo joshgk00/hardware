@@ -41,6 +41,7 @@ static int __maybe_unused j71s_identify_once(struct pci_dev *pdev, void __iomem 
  j71s_identify_build_command(&expected);
  memcpy(&stored_sgl, &tcb[4], sizeof(stored_sgl));
  if (memchr_inv(p->cq, 0, PAGE_SIZE) ||
+     memchr_inv(p->payload, 0, NVME_IDENTIFY_DATA_SIZE) ||
      memcmp(&p->sq[0], &expected, sizeof(expected)) ||
      READ_ONCE(tcb[0]) != 0x200 || READ_ONCE(tcb[1]) != 1 ||
      READ_ONCE(tcb[2]) != (p->payload_phys >> 12) ||
@@ -81,6 +82,17 @@ static int __maybe_unused j71s_identify_once(struct pci_dev *pdev, void __iomem 
     return -EIO;
    *nvme_status = status >> 1;
    pr_info("J71s Identify stage: completion-received\n");
+   if (!*nvme_status) {
+    const unsigned char *payload = p->payload;
+    bool changed = memchr_inv(payload, 0, NVME_IDENTIFY_DATA_SIZE) != NULL;
+    u16 vid = payload[0] | ((u16)payload[1] << 8);
+    bool vendor_matches = vid == pdev->vendor;
+
+    pr_info("J71s Identify response: nonzero=%d vendor-match=%d\n",
+            changed, vendor_matches);
+    if (!changed || !vendor_matches)
+     return -EBADMSG;
+   }
    return 0;
   }
   usleep_range(1000, 2000);

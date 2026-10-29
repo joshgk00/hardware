@@ -1931,3 +1931,12 @@ session and captured the Identify-preparation, TCB-init and descriptor messages.
 The delayed Identify build compiled, but neither the delay nor log capture has
 been validated during an actual storage command, and a hard hang can still
 prevent output or leave only a partial host log.
+
+The one-shot candidate now requires an initially zeroed Identify response
+buffer. After a successful completion it reports only whether the buffer became
+nonzero and whether its PCI vendor field matches the endpoint; it returns an
+error for an empty response or mismatched vendor. The simulated controller test
+covers both failure cases and a plausible response. These checks avoid treating
+an untouched buffer as a valid response, but a matching field alone would still
+not prove all returned Identify data or sustained storage operation. The
+modified diagnostic object compiled and has not been run on hardware.

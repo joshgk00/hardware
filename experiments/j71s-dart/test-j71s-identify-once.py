@@ -20,6 +20,7 @@ typedef uint64_t u64; typedef uint32_t u32; typedef uint16_t u16; typedef uint64
 #define U64_MAX UINT64_MAX
 #define J71S_IDENTIFY_QUEUE_DEPTH 16
 #define J71S_IDENTIFY_FLATDMA 0x40000000ULL
+#define NVME_IDENTIFY_DATA_SIZE 4096
 #define NVME_REG_CAP 0
 #define NVME_REG_INTMS 0xc
 #define NVME_REG_CC 0x14
@@ -54,20 +55,20 @@ typedef uint64_t u64; typedef uint32_t u32; typedef uint16_t u16; typedef uint64
 struct nvme_command { struct { uint8_t opcode,flags; u16 command_id; u32 nsid; u64 reserved[2]; struct {u64 prp1,prp2;} dptr; uint8_t cns,rest[23]; } identify; };
 struct nvme_completion { u64 result; u16 sq_head,sq_id,command_id,status; };
 struct j71s_identify_preparation {struct nvme_command *sq; struct nvme_completion *cq; void *payload; u64 sq_dma,cq_dma,payload_dma,payload_phys; bool armed,descriptor_published;};
-struct pci_dev {u16 command; bool reject_master;};
-static struct j71s_identify_preparation *active; static unsigned char registers[0x2000]; static int writes; static int complete;
+struct pci_dev {u16 command,vendor; bool reject_master;};
+static struct j71s_identify_preparation *active; static unsigned char registers[0x2000]; static int writes; static int complete,payload_mode;
 static bool j71s_test_kexec_locked(void) {return true;}
 static bool j71s_identify_window_contains(u64 n,size_t size) {return n>=0x80000000 && n<0xbc000000 && size<=0xbc000000-n;}
 static void j71s_identify_build_command(struct nvme_command *p) {memset(p,0,sizeof(*p));p->identify.opcode=6;p->identify.flags=32;p->identify.command_id=1;p->identify.dptr.prp1=0x40000000;p->identify.cns=1;}
 static void *memchr_inv(const void *ptr,int value,size_t n) {const unsigned char *p=ptr;while(n--){if(*p!=(unsigned char)value)return (void*)p;p++;}return NULL;}
 static u32 readl(const void *p) {u32 v;memcpy(&v,p,4);return v;}
-static void writel(u32 v,void *p) {size_t off=(unsigned char*)p-registers;writes++;memcpy(p,&v,4);if(off==NVME_REG_CC&&v&1){u32 ready=1;memcpy(registers+NVME_REG_CSTS,&ready,4);}if(off==NVME_REG_DBS&&complete){active->cq->status=1;active->cq->command_id=1;}}
+static void writel(u32 v,void *p) {size_t off=(unsigned char*)p-registers;writes++;memcpy(p,&v,4);if(off==NVME_REG_CC&&v&1){u32 ready=1;memcpy(registers+NVME_REG_CSTS,&ready,4);}if(off==NVME_REG_DBS&&complete){active->cq->status=1;active->cq->command_id=1;if(payload_mode){((unsigned char *)active->payload)[0]=payload_mode==1?0x6b:0x12;((unsigned char *)active->payload)[1]=0x10;}}}
 static int pci_read_config_word(struct pci_dev *p,int where,u16 *v) {(void)where;*v=p->command;return 0;}
 static void pci_set_master(struct pci_dev *p) {if(!p->reject_master)p->command|=PCI_COMMAND_MASTER;}
 '''
 checks=r'''
 int main(void) {
- struct pci_dev d={.command=PCI_COMMAND_MEMORY}; struct nvme_command sq[64]={0}; struct nvme_completion cq[256]={0}; unsigned char payload[4096]={0};
+ struct pci_dev d={.command=PCI_COMMAND_MEMORY,.vendor=0x106b}; struct nvme_command sq[64]={0}; struct nvme_completion cq[256]={0}; unsigned char payload[4096]={0};
  struct j71s_identify_preparation p={.sq=sq,.cq=cq,.payload=payload,.sq_dma=0x80000000,.cq_dma=0x80001000,.payload_phys=0x100000,.descriptor_published=true};
  u32 tcb[32]={0},sgl[256]={0}; u64 sgl_dma=0x200000; u16 status=999; u32 cap_lo=0x10003ff,cap_hi=0x20,scratch=0xbc000000,size=0xe00000;
  memcpy(registers,&cap_lo,4);memcpy(registers+4,&cap_hi,4);memcpy(registers+0x1810,&scratch,4);memcpy(registers+0x1818,&size,4);
@@ -77,16 +78,22 @@ int main(void) {
  if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,&status)!=-EINVAL || writes || p.armed)abort();
  j71s_identify_build_command(sq);d.reject_master=true;
  if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,&status)!=-EIO || !p.armed || writes!=6)abort();
- memset(registers+0x14,0,4);p.armed=false;d.reject_master=false;writes=0;complete=1;
+ memset(registers+0x14,0,4);p.armed=false;d.reject_master=false;writes=0;complete=1;payload_mode=1;
  if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,&status) || !p.armed || status!=0 || !(d.command&PCI_COMMAND_MASTER))abort();
  if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,&status)!=-EINVAL)abort();
- memset(registers+0x14,0,4);memset(registers+0x1c,0,4);memset(cq,0,sizeof(cq));
+ memset(registers+0x14,0,4);memset(registers+0x1c,0,4);memset(cq,0,sizeof(cq));memset(payload,0,sizeof(payload));
  p.armed=false;d.command=PCI_COMMAND_MEMORY;complete=0;
  if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,&status)!=-ETIMEDOUT || !p.armed)abort();
+ memset(registers+0x14,0,4);memset(registers+0x1c,0,4);memset(cq,0,sizeof(cq));memset(payload,0,sizeof(payload));
+ p.armed=false;d.command=PCI_COMMAND_MEMORY;complete=1;payload_mode=0;
+ if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,&status)!=-EBADMSG || !p.armed)abort();
+ memset(registers+0x14,0,4);memset(registers+0x1c,0,4);memset(cq,0,sizeof(cq));memset(payload,0,sizeof(payload));
+ p.armed=false;d.command=PCI_COMMAND_MEMORY;payload_mode=2;
+ if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,&status)!=-EBADMSG || !p.armed)abort();
 }
 '''
 with tempfile.TemporaryDirectory() as d:
  p=Path(d);(p/'test.c').write_text(preamble+fn+checks)
  subprocess.run(['cc','-std=gnu11','-Wall','-Wextra','-Werror',str(p/'test.c'),'-o',str(p/'test')],check=True)
  subprocess.run([str(p/'test')],check=True)
-print('One-shot Identify guard, failed-master retention and completion simulation passed.')
+print('One-shot guards, retention, completion and response validation passed.')
