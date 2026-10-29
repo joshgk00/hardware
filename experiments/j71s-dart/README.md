@@ -1683,3 +1683,23 @@ one disabled-controller write/read/restore test, but remain unproven during
 actual storage I/O. The updated capability and failure-path mock passed for
 both variants, and the modified NVMe object compiled; the full NVMe driver has
 not been run on this iPad.
+
+
+The private J71s Apple device tree's `nvme-mmu0` node contains an
+`invalidate-fifo-workaround` value of 1. In a separate read-only diagnostic,
+with the PCI endpoint enumerated and the NVMe controller disabled, the port
+register at the J71t-derived FIFO status offset was readable and bit 0 was 1.
+This is consistent with the related driver's idle FIFO indication, but does
+not establish the meaning of the bit or prove invalidation completion. The
+first attempt unbound before asynchronous enumeration completed; the successful
+attempt waited for the endpoint. No NVMe command or DMA was issued.
+
+`j71s-nvmmu-fifo-candidate.patch` is an experimental follow-up to
+`j71s-tcb-direction.patch`. It tracks used descriptor slots, skips invalidation
+for never-mapped slots, serializes and polls the candidate FIFO, and returns an
+error and retains the slot on timeout. It polls after writing the invalidation
+as an additional observation, but an empty status read does not itself prove
+that the write reached the hardware or that a cached translation was retired.
+Concurrency, DMA teardown, the status semantics and safe reuse remain
+unverified. The H9P object compiled; this candidate has not been run on J71s
+and is not an I/O-ready driver.

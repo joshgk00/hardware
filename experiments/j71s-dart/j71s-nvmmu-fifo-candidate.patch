@@ -1,0 +1,92 @@
+--- a/drivers/pci/controller/pcie-apple-h9p.c
++++ b/drivers/pci/controller/pcie-apple-h9p.c
+@@ -236,6 +236,9 @@
+ 
+ struct apple_h9p_nvmmu {
+ 	struct apple_h9p_pcie *pcie;
++	spinlock_t j71s_inv_lock;
++	DECLARE_BITMAP(j71s_used, APPLE_ANS_NVMMU_MAX_REQS);
++	bool j71s_poisoned;
+ 	void __iomem *base;
+ 	u64 pa_base;
+ 	u32 va_base;
+@@ -1140,6 +1143,8 @@
+ 	int irq;
+ 	int ret;
+ 
++	spin_lock_init(&nvmmu->j71s_inv_lock);
++
+ 	/* Discovery-only image has no NVMe drivers or command queues. Leave
+ 	 * storage DMA/NVMMU state untouched; this is NOT an I/O-ready result.
+ 	 */
+@@ -1283,6 +1288,36 @@
+ 	return true;
+ }
+ 
++/* J71t-derived candidate; FIFO status and retirement semantics are unverified. */
++static int apple_h9p_j71s_invalidate(struct apple_h9p_pcie *pcie, unsigned int tag)
++{
++ struct apple_h9p_nvmmu *nvmmu = &pcie->nvmmu;
++ unsigned long flags;
++ u32 value;
++ int ret;
++
++ spin_lock_irqsave(&nvmmu->j71s_inv_lock, flags);
++ if (nvmmu->j71s_poisoned) {
++  ret = -EIO;
++  goto out;
++ }
++ ret = readl_poll_timeout_atomic(pcie->base_port[0] + 0x22c, value,
++                                value != U32_MAX && (value & BIT(0)), 1, 20000);
++ if (ret)
++  goto poison;
++ writel(tag, nvmmu->base + H9P_NVMMU_TCB_CTRL);
++ ret = readl_poll_timeout_atomic(pcie->base_port[0] + 0x22c, value,
++                                value != U32_MAX && (value & BIT(0)), 1, 20000);
++ if (ret)
++  goto poison;
++ goto out;
++poison:
++ nvmmu->j71s_poisoned = true;
++out:
++ spin_unlock_irqrestore(&nvmmu->j71s_inv_lock, flags);
++ return ret;
++}
++
+ int apple_ans_nvmmu_map(struct device *dev, unsigned int tag,
+ 			const u64 *pages, unsigned int npages,
+ 			bool to_memory, dma_addr_t *iova)
+@@ -1320,6 +1355,8 @@
+ 	nvmmu = &pcie->nvmmu;
+ 	if (!nvmmu->base || !nvmmu->tcb || !nvmmu->tcb_sgl)
+ 		return -EOPNOTSUPP;
++	if (of_machine_is_compatible("apple,j71s") && READ_ONCE(nvmmu->j71s_poisoned))
++		return -EIO;
+ 
+ 	tcb = (u32 *)nvmmu->tcb + tag * H9P_NVMMU_TCB_DWORDS;
+ 	sgl = (u32 *)nvmmu->tcb_sgl + tag * H9P_NVMMU_SGL_WORDS;
+@@ -1331,7 +1368,24 @@
+ 						(H9P_NVMMU_TCB_READ | H9P_NVMMU_TCB_WRITE), iova);
+ 		if (ret)
+ 			return ret;
++		if (of_machine_is_compatible("apple,j71s"))
++			set_bit(tag, nvmmu->j71s_used);
+ 	} else {
++		if (of_machine_is_compatible("apple,j71s")) {
++			if (!test_bit(tag, nvmmu->j71s_used))
++				return 0;
++			WRITE_ONCE(tcb[1], 0);
++			dma_wmb();
++			memset(tcb, 0, H9P_NVMMU_TCB_BYTES);
++			dma_wmb();
++			ret = apple_h9p_j71s_invalidate(pcie, tag);
++			if (ret)
++				return ret;
++			clear_bit(tag, nvmmu->j71s_used);
++			if (iova)
++				*iova = 0;
++			return 0;
++		}
+ 		memset(tcb, 0, H9P_NVMMU_TCB_BYTES);
+ 		memset(sgl, 0, H9P_NVMMU_SGL_WORDS * sizeof(*sgl));
+ 		dma_wmb();
