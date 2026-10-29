@@ -2129,3 +2129,12 @@ marker for the observer to deliver it, then rechecks the link before writing.
 The actual-function mock verifies the extra guard and retained resources on
 link loss. This improves observability only; it does not prevent a stall after
 the final check or establish that the command path is safe or functional.
+
+
+On the next physical command attempt, the observer captured the host-link-up
+marker before the extra one-second delay, then the USB connection disappeared
+without a doorbell-return marker or a completion. This establishes that the
+first pre-doorbell check was reached, but not that the final recheck or doorbell
+write occurred or that a command executed. The comparison with the no-doorbell
+run is suggestive, not proof of a specific failing instruction. Preserve the
+private capture and physically reset before further tests.

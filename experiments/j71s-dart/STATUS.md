@@ -41,7 +41,9 @@ connection after the pre-submission marker, without a captured completion. This
 does not establish whether the doorbell was written or DMA occurred. A later
 physical comparison reached the same pre-submission link check and returned
 successfully when it skipped the doorbell write; the controller was still armed,
-so a physical reset is needed. A successful Identify
+so a physical reset is needed. A later command attempt captured the first
+pre-doorbell link-up marker but lost USB before a doorbell-return marker; the
+final check and write cannot be confirmed from the log. A successful Identify
 response would still not prove reliable storage or a safe installer.
 
 Device-specific captures, boot artifacts, serial output and generated Apple
