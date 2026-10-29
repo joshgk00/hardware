@@ -1391,3 +1391,14 @@ page cleanup. These lookups inspect software page tables; they do not test
 hardware DMA, validate the physical stream selection, or issue disk commands.
 The experiment and mock are `driver-patch/j71s-endpoint-map.h` and
 `test-j71s-endpoint-map.py`.
+
+The related J71b H9P FlatDMA code encodes each supplied physical address as a
+32-bit 4 KiB page number, but previously did not reject misaligned addresses or
+page numbers wider than 32 bits before truncating them. The experimental
+`h9p-validate-pages.patch` rejects either condition before changing any TCB or
+SGL; zero-page unmap requests remain accepted. The actual helper passes
+`test-h9p-page-validation.py` for aligned boundaries, a null page list,
+misalignment, overflow and a bad entry after a good one. The patch applies to
+the extracted J71b source after the dynamic HMB experiment, and the modified
+H9P object compiled with the existing kernel toolchain. It has not been run on
+hardware and does not establish J71s FlatDMA semantics or working storage.

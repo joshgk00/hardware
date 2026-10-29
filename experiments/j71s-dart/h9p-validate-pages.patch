@@ -1,0 +1,35 @@
+diff --git a/drivers/pci/controller/pcie-apple-h9p.c b/drivers/pci/controller/pcie-apple-h9p.c
+index 485b241..9b85dae 100644
+--- a/drivers/pci/controller/pcie-apple-h9p.c
++++ b/drivers/pci/controller/pcie-apple-h9p.c
+@@ -1263,6 +1263,21 @@ out_put_node:
+ 	return ret;
+ }
+ 
++/* Each SGL entry holds a 32-bit 4 KiB page number. */
++static bool apple_h9p_nvmmu_valid_pages(const u64 *pages, unsigned int npages)
++{
++	unsigned int i;
++
++	if (npages && !pages)
++		return false;
++	for (i = 0; i < npages; i++) {
++		if (!IS_ALIGNED(pages[i], APPLE_ANS_NVMMU_PAGE_SIZE) ||
++		    (pages[i] >> ilog2(APPLE_ANS_NVMMU_PAGE_SIZE)) > U32_MAX)
++			return false;
++	}
++	return true;
++}
++
+ int apple_ans_nvmmu_map(struct device *dev, unsigned int tag,
+ 			const u64 *pages, unsigned int npages,
+ 			dma_addr_t *iova)
+@@ -1280,7 +1295,7 @@ int apple_ans_nvmmu_map(struct device *dev, unsigned int tag,
+ 	if (tag >= APPLE_ANS_NVMMU_MAX_REQS ||
+ 	    npages > APPLE_ANS_NVMMU_MAX_PAGES)
+ 		return -EINVAL;
+-	if (npages && !pages)
++	if (!apple_h9p_nvmmu_valid_pages(pages, npages))
+ 		return -EINVAL;
+ 
+ 	while (host_dev && host_dev->bus == dev->bus)
