@@ -1,0 +1,64 @@
+diff --git a/kernel/kexec_core.c b/kernel/kexec_core.c
+index dc770b9a6..303a43a12 100644
+--- a/kernel/kexec_core.c
++++ b/kernel/kexec_core.c
+@@ -1032,7 +1032,13 @@ static struct kexec_load_limit load_limit_panic = {
+ 
+ struct kimage *kexec_image;
+ struct kimage *kexec_crash_image;
+-static int kexec_load_disabled;
++/* J71s one-shot NVMMU experiment: a physical reboot is required. */
++static int kexec_load_disabled = 1;
++bool j71s_test_kexec_locked(void)
++{
++ return kexec_load_disabled == 1 && !kexec_image && !kexec_crash_image;
++}
++EXPORT_SYMBOL_GPL(j71s_test_kexec_locked);
+ 
+ #ifdef CONFIG_SYSCTL
+ static int kexec_limit_handler(const struct ctl_table *table, int write,
+diff --git a/include/linux/kexec.h b/include/linux/kexec.h
+index 0af8ae4fd..32be8362a 100644
+--- a/include/linux/kexec.h
++++ b/include/linux/kexec.h
+@@ -448,6 +448,7 @@ extern struct kimage *kexec_image;
+ extern struct kimage *kexec_crash_image;
+ 
+ bool kexec_load_permitted(int kexec_image_type);
++bool j71s_test_kexec_locked(void);
+ 
+ #ifndef kexec_flush_icache_page
+ #define kexec_flush_icache_page(page)
+diff --git a/drivers/pci/controller/pcie-j71s-diagnostic.c b/drivers/pci/controller/pcie-j71s-diagnostic.c
+index db09c47cd..aaacf5bd8 100644
+--- a/drivers/pci/controller/pcie-j71s-diagnostic.c
++++ b/drivers/pci/controller/pcie-j71s-diagnostic.c
+@@ -22,6 +22,7 @@ struct j71s_diag_work {
+ #include "j71s-scratch-test.h"
+ #include "j71s-dma-alloc-test.h"
+ #include "j71s-tcb-address-test.h"
++#include "j71s-tcb-init-test.h"
+ #include "j71s-endpoint-map.h"
+ #include "j71s-msi-domain-test.h"
+ #include "j71s-msi-private.h"
+@@ -770,7 +771,7 @@ static struct platform_driver j71s_pcie_diagnostic_driver = {
+ 	.probe = j71s_pcie_diagnostic_probe,
+ 	.shutdown = j71s_pcie_diagnostic_shutdown,
+ 	.remove = j71s_pcie_diagnostic_shutdown,
+-	.driver = { .name = "j71s-pcie-diagnostic", .of_match_table = j71s_pcie_diagnostic_of_match },
++	.driver = { .name = "j71s-pcie-diagnostic", .of_match_table = j71s_pcie_diagnostic_of_match, .suppress_bind_attrs = true },
+ };
+ module_platform_driver(j71s_pcie_diagnostic_driver);
+ MODULE_LICENSE("GPL");
+diff --git a/drivers/pci/controller/j71s-scan-private.h b/drivers/pci/controller/j71s-scan-private.h
+index a209df515..e11ce5a62 100644
+--- a/drivers/pci/controller/j71s-scan-private.h
++++ b/drivers/pci/controller/j71s-scan-private.h
+@@ -158,6 +158,7 @@ static int j71s_pci_test_probe(struct pci_dev *pdev, const struct pci_device_id
+ 	j71s_test_dma_allocations(pdev, data->bar, host->dev.parent);
+ 	j71s_test_tcb_addresses(pdev, data->bar, host->dev.parent);
+ 	j71s_test_msi_allocation(pdev, data->bar);
++	j71s_test_tcb_init(pdev, data->bar, host->dev.parent);
+ 	pci_set_drvdata(pdev, data);
+ 	dev_info(&pdev->dev, "experimental PCI MSI domain: present=%d\n", !!dev_get_msi_domain(&pdev->dev));
+ 	dev_info(&pdev->dev, "experimental PCI driver: bound version=%#x master-off=%d\n",

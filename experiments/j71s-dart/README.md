@@ -1533,3 +1533,22 @@ addition to the earlier guards. These observations do not establish that the
 controller read either buffer: a DMA read leaves no changed bytes. Both normal
 and file-based kexec load paths were checked against the special kernel's
 startup lock. The revised kernel is built but remains unbooted.
+
+While the one-shot boot remained pending, a separate reversible preflight
+allocated the same sizes with a 36-bit mask on the PCI host device and checked
+that each DMA address corresponded to the allocated physical memory via a
+single-entry scatterlist. On the iPad it reported `identity=1 buffers=1
+masks-restored=1`; PCI bus mastering remained off and normal PCI/DART cleanup
+passed. Battery was 46%, discharging. This verifies those prerequisites for
+one allocation in the running kernel, not a guarantee for a future allocation
+or a hardware DMA test. The preflight and mock are
+`driver-patch/j71s-tcb-preflight.h` and `test-j71s-tcb-preflight.py`.
+
+For local reproducibility, `tcb-init-local-lockdown.patch` captures the four
+special-kernel integration changes relative to the preceding private
+TCB-address diagnostic source: disabled kexec loading, the guard declaration,
+suppressed diagnostic bind/unbind and the one-shot helper call. Its application
+was replayed on copies of those four files and matched the built source. It
+requires the separately provided `driver-patch/j71s-tcb-init-test.h` and the
+preceding diagnostic source; it is not a standalone or production patch.
+`test-tcb-init-lockdown.py` checks the coupled guard and retention ordering.
