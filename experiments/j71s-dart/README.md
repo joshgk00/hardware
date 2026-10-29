@@ -1402,3 +1402,17 @@ misalignment, overflow and a bad entry after a good one. The patch applies to
 the extracted J71b source after the dynamic HMB experiment, and the modified
 H9P object compiled with the existing kernel toolchain. It has not been run on
 hardware and does not establish J71s FlatDMA semantics or working storage.
+
+The J71s Apple DT contains PCIe MSI parent, address, vector offset and
+per-port vector ranges. `extract-pcie-msi.py` validates property sizes, the
+AIC parent, address alignment, bounds and non-overlap, then writes a new
+mode-0600 private DTS fragment without printing the device-derived values.
+A synthetic-input test covers malformed metadata and overlaps; the private
+fragment from the connected iPad compiled with `dtc`. Its vector offset is
+different from the J71b test tree, so the J71b MSI interrupt start must not be
+copied blindly. The root has 32 vectors and port 0 has eight; the MSI address
+matches the related J71b candidate. These are firmware-data observations,
+not evidence of delivered interrupts. In particular, the relationship between
+the Apple vector offset, PCI MSI message data, and Linux AIC interrupt
+numbering still needs verification on S8000 before enabling MSI. The
+extraction code does not configure or write any hardware.
