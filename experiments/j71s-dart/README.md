@@ -1487,3 +1487,20 @@ allocation was already 16 KiB; this change makes the hardware requirement
 explicit and covers smaller page sizes. The checks and 128-entry assumption
 come from the related J71t implementation and are not independently proven for
 S8000. This patch does not start the controller or test physical DMA.
+
+A guarded NVMMU table-address test allocated two zeroed host DMA buffers,
+required controller CC/CSTS, PCI bus mastering, TCB control and SART control
+to be zero, then wrote and read back the four candidate table/base address
+fields in the sequence used by the related J71t implementation. An initial
+attempt stopped before writes because two saved table fields were nonzero.
+A revised test saved those nonzero values (their origin is unknown), verified
+all four candidate writes and restored every field. On the iPad it reported
+`matched=1 restore-errors=0 retained=0 baseline-nonzero=2`; DMA masks restored,
+and PCI/DART cleanup checks passed. Battery was 47% and discharging. Host mocks
+cover allocation failure, mismatched writes, nonzero/all-ones baselines and
+retention of buffers if restoration fails. No NVMMU initialization command,
+PCI bus mastering, physical DMA or disk command was issued. This is register
+readback only, not proof that the NVMMU can fetch these buffers or that
+restoring register values reverses every possible side effect. The experiment
+and mock are `driver-patch/j71s-tcb-address-test.h` and
+`test-j71s-tcb-address.py`.
