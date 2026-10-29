@@ -1552,3 +1552,17 @@ was replayed on copies of those four files and matched the built source. It
 requires the separately provided `driver-patch/j71s-tcb-init-test.h` and the
 preceding diagnostic source; it is not a standalone or production patch.
 `test-tcb-init-lockdown.py` checks the coupled guard and retention ordering.
+
+The one-shot initialization kernel was subsequently booted on the iPad.
+It reported `armed=1 poll=0 ctrl-zero=1 bit16=0 bit4=0 all-ones=0
+ tcb-changed=0 table-changed=0 buffers-retained=1`. Thus the candidate command
+was written and a bounded poll observed the selected bits clear; the two
+zeroed buffers did not visibly change. That does not prove the command was
+accepted, that hardware read them, or that DMA or storage works. The PCI
+endpoint remained responsive with bus mastering off. Runtime checks showed
+`kexec_load_disabled=1`, no loaded kexec image, and the diagnostic unbind
+attribute absent. Battery was 45%, discharging. The two buffers intentionally
+remain allocated in this kernel; physical reset is required before further
+kernel tests. The compiled image was also regenerated from its `vmlinux` and
+matched byte-for-byte; GDB showed the built-in kexec lock set and bind/unbind
+suppression enabled.
