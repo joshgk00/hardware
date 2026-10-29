@@ -2138,3 +2138,9 @@ first pre-doorbell check was reached, but not that the final recheck or doorbell
 write occurred or that a command executed. The comparison with the no-doorbell
 run is suggestive, not proof of a specific failing instruction. Preserve the
 private capture and physically reset before further tests.
+
+
+A further no-doorbell candidate matches the command path through the extra
+one-second wait and final link recheck before skipping the write. The mock
+covers both successful skip and link loss at the final check. This comparison
+has not been run on the iPad; controller enable may still cause DMA.

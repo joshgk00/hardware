@@ -103,10 +103,13 @@ int main(void) {
  if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,false,&status)!=-EBADMSG || !p.armed)abort();
  memset(registers+0x14,0,4);memset(registers+0x1c,0,4);memset(cq,0,sizeof(cq));memset(payload,0,sizeof(payload));
  p.armed=false;d.command=PCI_COMMAND_MEMORY;writes=0;sleeps=0;status=999;complete=1;payload_mode=1;
- if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,true,&status) || !p.armed || writes!=7 || sleeps!=101 || status!=999 || cq[0].status)abort();
+ if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,true,&status) || !p.armed || writes!=7 || sleeps!=111 || status!=999 || cq[0].status)abort();
  memset(registers+0x14,0,4);memset(registers+0x1c,0,4);memset(cq,0,sizeof(cq));memset(payload,0,sizeof(payload));
  p.armed=false;d.command=PCI_COMMAND_MEMORY;writes=0;sleeps=0;link_reads=0;link_fail_at=103;
  if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,true,&status)!=-ENOLINK || !p.armed || writes!=7 || sleeps!=101)abort();
+ memset(registers+0x14,0,4);memset(registers+0x1c,0,4);memset(cq,0,sizeof(cq));memset(payload,0,sizeof(payload));
+ p.armed=false;d.command=PCI_COMMAND_MEMORY;writes=0;sleeps=0;link_reads=0;link_fail_at=104;
+ if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,true,&status)!=-ENOLINK || !p.armed || writes!=7 || sleeps!=111)abort();
  memset(registers+0x14,0,4);memset(registers+0x1c,0,4);memset(cq,0,sizeof(cq));memset(payload,0,sizeof(payload));
  p.armed=false;d.command=PCI_COMMAND_MEMORY;writes=0;sleeps=0;link_reads=0;link_fail_at=3;
  if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,true,&status)!=-ENOLINK || !p.armed || writes!=7 || sleeps)abort();
