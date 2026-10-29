@@ -1579,3 +1579,14 @@ modified H9P object compiled and the integration patch replay matched its source
 This is software preparation only. The descriptor format and DMA behavior have
 not been validated on J71s, and the header and patch do not provide a working
 PCI host or storage driver by themselves.
+
+A further review of the newer J71t NVMMU implementation found a significant
+difference from the older J71b reference: J71t uses exactly one TCB direction
+per request and publishes the page count last, after a DMA write barrier.
+The reusable builder now accepts explicit read, write, or legacy bidirectional
+flags, validates the selection, and publishes the count after the other fields.
+The existing J71b integration deliberately retains its prior bidirectional
+flags; it must not be mistaken for a verified J71s request mode. Tests exercise
+both single-direction encodings, legacy encoding, publication ordering and
+failure atomicity, and the modified H9P object compiled. The S8000 hardware
+semantics and safe slot retirement remain unverified.

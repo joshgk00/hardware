@@ -16,30 +16,40 @@ typedef uint32_t u32;typedef uint64_t u64;typedef u64 dma_addr_t;
 #define APPLE_ANS_NVMMU_MAX_PAGES 256
 #define APPLE_ANS_NVMMU_PAGE_SIZE 4096
 #define APPLE_ANS_TCB_BYTES 0x80
+#define APPLE_ANS_TCB_READ 0x100
+#define APPLE_ANS_TCB_WRITE 0x200
 #define APPLE_ANS_FLATDMA_BASE 0x40000000ULL
 #define APPLE_ANS_FLATDMA_STRIDE (8ULL * 1024 * 1024)
 #define IS_ALIGNED(x,a) (((x)&((a)-1))==0)
 #define check_add_overflow(a,b,c) __builtin_add_overflow(a,b,c)
+#define WRITE_ONCE(x,v) ((x)=(v))
+static u32 *observed_tcb;static int barriers;
+static void dma_wmb(void){if(observed_tcb && ((barriers==0 && observed_tcb[1]!=0)||(barriers==1 && observed_tcb[1]==0)))abort();barriers++;}
 '''
 t=r'''
 int main(void){u32 tcb[32],sgl[256],saved_tcb[32],saved_sgl[256];u64 pages[256]={0x80001000,0x80003000},addr,iova;
- memset(tcb,0xa5,sizeof(tcb));memset(sgl,0xa5,sizeof(sgl));
- if(apple_ans_build_tcb(tcb,sgl,0x100000,3,pages,2,&iova))abort();
+ memset(tcb,0xa5,sizeof(tcb));memset(sgl,0xa5,sizeof(sgl));observed_tcb=tcb;barriers=0;
+ if(apple_ans_build_tcb(tcb,sgl,0x100000,3,pages,2,APPLE_ANS_TCB_READ|APPLE_ANS_TCB_WRITE,&iova))abort();
  memcpy(&addr,&tcb[4],8);
  if(tcb[0]!=0x300||tcb[1]!=2||tcb[2]!=0x80001||sgl[0]!=0x80001||sgl[1]!=0x80003||sgl[2]!=0||addr!=0x100c00||iova!=0x41800000)abort();
+ if(barriers!=2)abort();
+ observed_tcb=NULL;
  memcpy(saved_tcb,tcb,sizeof(tcb));memcpy(saved_sgl,sgl,sizeof(sgl));
- pages[1]=0x80003001;if(apple_ans_build_tcb(tcb,sgl,0x100000,3,pages,2,&iova)!=-EINVAL)abort();
+ pages[1]=0x80003001;if(apple_ans_build_tcb(tcb,sgl,0x100000,3,pages,2,APPLE_ANS_TCB_READ|APPLE_ANS_TCB_WRITE,&iova)!=-EINVAL)abort();
  if(memcmp(tcb,saved_tcb,sizeof(tcb))||memcmp(sgl,saved_sgl,sizeof(sgl)))abort();
- pages[1]=1ULL<<44;if(apple_ans_build_tcb(tcb,sgl,0x100000,3,pages,2,&iova)!=-EINVAL)abort();
- pages[1]=0x80003000;if(apple_ans_build_tcb(tcb,sgl,UINT64_MAX-100,3,pages,2,&iova)!=-EOVERFLOW)abort();
+ pages[1]=1ULL<<44;if(apple_ans_build_tcb(tcb,sgl,0x100000,3,pages,2,APPLE_ANS_TCB_READ|APPLE_ANS_TCB_WRITE,&iova)!=-EINVAL)abort();
+ pages[1]=0x80003000;if(apple_ans_build_tcb(tcb,sgl,UINT64_MAX-100,3,pages,2,APPLE_ANS_TCB_READ|APPLE_ANS_TCB_WRITE,&iova)!=-EOVERFLOW)abort();
  if(memcmp(tcb,saved_tcb,sizeof(tcb))||memcmp(sgl,saved_sgl,sizeof(sgl)))abort();
- if(apple_ans_build_tcb(tcb,sgl,0,36,pages,2,&iova)!=-EINVAL||apple_ans_build_tcb(tcb,sgl,0,0,NULL,1,&iova)!=-EINVAL||apple_ans_build_tcb(tcb,sgl,0,0,pages,0,&iova)!=-EINVAL||apple_ans_build_tcb(tcb,sgl,0,0,pages,257,&iova)!=-EINVAL)abort();
+ if(apple_ans_build_tcb(tcb,sgl,0,36,pages,2,APPLE_ANS_TCB_READ|APPLE_ANS_TCB_WRITE,&iova)!=-EINVAL||apple_ans_build_tcb(tcb,sgl,0,0,NULL,1,APPLE_ANS_TCB_READ,&iova)!=-EINVAL||apple_ans_build_tcb(tcb,sgl,0,0,pages,0,APPLE_ANS_TCB_READ,&iova)!=-EINVAL||apple_ans_build_tcb(tcb,sgl,0,0,pages,257,APPLE_ANS_TCB_READ,&iova)!=-EINVAL)abort();
+ if(apple_ans_build_tcb(tcb,sgl,0,0,pages,2,0x400,&iova)!=-EINVAL)abort();
+ if(memcmp(tcb,saved_tcb,sizeof(tcb))||memcmp(sgl,saved_sgl,sizeof(sgl)))abort();
  for(int i=0;i<256;i++)pages[i]=(u64)i*4096;
- if(apple_ans_build_tcb(tcb,sgl,0x100000,35,pages,256,&iova)||sgl[255]!=255||tcb[1]!=256||iova!=0x51800000)abort();
+ if(apple_ans_build_tcb(tcb,sgl,0x100000,35,pages,256,APPLE_ANS_TCB_READ,&iova)||sgl[255]!=255||tcb[1]!=256||iova!=0x51800000||tcb[0]!=APPLE_ANS_TCB_READ)abort();
+ if(apple_ans_build_tcb(tcb,sgl,0x100000,0,pages,1,APPLE_ANS_TCB_WRITE,&iova)||tcb[0]!=APPLE_ANS_TCB_WRITE)abort();
 }
 '''
 with tempfile.TemporaryDirectory() as d:
  pth=Path(d);(pth/'t.c').write_text(p+func+t)
  subprocess.run(['cc','-std=gnu11','-Wall','-Wextra','-Werror',str(pth/'t.c'),'-o',str(pth/'t')],check=True)
  subprocess.run([str(pth/'t')],check=True)
-print('ANS TCB golden encoding, limits and failure atomicity passed.')
+print('ANS TCB directions, publication order, bounds and failure atomicity passed.')

@@ -1,5 +1,5 @@
 diff --git a/drivers/pci/controller/pcie-apple-h9p.c b/drivers/pci/controller/pcie-apple-h9p.c
-index 89f4c6c..e1d25bb 100644
+index 89f4c6c..429b039 100644
 --- a/drivers/pci/controller/pcie-apple-h9p.c
 +++ b/drivers/pci/controller/pcie-apple-h9p.c
 @@ -45,6 +45,7 @@
@@ -19,7 +19,7 @@ index 89f4c6c..e1d25bb 100644
  	u32 *tcb;
  	u32 *sgl;
  	int ret;
-@@ -1324,23 +1323,14 @@ int apple_ans_nvmmu_map(struct device *dev, unsigned int tag,
+@@ -1324,23 +1323,15 @@ int apple_ans_nvmmu_map(struct device *dev, unsigned int tag,
  
  	tcb = (u32 *)nvmmu->tcb + tag * H9P_NVMMU_TCB_DWORDS;
  	sgl = (u32 *)nvmmu->tcb_sgl + tag * H9P_NVMMU_SGL_WORDS;
@@ -40,7 +40,8 @@ index 89f4c6c..e1d25bb 100644
 -			*iova = H9P_NVMMU_FLATDMA_BASE +
 -				tag * H9P_NVMMU_FLATDMA_STRIDE;
 +		ret = apple_ans_build_tcb(tcb, sgl, nvmmu->tcb_sgl_dma,
-+					  tag, pages, npages, iova);
++					  tag, pages, npages,
++					  H9P_NVMMU_TCB_READ | H9P_NVMMU_TCB_WRITE, iova);
 +		if (ret)
 +			return ret;
  	} else {
