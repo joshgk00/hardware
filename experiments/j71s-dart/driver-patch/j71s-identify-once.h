@@ -132,6 +132,14 @@ static int __maybe_unused j71s_identify_once(struct pci_dev *pdev, void __iomem 
   ret = 0;
   goto out_port;
  }
+ /* Give the observer a full second to deliver the last pre-write marker. */
+ for (i = 0; i < 10; i++)
+  msleep(100);
+ link_status = readl(port + 0x88);
+ if (link_status == U32_MAX || !(link_status & BIT(0))) {
+  ret = -ENOLINK;
+  goto out_port;
+ }
  writel(1, bar + NVME_REG_DBS);
  /* A returned MMIO write can still be posted; this is not a completion. */
  pr_info("J71s Identify stage: doorbell-write-returned\n");

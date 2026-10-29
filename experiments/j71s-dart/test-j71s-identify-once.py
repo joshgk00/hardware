@@ -87,8 +87,10 @@ int main(void) {
  if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,false,&status)!=-EIO || !p.armed || writes!=6)abort();
  memset(registers+0x14,0,4);memset(registers+0x1c,0,4);p.armed=false;d.reject_master=false;d.command=PCI_COMMAND_MEMORY;writes=0;link_fail_at=103;link_reads=0;sleeps=0;
  if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,false,&status)!=-ENOLINK || !p.armed || writes!=7 || sleeps!=101)abort();
+ memset(registers+0x14,0,4);memset(registers+0x1c,0,4);p.armed=false;d.command=PCI_COMMAND_MEMORY;writes=0;link_fail_at=104;link_reads=0;sleeps=0;
+ if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,false,&status)!=-ENOLINK || !p.armed || writes!=7 || sleeps!=111)abort();
  memset(registers+0x14,0,4);memset(registers+0x1c,0,4);p.armed=false;d.command=PCI_COMMAND_MEMORY;writes=0;link_fail_at=0;link_reads=0;sleeps=0;complete=1;payload_mode=1;
- if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,false,&status) || !p.armed || status!=0 || !(d.command&PCI_COMMAND_MASTER) || sleeps!=102)abort();
+ if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,false,&status) || !p.armed || status!=0 || !(d.command&PCI_COMMAND_MASTER) || sleeps!=112)abort();
  if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,false,&status)!=-EINVAL)abort();
  memset(registers+0x14,0,4);memset(registers+0x1c,0,4);memset(cq,0,sizeof(cq));memset(payload,0,sizeof(payload));
  p.armed=false;d.command=PCI_COMMAND_MEMORY;complete=0;

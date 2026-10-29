@@ -2122,3 +2122,10 @@ returned successfully with no valid completion expected. The USB log remained
 responsive long enough to capture those markers. This comparison narrows the
 difference with command-path failures, but missing asynchronous markers in the
 earlier runs cannot prove whether the write happened or whether DMA succeeded.
+
+
+The next command candidate leaves one second after the pre-doorbell link-up
+marker for the observer to deliver it, then rechecks the link before writing.
+The actual-function mock verifies the extra guard and retained resources on
+link loss. This improves observability only; it does not prevent a stall after
+the final check or establish that the command path is safe or functional.
