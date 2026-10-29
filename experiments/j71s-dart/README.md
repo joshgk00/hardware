@@ -1446,3 +1446,18 @@ was delivered. The domain's message encoding and physical interrupt routing
 remain unverified, and it is not yet a production PCI host implementation.
 The source and mock are `driver-patch/j71s-msi-host-test.h` and
 `test-j71s-msi-host.py`; device-derived values remain private.
+
+A guarded follow-up allowed only the endpoint's MSI configuration writes and
+INTx-disable command changes needed for a one-vector test, while keeping PCI
+bus mastering and controller CC/CSTS off. `pci_alloc_irq_vectors()` returned
+one vector; the MSI enable bit, candidate message address and data read back
+as expected. After `pci_free_irq_vectors()`, the enable bit was clear and the
+saved capability and command values were restored. On device the checks
+reported `ret=1 matching=1 disabled=1 restored=1`; the PCI host, DART and MSI
+domain then unbound and the tested cleanup passed. Battery was 48%,
+discharging. Host mocks cover the write policy, missing domain, allocation
+failure and failed-disable handling. No interrupt handler was installed and no
+MSI was sent, so the physical interrupt route and message encoding remain
+unproven. The diagnostic and policy snippets and tests are
+`driver-patch/j71s-msi-alloc-test.h`, `driver-patch/j71s-msi-alloc-policy.h`,
+`test-j71s-msi-alloc.py` and `test-j71s-msi-alloc-policy.py`.
