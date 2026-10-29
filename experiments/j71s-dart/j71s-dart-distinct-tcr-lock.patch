@@ -1,0 +1,34 @@
+--- a/drivers/iommu/apple-dart.c
++++ b/drivers/iommu/apple-dart.c
+@@ -213,6 +213,8 @@
+ 	int num_clks;
+ 
+ 	spinlock_t lock;
++	/* Packed S5L stream controls may be updated while lock is held. */
++	spinlock_t tcr_lock;
+ 
+ 	u32 ias;
+ 	u32 oas;
+@@ -382,12 +384,12 @@
+ 		return;
+ 
+ 	shift = sid * DART_S5L8960X_TCR_BITS_PER_STREAM;
+-	spin_lock_irqsave(&dart->lock, flags);
++	spin_lock_irqsave(&dart->tcr_lock, flags);
+ 	tcr = readl(dart->regs + dart->hw->tcr);
+ 	tcr &= ~(0xffU << shift);
+ 	tcr |= val << shift;
+ 	writel(tcr, dart->regs + dart->hw->tcr);
+-	spin_unlock_irqrestore(&dart->lock, flags);
++	spin_unlock_irqrestore(&dart->tcr_lock, flags);
+ }
+ 
+ static u32 apple_dart_t8020_read_tcr(struct apple_dart *dart, u32 sid)
+@@ -1347,6 +1349,7 @@
+ 	dart->dev = dev;
+ 	dart->hw = of_device_get_match_data(dev);
+ 	spin_lock_init(&dart->lock);
++	spin_lock_init(&dart->tcr_lock);
+ 
+ 	dart->regs = devm_platform_get_and_ioremap_resource(pdev, 0, &res);
+ 	if (IS_ERR(dart->regs))

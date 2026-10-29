@@ -43,7 +43,9 @@ are in [README.md](README.md).
 ## Contributions already opened
 
 - [Fix packed S5L DART stream controls](https://github.com/OrchardLinux/linux/pull/1)
-  is a draft kernel PR; it does not claim working J71s DMA.
+  was closed after its locking issue was incorporated into the hardware
+  repository's [upstream patch](https://github.com/OrchardLinux/hardware/commit/f82f35a396d314bd815a2f44e01727993e30cc21),
+  with Josh credited. The upstream fix was tested on an iPad 6, not this J71s.
 - [Select the host Rust installer architecture](https://github.com/OrchardLinux/hardware/pull/13)
   is a draft hardware PR; it fixes a build-host issue, not iPad support.
 

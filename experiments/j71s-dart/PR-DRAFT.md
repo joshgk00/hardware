@@ -1,3 +1,9 @@
+> Historical draft: [linux PR 1](https://github.com/OrchardLinux/linux/pull/1)
+> was closed after Orchard incorporated the report using a separate TCR lock
+> in [hardware commit f82f35a](https://github.com/OrchardLinux/hardware/commit/f82f35a396d314bd815a2f44e01727993e30cc21).
+> The proposed shared-lock implementation below is superseded and must not be
+> reused; a caller can already hold that lock.
+
 # iommu/apple-dart: fix packed S5L stream control updates
 
 The older DART implementation stores four eight-bit stream controls in one
