@@ -43,7 +43,10 @@ physical comparison reached the same pre-submission link check and returned
 successfully when it skipped the doorbell write; the controller was still armed,
 so a physical reset is needed. A later command attempt captured the first
 pre-doorbell link-up marker but lost USB before a doorbell-return marker; the
-final check and write cannot be confirmed from the log. A successful Identify
+final check and write cannot be confirmed from the log. A matched no-write
+comparison subsequently survived the same wait and final check, then recorded
+that it skipped the write; this is suggestive but does not prove the cause.
+A successful Identify
 response would still not prove reliable storage or a safe installer.
 
 Device-specific captures, boot artifacts, serial output and generated Apple

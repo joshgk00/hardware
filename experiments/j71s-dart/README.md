@@ -2142,5 +2142,9 @@ private capture and physically reset before further tests.
 
 A further no-doorbell candidate matches the command path through the extra
 one-second wait and final link recheck before skipping the write. The mock
-covers both successful skip and link loss at the final check. This comparison
-has not been run on the iPad; controller enable may still cause DMA.
+covers both successful skip and link loss at the final check. A physical run
+captured the pre-doorbell marker, waited approximately one second, and recorded
+`doorbell-skipped` followed by a successful return with no completion expected.
+This strengthens the comparison with the command-path disconnect, but does not
+prove the earlier write was reached or that DMA succeeded. Controller enable may
+still cause DMA and resources remain armed until physical reset.
