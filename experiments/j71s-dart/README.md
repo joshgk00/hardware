@@ -1612,3 +1612,18 @@ property and the temporary test changeset are experimental, not an upstream
 binding. A private RAM boot image with the candidate has been assembled but not
 yet run. None of the software evidence proves the physical stream mapping,
 hardware DMA or storage functionality.
+
+The private bounded-window RAM image was booted directly from DFU on the iPad.
+The DART initialized and Linux attached the PCI storage endpoint to its IOMMU
+group. The endpoint's software page-map test reported `first-match=1
+last-match=1 unmapped=1 aperture-match=1 iova-in-window=1`. The latter checks
+show the requested candidate aperture and the allocated IOVA agree in Linux's
+software state; they do not establish the actual S8000 hardware stream or DMA
+routing. The diagnostic unbound with no PCI devices left; both temporary DT
+changesets reported successful reversion and tested PCIe restoration passed.
+Battery initially returned I/O errors, then reported 43% and discharging. No
+physical DMA or disk command occurred. `dart-window-coexist.patch` records the
+private test's generic changeset and observation integration, relative to the
+preceding diagnostic source; it also needs a private header containing the
+candidate values and the separately supplied DART window patch. This is test
+infrastructure, not a standalone driver or proposed production binding.

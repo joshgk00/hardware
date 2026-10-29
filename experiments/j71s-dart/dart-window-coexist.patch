@@ -1,0 +1,95 @@
+diff --git a/drivers/pci/controller/pcie-j71s-diagnostic.c b/drivers/pci/controller/pcie-j71s-diagnostic.c
+index db09c47..d48d3a0 100644
+--- a/drivers/pci/controller/pcie-j71s-diagnostic.c
++++ b/drivers/pci/controller/pcie-j71s-diagnostic.c
+@@ -22,6 +22,7 @@ struct j71s_diag_work {
+ #include "j71s-scratch-test.h"
+ #include "j71s-dma-alloc-test.h"
+ #include "j71s-tcb-address-test.h"
++#include "j71s-dart-window-private.h"
+ #include "j71s-endpoint-map.h"
+ #include "j71s-msi-domain-test.h"
+ #include "j71s-msi-private.h"
+diff --git a/drivers/pci/controller/j71s-dart-coexist.h b/drivers/pci/controller/j71s-dart-coexist.h
+index 6d4e457..74d610a 100644
+--- a/drivers/pci/controller/j71s-dart-coexist.h
++++ b/drivers/pci/controller/j71s-dart-coexist.h
+@@ -5,8 +5,10 @@ static void j71s_pcie_dart_coexist_test(struct device *parent)
+  struct device_node *np;
+  struct platform_device *existing, *dart;
+  int ret;
+- bool applied = false;
+- struct of_changeset cs;
++ bool applied = false, window_applied = false;
++ struct of_changeset cs, window_cs;
++ u32 window[4] = { upper_32_bits(J71S_DART_WINDOW_START), lower_32_bits(J71S_DART_WINDOW_START),
++                   upper_32_bits(J71S_DART_WINDOW_LENGTH), lower_32_bits(J71S_DART_WINDOW_LENGTH) };
+  struct j71s_msi_test msi = {};
+  u32 map[4], mask = 0xff00;
+ 
+@@ -26,10 +28,23 @@ static void j71s_pcie_dart_coexist_test(struct device *parent)
+   dev_err(parent, "coexist DART: node already populated\n");
+   goto out_node;
+  }
++ of_changeset_init(&window_cs);
++ if (of_find_property(np, "apple,dma-range", NULL)) {
++  dev_err(parent, "coexist DART window: property already present\n");
++  goto out_window;
++ }
++ ret = of_changeset_add_prop_u32_array(&window_cs, np, "apple,dma-range", window, 4);
++ if (!ret)
++  ret = of_changeset_apply(&window_cs);
++ if (ret) {
++  dev_err(parent, "coexist DART window: changeset failed=%d\n", ret);
++  goto out_window;
++ }
++ window_applied = true;
+  dart = of_device_alloc(np, NULL, parent);
+  if (!dart) {
+   dev_err(parent, "coexist DART: allocation failed\n");
+-  goto out_flag;
++  goto out_window;
+  }
+  dart->dev.coherent_dma_mask = DMA_BIT_MASK(32);
+  dart->dev.dma_mask = &dart->dev.coherent_dma_mask;
+@@ -38,7 +53,7 @@ static void j71s_pcie_dart_coexist_test(struct device *parent)
+  if (ret) {
+   dev_err(parent, "coexist DART: add failed=%d\n", ret);
+   platform_device_put(dart);
+-  goto out_flag;
++  goto out_window;
+  }
+  dev_info(parent, "coexist DART: registered driver-bound=%d\n", !!dart->dev.driver);
+  of_changeset_init(&cs);
+@@ -82,7 +97,13 @@ static void j71s_pcie_dart_coexist_test(struct device *parent)
+   dev_info(parent, "coexist DART map: revert=%d\n", ret);
+  }
+  of_changeset_destroy(&cs);
+-out_flag:
++out_window:
++ if (window_applied) {
++  ret = of_changeset_revert(&window_cs);
++  dev_info(parent, "coexist DART window: revert=%d\n", ret);
++ }
++ of_changeset_destroy(&window_cs);
++/* Release the node population marker. */
+  of_node_clear_flag(np, OF_POPULATED);
+ out_node:
+  of_node_put(np);
+diff --git a/drivers/pci/controller/j71s-endpoint-map.h b/drivers/pci/controller/j71s-endpoint-map.h
+index 07e3c63..f95b224 100644
+--- a/drivers/pci/controller/j71s-endpoint-map.h
++++ b/drivers/pci/controller/j71s-endpoint-map.h
+@@ -31,7 +31,10 @@ static int j71s_endpoint_map_test(struct pci_dev *pdev, void __iomem *bar)
+  dma_unmap_page(dev, dma, PAGE_SIZE, DMA_BIDIRECTIONAL);
+  after = iommu_iova_to_phys(domain, dma);
+  __free_page(page);
+- dev_info(dev, "experimental endpoint page map: first-match=%d last-match=%d unmapped=%d\n",
+-          first == phys, last == phys + PAGE_SIZE - 1, after == 0);
++ dev_info(dev, "experimental endpoint page map: first-match=%d last-match=%d unmapped=%d aperture-match=%d iova-in-window=%d\n",
++          first == phys, last == phys + PAGE_SIZE - 1, after == 0,
++          domain->geometry.aperture_start == J71S_DART_WINDOW_START &&
++          domain->geometry.aperture_end == J71S_DART_WINDOW_START + J71S_DART_WINDOW_LENGTH - 1,
++          dma >= J71S_DART_WINDOW_START && dma <= J71S_DART_WINDOW_START + J71S_DART_WINDOW_LENGTH - PAGE_SIZE);
+  return first == phys && last == phys + PAGE_SIZE - 1 && after == 0 ? 0 : -EIO;
+ }
