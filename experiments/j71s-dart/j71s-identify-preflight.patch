@@ -16,7 +16,7 @@
  	j71s_test_msi_allocation(pdev, data->bar);
 -	j71s_test_tcb_init(pdev, data->bar, host->dev.parent);
 +	{
-+		struct j71s_identify_preparation prepared;
++		struct j71s_identify_preparation prepared = {};
 +		int prep_ret = j71s_identify_prepare(&pdev->dev, &prepared);
 +
 +		dev_info(&pdev->dev, "J71s Identify preparation: ret=%d controller-disabled=%d\n",

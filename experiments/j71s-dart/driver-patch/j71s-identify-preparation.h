@@ -17,6 +17,7 @@ struct j71s_identify_preparation {
  dma_addr_t sq_dma, cq_dma, payload_dma;
  phys_addr_t payload_phys;
  bool armed; /* Irreversible in this experiment: physical reset required. */
+ bool descriptor_published;
 };
 
 static bool j71s_identify_window_contains(dma_addr_t addr, size_t size)
@@ -39,7 +40,7 @@ static void j71s_identify_build_command(struct nvme_command *cmd)
 static int __maybe_unused j71s_identify_release_unarmed(struct device *dev,
                                                    struct j71s_identify_preparation *p)
 {
- if (p->armed)
+ if (p->armed || p->descriptor_published)
   return -EBUSY;
  if (p->payload) dma_free_coherent(dev, PAGE_SIZE, p->payload, p->payload_dma);
  if (p->cq) dma_free_coherent(dev, PAGE_SIZE, p->cq, p->cq_dma);
@@ -57,6 +58,9 @@ static int __maybe_unused j71s_identify_prepare(struct device *dev,
 
  BUILD_BUG_ON(J71S_IDENTIFY_QUEUE_DEPTH * sizeof(struct nvme_command) > PAGE_SIZE);
  BUILD_BUG_ON(J71S_IDENTIFY_QUEUE_DEPTH * sizeof(struct nvme_completion) > PAGE_SIZE);
+ /* Caller supplies a zero-initialized context; never reset a published one. */
+ if (!dev || !p || p->armed || p->descriptor_published)
+  return -EBUSY;
  memset(p, 0, sizeof(*p));
  p->sq = dma_alloc_coherent(dev, PAGE_SIZE, &p->sq_dma, GFP_KERNEL | __GFP_ZERO);
  p->cq = dma_alloc_coherent(dev, PAGE_SIZE, &p->cq_dma, GFP_KERNEL | __GFP_ZERO);

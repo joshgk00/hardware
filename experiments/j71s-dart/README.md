@@ -1794,3 +1794,15 @@ The caller's ownership flag is not proof: the actual host, DART mapping, SART,
 TCB/SGL allocation, lifetime and PCI write-policy integration remain unfinished,
 and physical DMA and invalidation are unverified. The currently packaged boot
 image predates this helper and does not submit any storage command.
+
+`driver-patch/j71s-identify-descriptor.h` links a prepared Identify response
+buffer to a tag-zero TCB using the candidate device-to-memory direction. It
+allocates a host SGL, checks its physical/identity mapping and address bounds,
+and uses the shared descriptor builder to publish the count last. Once
+published, the SGL and response buffer must be retained until physical reset;
+the preparation context rejects cleanup or reuse after descriptor publication.
+The one-shot command helper now requires that published state. The diagnostic
+object compiled, and the descriptor-builder, command and simulated-controller
+tests passed. This helper has not been connected to an initialized retained
+TCB or executed on the iPad; it does not prove physical translation, DMA, or
+safe invalidation. The prepared DFU image predates this change.

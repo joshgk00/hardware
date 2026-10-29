@@ -23,7 +23,8 @@ static int __maybe_unused j71s_identify_once(struct pci_dev *pdev, void __iomem 
  int ret;
 
  if (!ownership_proven || !j71s_test_kexec_locked() || !pdev || !bar || !p ||
-     !p->sq || !p->cq || !p->payload || p->armed || !tcb || !sgl || !nvme_status ||
+     !p->sq || !p->cq || !p->payload || p->armed || !p->descriptor_published ||
+     !tcb || !sgl || !nvme_status ||
      !scratch_size || scratch_iova != 0xbc000000U || scratch_size != 0xe00000U ||
      pci_read_config_word(pdev, PCI_COMMAND, &pci_command) ||
      (pci_command & PCI_COMMAND_MASTER) || !(pci_command & PCI_COMMAND_MEMORY) ||

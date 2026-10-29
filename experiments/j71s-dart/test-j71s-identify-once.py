@@ -52,7 +52,7 @@ typedef uint64_t u64; typedef uint32_t u32; typedef uint16_t u16; typedef uint64
 #define readl_poll_timeout(addr,val,cond,delay,timeout) ((val)=readl(addr), (cond)?0:-ETIMEDOUT)
 struct nvme_command { struct { uint8_t opcode,flags; u16 command_id; u32 nsid; u64 reserved[2]; struct {u64 prp1,prp2;} dptr; uint8_t cns,rest[23]; } identify; };
 struct nvme_completion { u64 result; u16 sq_head,sq_id,command_id,status; };
-struct j71s_identify_preparation {struct nvme_command *sq; struct nvme_completion *cq; void *payload; u64 sq_dma,cq_dma,payload_dma,payload_phys; bool armed;};
+struct j71s_identify_preparation {struct nvme_command *sq; struct nvme_completion *cq; void *payload; u64 sq_dma,cq_dma,payload_dma,payload_phys; bool armed,descriptor_published;};
 struct pci_dev {u16 command; bool reject_master;};
 static struct j71s_identify_preparation *active; static unsigned char registers[0x2000]; static int writes; static int complete;
 static bool j71s_test_kexec_locked(void) {return true;}
@@ -67,7 +67,7 @@ static void pci_set_master(struct pci_dev *p) {if(!p->reject_master)p->command|=
 checks=r'''
 int main(void) {
  struct pci_dev d={.command=PCI_COMMAND_MEMORY}; struct nvme_command sq[64]={0}; struct nvme_completion cq[256]={0}; unsigned char payload[4096]={0};
- struct j71s_identify_preparation p={.sq=sq,.cq=cq,.payload=payload,.sq_dma=0x80000000,.cq_dma=0x80001000,.payload_phys=0x100000};
+ struct j71s_identify_preparation p={.sq=sq,.cq=cq,.payload=payload,.sq_dma=0x80000000,.cq_dma=0x80001000,.payload_phys=0x100000,.descriptor_published=true};
  u32 tcb[32]={0},sgl[256]={0}; u64 sgl_dma=0x200000; u16 status=999; u32 cap_lo=0x10003ff,cap_hi=0x20,scratch=0xbc000000,size=0xe00000;
  memcpy(registers,&cap_lo,4);memcpy(registers+4,&cap_hi,4);memcpy(registers+0x1810,&scratch,4);memcpy(registers+0x1818,&size,4);
  tcb[0]=0x200;tcb[1]=1;tcb[2]=0x100;sgl[0]=0x100;memcpy(&tcb[4],&sgl_dma,8);j71s_identify_build_command(sq);active=&p;
