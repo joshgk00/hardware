@@ -1,5 +1,7 @@
 # Experimental older Apple DART stream fix
 
+For the current hardware state and next action, see [STATUS.md](STATUS.md).
+
 At Hoolock kernel revision `6831bc701a6ce059e71e5aaa9488c9195bea6927`,
 `apple_dart_s5l8960x_write_tcr()` reads a shared register containing four
 8-bit stream fields. Its read function shifts the requested field, but the
