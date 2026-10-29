@@ -1900,3 +1900,16 @@ in addition to the existing alignment and DART IOVA checks. The host-side
 boundary test and the Identify, scratch, bridge and endpoint policy simulations
 pass; the combined diagnostic object compiles. These are address and software
 checks, not proof of the S8000 translation path.
+
+A private, separate DFU candidate now contains the compiled one-shot
+coordinator and an explicit `orchard,identify-once` property. A device-tree
+comparison confirmed that property is the sole logical change from the
+previously booted tree; component hashes and kernel decompression were checked.
+Unlike the prior preflight image, this candidate is designed to enable the
+controller and attempt one Identify command if its guards pass. It has not been
+booted. The new coordinator simulation checks opt-in behavior, operation order
+and helper failures, in addition to the individual mock tests. None of these
+checks proves actual DMA isolation, storage safety, bridge forwarding, or the
+NVMMU semantics. Physical reset of the existing one-shot session is required
+before this candidate could be tested; results must not be described as an
+installation.
