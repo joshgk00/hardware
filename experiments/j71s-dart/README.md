@@ -2013,3 +2013,18 @@ mapped addresses and still unmaps/frees the test page. The bounded mock test
 covers these failures as well as mapping and cleanup failures, and the diagnostic
 object compiled. Earlier J71s preflight reported these checks successful, but
 passing them still does not prove physical DMA isolation or hardware routing.
+
+
+The maintainer-guided distinct-TCR-lock diagnostic was booted from DFU on J71s.
+Its endpoint software mapping and candidate aperture checks passed, Identify
+buffer and descriptor preparation returned success, scratch and root setup
+reached the candidate path, endpoint bus-master enable read back, and the NVMe
+controller reported ready. The final captured marker was immediately before
+the Identify submission-doorbell write. The USB diagnostic device disconnected
+shortly afterward; the serial observer eventually timed out without a final
+result. No completion, response, or DART fault was captured. This does not prove
+that the doorbell write completed, that a command executed, or that physical DMA
+was isolated; absence of a captured fault after the disconnect is not evidence
+that none occurred. Resources were intended to remain retained until physical
+reset. Preserve the partial log privately and inspect the device before any
+further test; do not retry automatically.

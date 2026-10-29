@@ -21,19 +21,22 @@ useful reference, but it is not evidence that J71s works.
   descriptor with the controller disabled. The allocations and descriptor are
   retained for the one-shot session until physical reset.
 
-No NVMe command or physical storage DMA has been confirmed, and Omarchy is not
-installed. The one-shot Identify implementation and its opt-in boot image are
-experimental and have not been run on the iPad. The candidate's host and device
-DMA isolation, reset behavior and translation retirement remain unverified.
+The observer-gated Identify diagnostic has now been booted once on J71s. The
+controller reported ready and the last captured message was emitted immediately
+before the submission-doorbell write. The USB diagnostic connection disappeared;
+no completion or response was captured. The result does not establish whether
+the doorbell write completed or whether any physical DMA occurred. Omarchy is
+not installed, and DMA isolation, reset behavior and translation retirement
+remain unverified.
 
 ## Next step
 
-Physically restart the iPad to clear the previous one-shot session. Once it is
-connected and its battery level is checked, a DFU boot can test the candidate
-that attempts one read-only Identify command. Capture the stage messages and
-retain all buffers until another physical reset, even after a timeout. A response
-is only a first hardware result; it does not establish reliable storage or a
-safe installer.
+Inspect the iPad's physical screen and recover with a physical restart before
+any new hardware boot. Preserve the partial log and investigate the lost USB
+connection; do not automatically repeat the command. If the iPad returns to
+normal, check battery level before further tests. A successful Identify response
+would still be only a first hardware result, not evidence of reliable storage or
+a safe installer.
 
 Device-specific captures, boot artifacts, serial output and generated Apple
 Device Tree material are kept private. Do not commit them to a public branch.
