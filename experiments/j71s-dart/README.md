@@ -1649,3 +1649,20 @@ not prove an inherited active device is safely stopped, protect against every
 race or replace a complete host isolation and teardown design. Both changes
 compiled together as `nvme.o`; neither was run on hardware. The raw captured
 PCI configuration remains private.
+
+A guarded RAM-kernel test attempted the J71t-derived PCI configuration
+sequence while PCI bus mastering and controller CC/CSTS were off. The first
+attempt stopped at the legacy latency-timer byte: the write and read calls
+succeeded but the readback differed from `0x40`. Its original zero baseline
+was restored; the differing value was not recorded, so the test does not prove
+that the byte remained zero. A follow-up left that byte untouched and tested
+LTR, L1SS control 2 and the candidate S8000 L1SS control 1. All three read back
+as requested, and the saved values restored with zero reported errors. The
+PCI host unbound, no PCI devices remained and the tested PCIe cleanup passed.
+Battery was 41%, discharging. Host mocks cover the restricted write policy,
+partial failure including a simulated failed write with side effects, and
+reverse restoration. No controller DMA or storage command was issued; these
+are config-register readbacks, not proof the settings are correct during I/O.
+The diagnostic and mocks are `driver-patch/j71s-ans-config-test.h`,
+`driver-patch/j71s-ans-config-policy.h`, `test-j71s-ans-config-test.py`, and
+`test-j71s-ans-config-experiment-policy.py`.
