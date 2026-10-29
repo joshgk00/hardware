@@ -1,0 +1,38 @@
+--- a/drivers/pci/controller/j71s-scan-private.h
++++ b/drivers/pci/controller/j71s-scan-private.h
+@@ -4,6 +4,9 @@
+ 	struct resource buses;
+ 	struct resource mem;
+ 	unsigned int bar_writes;
++ bool identify_opted_in, identify_master_used;
++ struct j71s_identify_preparation *identify_owner;
++ struct j71s_identify_scratch *identify_scratch;
+  bool msi_active;
+  u16 msi_ctrl, msi_data;
+  u32 msi_lo, msi_hi;
+@@ -16,11 +19,25 @@
+ 	return state->ecam + ((unsigned long)bus->number << 20) + where;
+ }
+ #include "j71s-msi-alloc-test.h"
++#include "j71s-identify-master-policy.h"
+ static int j71s_scan_bar_write(struct pci_bus *bus, unsigned int devfn,
+ 			      int where, int size, u32 value)
+ {
+ 	struct j71s_scan_state *state = bus->sysdata;
+ 	void __iomem *endpoint = state->ecam + 0x100000;
++
++	if (state->identify_opted_in &&
++	    j71s_identify_master_allowed(state->identify_opted_in,
++		state->identify_master_used,
++		state->identify_owner && state->identify_owner->armed,
++		state->identify_owner && state->identify_owner->descriptor_published,
++		state->identify_scratch && state->identify_scratch->ready && state->identify_scratch->retained,
++		j71s_test_kexec_locked(), bus->number, devfn, where, size,
++		readl(endpoint), readw(endpoint + PCI_COMMAND), value)) {
++		/* Do not retry if a failed configuration write had side effects. */
++		state->identify_master_used = true;
++		return pci_generic_config_write(bus, devfn, where, size, value);
++	}
+ 
+ 	if (bus->number == 1 && !devfn && state->msi_active &&
+ 	    readl(endpoint) == 0x2002106bU &&

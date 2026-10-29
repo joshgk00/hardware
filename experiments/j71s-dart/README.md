@@ -1832,3 +1832,15 @@ after the first write. The code has not been wired into probe or run on the
 iPad. Earlier controller-disabled tests verified individual register readbacks,
 not DMA through this window. The current DFU image does not include or execute
 the new setup.
+
+`j71s-identify-master-integration.patch` and
+`driver-patch/j71s-identify-master-policy.h` add a default-disabled policy for
+exactly one endpoint bus-master enable. The guard requires the experimental
+caller to opt in, provide a published descriptor and retained/ready scratch,
+mark the request armed, keep kexec locked, and write only the expected command
+transition on the matching endpoint. A write attempt consumes the permission even
+if PCI reports failure, because a failed write could have side effects. The
+policy mock and diagnostic object compile passed. No code currently enables
+the opt-in or invokes the Identify helper. Root-bridge forwarding, physical DMA,
+resource ownership, and cleanup are not established, and the current boot
+image predates this policy.
