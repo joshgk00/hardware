@@ -102,20 +102,22 @@ static int __maybe_unused j71s_identify_once(struct pci_dev *pdev, void __iomem 
   goto out_port;
  }
  pr_info("J71s Identify stage: controller-ready\n");
- if (no_doorbell) {
-  pr_info("J71s Identify stage: controller-only-observation\n");
-  for (i = 0; i < 100; i++) {
+ pr_info("J71s Identify stage: %s\n", no_doorbell ?
+         "controller-only-observation" : "controller-warmup");
+ for (i = 0; i < 100; i++) {
    link_status = readl(port + 0x88);
    if (link_status == U32_MAX || !(link_status & BIT(0))) {
     ret = -ENOLINK;
     goto out_port;
    }
    msleep(100);
-  }
+ }
+ if (no_doorbell) {
   pr_info("J71s Identify stage: controller-only-survived\n");
   ret = 0;
   goto out_port;
  }
+ pr_info("J71s Identify stage: controller-warmup-complete\n");
  dma_wmb();
  pr_info("J71s Identify stage: submitting-command\n");
  /* Give the USB observer time to drain the last marker before the write. */

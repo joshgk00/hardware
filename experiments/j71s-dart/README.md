@@ -2092,6 +2092,12 @@ the helper. The actual-function mock verifies no doorbell write, a bounded
 wait and link-loss handling; the coordinator mock verifies mode selection, and
 the diagnostic object compiled. This is a diagnostic comparison, not working
 storage. Enabling the controller can itself cause DMA even without a submitted
-command; all one-shot resources remain retained until physical reset. The new
-mode has not been run on the iPad and cannot by itself prove when the previous
-connection losses occurred.
+command; all one-shot resources remain retained until physical reset. A physical J71s run reached controller-ready and remained responsive for approximately 10.4 seconds through the observation period, with the host-link indicator up and no submission-doorbell write. The observer completed normally. No command completion or Identify response was expected or captured. This narrows the difference from the two earlier failed command-path runs, but does not prove where those runs stopped or that any DMA succeeded.
+
+
+The next command-path candidate uses the same ten-second link observation after
+controller-ready before proceeding toward the submission doorbell. This tests
+whether a longer settling interval changes the behavior; it does not establish
+the cause of the prior disconnects. Resources remain retained until a physical
+reset. The actual-function mock covers the warmup and link loss before the
+doorbell. This candidate has not yet been tested on the device.
