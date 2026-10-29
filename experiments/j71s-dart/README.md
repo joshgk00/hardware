@@ -1806,3 +1806,16 @@ object compiled, and the descriptor-builder, command and simulated-controller
 tests passed. This helper has not been connected to an initialized retained
 TCB or executed on the iPad; it does not prove physical translation, DMA, or
 safe invalidation. The prepared DFU image predates this change.
+
+`j71s-identify-descriptor-probe.patch` is a follow-on to the FIFO one-shot and
+Identify preflight patches. It keeps the prepared endpoint queues and response
+buffer, exposes the retained TCB only when its init poll succeeded with its
+buffers unchanged, and prepares the candidate tag-zero Identify descriptor
+while the controller stays disabled. If descriptor preparation does not
+publish, the endpoint buffers are freed before controller activation; after
+publication, they and the host SGL remain retained. It requires the existing
+Identify and descriptor headers to be included by the diagnostic source. The
+object compiles and the related software tests pass, but the integration has
+not been booted or run on physical hardware. A clear init poll does not prove
+that the NVMMU fetched its tables, and publishing the descriptor does not prove
+DMA, controller initialization, invalidation, or successful storage access.

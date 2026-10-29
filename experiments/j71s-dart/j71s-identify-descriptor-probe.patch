@@ -1,0 +1,57 @@
+--- a/drivers/pci/controller/j71s-tcb-init-test.h
++++ b/drivers/pci/controller/j71s-tcb-init-test.h
+@@ -17,6 +17,9 @@
+  sg_free_table(&table);
+  return ok;
+ }
++
++/* Retained until physical reboot; never valid when init polling failed. */
++static u32 *j71s_once_ready_tcb;
+ 
+ static void j71s_test_tcb_init(struct pci_dev *pdev, void __iomem *bar,
+                                struct device *host)
+@@ -97,6 +100,8 @@
+  dma_rmb();
+  tcb_changed = memchr_inv(tcb, 0, tcb_size) != NULL;
+  table_changed = memchr_inv(table, 0, table_size) != NULL;
++ if (!ret && !tcb_changed && !table_changed)
++  j71s_once_ready_tcb = tcb;
+  dev_info(host, "TCB init experiment: armed=1 poll=%d ctrl-zero=%d bit16=%d bit4=%d all-ones=%d tcb-changed=%d table-changed=%d buffers-retained=1\n",
+           ret, ctrl == 0, !!(ctrl & 0x10000), !!(ctrl & 0x10), ctrl == U32_MAX,
+           tcb_changed, table_changed);
+--- a/drivers/pci/controller/j71s-scan-private.h
++++ b/drivers/pci/controller/j71s-scan-private.h
+@@ -100,6 +100,8 @@
+ struct j71s_pci_test_data {
+ 	void __iomem *bar;
+ 	u16 saved_command;
++	struct j71s_identify_preparation prepared;
++	struct j71s_identify_descriptor descriptor;
+ };
+ 
+ static void j71s_pci_test_remove(struct pci_dev *pdev)
+@@ -159,14 +161,21 @@
+ 	j71s_test_tcb_addresses(pdev, data->bar, host->dev.parent);
+ 	j71s_test_msi_allocation(pdev, data->bar);
+ 	{
+-		struct j71s_identify_preparation prepared = {};
+-		int prep_ret = j71s_identify_prepare(&pdev->dev, &prepared);
++		int prep_ret = j71s_identify_prepare(&pdev->dev, &data->prepared);
++		int descriptor_ret = -EINVAL;
+ 
+ 		dev_info(&pdev->dev, "J71s Identify preparation: ret=%d controller-disabled=%d\n",
+ 			 prep_ret, !readl(data->bar + 0x14) && !readl(data->bar + 0x1c));
+ 		if (!prep_ret) {
+-			j71s_identify_release_unarmed(&pdev->dev, &prepared);
+ 			j71s_test_tcb_init(pdev, data->bar, host->dev.parent);
++			if (j71s_once_ready_tcb)
++				descriptor_ret = j71s_identify_prepare_descriptor(host->dev.parent,
++					&data->prepared, j71s_once_ready_tcb, &data->descriptor);
++			dev_info(&pdev->dev, "J71s Identify descriptor: ret=%d published=%d controller-disabled=%d\n",
++				 descriptor_ret, data->descriptor.published,
++				 !readl(data->bar + 0x14) && !readl(data->bar + 0x1c));
++			if (!data->descriptor.published)
++				j71s_identify_release_unarmed(&pdev->dev, &data->prepared);
+ 		}
+ 	}
+ 	pci_set_drvdata(pdev, data);
