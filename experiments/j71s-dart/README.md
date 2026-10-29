@@ -2059,3 +2059,12 @@ read, link loss after arming without another CSTS read, cleanup of the temporary
 CPU mapping, and existing completion/failure cases. The diagnostic object
 compiled. This check has not been run with physical storage DMA and cannot
 prevent an endpoint access from stalling if the link drops after a check.
+
+The host kernel's USB log records the J71s RAM diagnostic disconnecting after
+the first Identify attempt. In the inspected 20-minute window it showed no
+USB over-current, disabled-port or device-descriptor error for that sequence.
+This is only host-side evidence; a normal disconnect message does not identify
+whether the device reset, stalled, lost power, or was unplugged. The user later
+reported that the iPad returned to iPadOS, but the host had not yet detected it
+again. The device's screen and cable/battery state must be checked before the
+next physical test.
