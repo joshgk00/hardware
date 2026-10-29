@@ -1,0 +1,147 @@
+diff --git a/drivers/nvme/host/pci.c b/drivers/nvme/host/pci.c
+index 23728a3aa..674b4ea50 100644
+--- a/drivers/nvme/host/pci.c
++++ b/drivers/nvme/host/pci.c
+@@ -35,12 +35,32 @@
+ #include "j71b-readonly-policy.h"
+ 
+ /* Validate DMA/HMB ownership before deploying on physical storage. */
++/* J71s use is read-only and requires a separate explicit opt-in. */
++static bool j71s_ro_test;
++module_param(j71s_ro_test, bool, 0000);
++MODULE_PARM_DESC(j71s_ro_test, "Explicit J71s read-only storage experiment opt-in");
++
++static bool nvme_apple_legacy_diagnostic(void)
++{
++	return of_machine_is_compatible("apple,j71b") ||
++	       of_machine_is_compatible("apple,j71s");
++}
++
+ static bool j71b_ro_test;
+ module_param(j71b_ro_test, bool, 0000);
+ MODULE_PARM_DESC(j71b_ro_test, "Explicit J71b read-only storage experiment opt-in");
+ static bool j71b_rw;
+ module_param(j71b_rw, bool, 0444);
+ MODULE_PARM_DESC(j71b_rw, "Explicit J71b recovery read-write NVMe opt-in");
++
++static bool nvme_legacy_opt_in_valid(void)
++{
++	if (of_machine_is_compatible("apple,j71s"))
++		return j71s_ro_test && !j71b_rw && !j71b_ro_test;
++	if (of_machine_is_compatible("apple,j71b"))
++		return (j71b_ro_test != j71b_rw) && !j71s_ro_test;
++	return true;
++}
+ static struct nvme_dev *j71b_current;
+ static bool j71b_stopping, j71b_quiesced;
+ static int j71b_quiesce_set(const char *val, const struct kernel_param *kp);
+@@ -61,13 +81,13 @@ bool nvme_pci_j71b_is_failed(void)
+ bool nvme_pci_j71b_hold(struct nvme_dev *dev, const char *reason)
+ {
+ 	(void)reason;
+-	return of_machine_is_compatible("apple,j71b") &&
++	return nvme_apple_legacy_diagnostic() &&
+ 		READ_ONCE(dev->j71b_dma_armed) && nvme_pci_j71b_is_failed();
+ }
+ 
+ bool nvme_pci_j71b_fail(struct nvme_dev *dev, const char *reason)
+ {
+-	if (!of_machine_is_compatible("apple,j71b") ||
++	if (!nvme_apple_legacy_diagnostic() ||
+ 	    !READ_ONCE(dev->j71b_dma_armed))
+ 		return false;
+ 	if (!atomic_xchg(&j71b_failed, 1)) {
+@@ -1323,14 +1343,14 @@ static blk_status_t nvme_prep_rq(struct request *req)
+ 
+ 	if (nvme_pci_j71b_is_failed() || READ_ONCE(j71b_stopping))
+ 		return BLK_STS_IOERR;
+-	if (of_machine_is_compatible("apple,j71b") && blk_integrity_rq(req))
++	if (nvme_apple_legacy_diagnostic() && blk_integrity_rq(req))
+ 		return BLK_STS_NOTSUPP;
+ 	ret = nvme_setup_cmd(req->q->queuedata, req);
+ 	if (ret)
+ 		return ret;
+ 
+ 	/* Both single and batched requests reach this BEFORE DMA/start/submission. */
+-	if (of_machine_is_compatible("apple,j71b") &&
++	if (nvme_apple_legacy_diagnostic() &&
+ 	    !j71b_rw && !j71b_ro_command_allowed(((struct nvme_queue *)
+ 			req->mq_hctx->driver_data)->qid,
+ 			(const unsigned char *)&iod->cmd)) {
+@@ -1517,7 +1537,7 @@ static inline void nvme_handle_cqe(struct nvme_queue *nvmeq,
+ 	struct request *req;
+ 
+ 	/* Diagnostic completions stay individual so retirement errors can retain RQs. */
+-	if (of_machine_is_compatible("apple,j71b"))
++	if (nvme_apple_legacy_diagnostic())
+ 		iob = NULL;
+ 	if (nvme_pci_j71b_is_failed())
+ 		return;
+@@ -1663,7 +1683,7 @@ static int nvme_pci_subsystem_reset(struct nvme_ctrl *ctrl)
+ 
+ 	int ret = 0;
+ 
+-	if (of_machine_is_compatible("apple,j71b"))
++	if (nvme_apple_legacy_diagnostic())
+ 		return -EPERM;
+ 
+ 	/*
+@@ -2324,7 +2344,7 @@ static int nvme_pci_configure_admin_queue(struct nvme_dev *dev)
+ 	if (result < 0) {
+ 		struct pci_dev *pdev = to_pci_dev(dev->dev);
+ 
+-		if (of_machine_is_compatible("apple,j71b"))
++		if (nvme_apple_legacy_diagnostic())
+ 			return result; /* Diagnostic never escalates an unknown reset to FLR. */
+ 		/*
+ 		 * The NVMe Controller Reset method did not get an expected
+@@ -2356,7 +2376,7 @@ static int nvme_pci_configure_admin_queue(struct nvme_dev *dev)
+ 	aqa = nvmeq->q_depth - 1;
+ 	aqa |= aqa << 16;
+ 
+-	if (of_machine_is_compatible("apple,j71b")) {
++	if (nvme_apple_legacy_diagnostic()) {
+ 		__module_get(THIS_MODULE); /* Released only after checked CC/DMA stop. */
+ 		j71b_current = dev;
+ 		WRITE_ONCE(dev->j71b_dma_armed, true);
+@@ -3302,7 +3322,7 @@ static void nvme_dev_disable(struct nvme_dev *dev, bool shutdown)
+ 	enum nvme_ctrl_state state = nvme_ctrl_state(&dev->ctrl);
+ 	struct pci_dev *pdev = to_pci_dev(dev->dev);
+ 	bool dead;
+-	bool diagnostic = of_machine_is_compatible("apple,j71b");
++	bool diagnostic = nvme_apple_legacy_diagnostic();
+ 	int ret;
+ 
+ 	if (nvme_pci_j71b_hold(dev, "disable-after-arm"))
+@@ -3438,7 +3458,7 @@ static void nvme_reset_work(struct work_struct *work)
+ 	bool was_suspend = !!(dev->ctrl.ctrl_config & NVME_CC_SHN_NORMAL);
+ 	int result;
+ 
+-	if (of_machine_is_compatible("apple,j71b")) {
++	if (nvme_apple_legacy_diagnostic()) {
+ 		nvme_pci_j71b_fail(dev, "reset-request-rejected");
+ 		return;
+ 	}
+@@ -3816,8 +3836,8 @@ static int nvme_probe(struct pci_dev *pdev, const struct pci_device_id *id)
+ 	struct nvme_dev *dev;
+ 	int result = -ENOMEM;
+ 
+-	if (of_machine_is_compatible("apple,j71b") &&
+-	    (!(j71b_ro_test || j71b_rw) || pdev->vendor != PCI_VENDOR_ID_APPLE ||
++	if (nvme_apple_legacy_diagnostic() &&
++	    (!nvme_legacy_opt_in_valid() || pdev->vendor != PCI_VENDOR_ID_APPLE ||
+ 	     pdev->device != PCI_DEVICE_ID_APPLE_ANS_NVME))
+ 		return -EPERM;
+ 
+@@ -4397,9 +4417,9 @@ static struct pci_driver nvme_driver = {
+ 
+ static int __init nvme_init(void)
+ {
+-	if (of_machine_is_compatible("apple,j71b") && j71b_ro_test == j71b_rw)
++	if (!nvme_legacy_opt_in_valid())
+ 		return -EPERM;
+-	if (of_machine_is_compatible("apple,j71b")) {
++	if (nvme_apple_legacy_diagnostic()) {
+ 		nvme_driver.driver.suppress_bind_attrs = true;
+ 		nvme_driver.err_handler = NULL;
+ #ifdef CONFIG_PM_SLEEP

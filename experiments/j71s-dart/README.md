@@ -1461,3 +1461,16 @@ MSI was sent, so the physical interrupt route and message encoding remain
 unproven. The diagnostic and policy snippets and tests are
 `driver-patch/j71s-msi-alloc-test.h`, `driver-patch/j71s-msi-alloc-policy.h`,
 `test-j71s-msi-alloc.py` and `test-j71s-msi-alloc-policy.py`.
+
+Source review found that the existing J71b NVMe read-only command policy,
+DMA-armed failure retention and reset/shutdown restrictions were conditioned
+on the J71b machine compatible. Binding the driver on J71s without adaptation
+would not enable those J71b-specific safeguards. The experimental
+`j71s-nvme-readonly-guard.patch` extends those paths to J71s behind a separate
+`j71s_ro_test` boot/module opt-in. On J71s it rejects the J71b read-write and
+read-only switches; the J71b mode selection remains separately checked. Its
+actual helper passed an exhaustive host-side model/opt-in matrix, and the
+modified NVMe PCI and ANS objects linked as `nvme.o` in the extracted J71b
+kernel tree. The patch does not add a J71s PCI host, change kernel/device-tree
+boot configuration, or start the NVMe driver. It has not been exercised on
+hardware and is not proof that DMA can be stopped or that the controller works.
