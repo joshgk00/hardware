@@ -1980,3 +1980,12 @@ checks that the clean follows zeroing and precedes MMIO writes, including all
 seven write-failure cases; the diagnostic object compiled. This addresses CPU
 cache visibility in the candidate only. It does not demonstrate that the
 storage hardware can access the scratch window or that S8000 is coherent.
+
+The scratch candidate now reads the controller's requested scratch size and
+alignment and rejects zero, oversized, non-power-of-two or misaligned requests.
+It also requires the candidate init register to be zero and rechecks those
+fields immediately before writing the SART window. A mock test covers invalid
+size and alignment in addition to the prior failure paths, and the diagnostic
+object compiled. Earlier J71s controller-disabled observations reported a
+14 MiB request with 4 KiB alignment; these new runtime checks have not yet run
+on the iPad or established physical DMA.

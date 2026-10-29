@@ -25,6 +25,7 @@ typedef uint32_t u32;typedef uint16_t u16;
 #define BIT(n) (1U<<(n))
 #define DMA_BIT_MASK(n) ((1ULL<<(n))-1)
 #define IS_ALIGNED(a,n) (((a)&((n)-1))==0)
+#define is_power_of_2(n) ((n) && !((n)&((n)-1)))
 #define IORESOURCE_SYSTEM_RAM 1
 #define IORES_DESC_NONE 0
 #define REGION_DISJOINT 0
@@ -53,12 +54,16 @@ static u32 readl(const void *p){u32 v;memcpy(&v,p,4);return v;}
 static void writel(u32 v,void *p){uintptr_t q=(uintptr_t)p,lo=(uintptr_t)mmu_bytes;size_t off=q-lo;nwrite++;if(nwrite==fail_write)v^=1;if(q>=lo&&q<lo+sizeof(mmu_bytes)&&(off==0x24||off==0x28))v|=BIT(31);memcpy(p,&v,4);}
 '''
 checks=r'''
-static void reset(void){u32 fixed=BIT(31);memset(bar_bytes,0,sizeof(bar_bytes));memset(mmu_bytes,0,sizeof(mmu_bytes));memcpy(mmu_bytes+0x24,&fixed,4);memcpy(mmu_bytes+0x28,&fixed,4);nwrite=0;fail_write=0;unmaps=0;nodeputs=0;cache_cleans=0;locked=true;allow_region=true;valid_node=true;}
+static void reset(void){u32 fixed=BIT(31),size=J71S_SCRATCH_BYTES,align=4096;memset(bar_bytes,0,sizeof(bar_bytes));memcpy(bar_bytes+0x1808,&size,4);memcpy(bar_bytes+0x180c,&align,4);memset(mmu_bytes,0,sizeof(mmu_bytes));memcpy(mmu_bytes+0x24,&fixed,4);memcpy(mmu_bytes+0x28,&fixed,4);nwrite=0;fail_write=0;unmaps=0;nodeputs=0;cache_cleans=0;locked=true;allow_region=true;valid_node=true;}
 int main(void){
  struct pci_dev dev={0};struct j71s_identify_scratch s;int rc;
  reset();memset(&s,0,sizeof(s));dev.command=PCI_COMMAND_MASTER;
  if(j71s_identify_setup_scratch(&dev,bar_bytes,&s)!=-EINVAL || nwrite || s.retained)abort();
- dev.command=0;reset();allow_region=false;memset(&s,0,sizeof(s));
+ dev.command=0;reset();{u32 bad=8193;memcpy(bar_bytes+0x180c,&bad,4);}memset(&s,0,sizeof(s));
+ if(j71s_identify_setup_scratch(&dev,bar_bytes,&s)!=-EINVAL || nwrite || s.retained || s.cpu)abort();
+ reset();{u32 bad=J71S_SCRATCH_BYTES+1;memcpy(bar_bytes+0x1808,&bad,4);}memset(&s,0,sizeof(s));
+ if(j71s_identify_setup_scratch(&dev,bar_bytes,&s)!=-EINVAL || nwrite || s.retained || s.cpu)abort();
+ reset();allow_region=false;memset(&s,0,sizeof(s));
  if(j71s_identify_setup_scratch(&dev,bar_bytes,&s)!=-EINVAL || nwrite || s.retained || s.cpu)abort();
  for(int f=1;f<=7;f++){
   reset();fail_write=f;memset(&s,0,sizeof(s));rc=j71s_identify_setup_scratch(&dev,bar_bytes,&s);

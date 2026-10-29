@@ -24,7 +24,7 @@ static int __maybe_unused j71s_identify_setup_scratch(struct pci_dev *pdev,
  struct device_node *node;
  struct reserved_mem *r;
  const u32 offsets[] = { 0x24, 0x28, 0x2c };
- u32 values[3];
+ u32 values[3], requested_size, requested_align;
  u16 command;
  unsigned int i;
  int ret = -EINVAL;
@@ -36,8 +36,15 @@ static int __maybe_unused j71s_identify_setup_scratch(struct pci_dev *pdev,
   return -EINVAL;
  node = of_find_node_by_path("/reserved-memory/j71s-nvme-scratch");
  r = node ? of_reserved_mem_lookup(node) : NULL;
+ requested_size = readl(bar + 0x1808);
+ requested_align = readl(bar + 0x180c);
  if (!r || !of_property_read_bool(node, "no-map") ||
      of_property_read_bool(node, "reusable") || r->size != J71S_SCRATCH_BYTES ||
+     !requested_size || requested_size > J71S_SCRATCH_BYTES ||
+     !is_power_of_2(requested_align) ||
+     !IS_ALIGNED(r->base, requested_align) ||
+     !IS_ALIGNED(J71S_SCRATCH_IOVA, requested_align) ||
+     readl(bar + 0x1800) != 0 ||
      !IS_ALIGNED(r->base, SZ_1M) || (r->base >> 20) > U32_MAX ||
      r->base > DMA_BIT_MASK(36) - (r->size - 1) ||
      region_intersects(r->base, r->size, IORESOURCE_SYSTEM_RAM, IORES_DESC_NONE) != REGION_DISJOINT)
@@ -66,7 +73,9 @@ static int __maybe_unused j71s_identify_setup_scratch(struct pci_dev *pdev,
  wmb();
  if (!j71s_test_kexec_locked() || pci_read_config_word(pdev, PCI_COMMAND, &command) ||
      (command & PCI_COMMAND_MASTER) || readl(bar + NVME_REG_CC) ||
-     readl(bar + NVME_REG_CSTS) || readl(s->mmu + 0x20) || readl(s->mmu + 0x04))
+     readl(bar + NVME_REG_CSTS) || readl(bar + 0x1800) ||
+     readl(bar + 0x1808) != requested_size || readl(bar + 0x180c) != requested_align ||
+     readl(s->mmu + 0x20) || readl(s->mmu + 0x04))
   goto unmap;
  /* Window writes can expose the reservation; retain it on every later path. */
  s->retained = true;
