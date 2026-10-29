@@ -1819,3 +1819,14 @@ object compiles and the related software tests pass, but the integration has
 not been booted or run on physical hardware. A clear init poll does not prove
 that the NVMMU fetched its tables, and publishing the descriptor does not prove
 DMA, controller initialization, invalidation, or successful storage access.
+
+`driver-patch/j71s-identify-scratch.h` is an unconnected candidate for setting
+up the retained 14 MiB no-map scratch reservation and SART window for a later
+Identify attempt. It validates the reservation and controller-disabled state,
+zeros the reserved memory, programs candidate values, and reads them back. It
+retains the mapping from the first window write onward, including error paths;
+there is deliberately no teardown. The diagnostic object compiles with the
+header, but this code has not been unit tested, wired into probe, or run on the
+iPad. Earlier controller-disabled tests verified individual register readbacks,
+not DMA through this window. The current DFU image does not include or execute
+the new setup.
