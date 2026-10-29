@@ -1,0 +1,36 @@
+diff --git a/drivers/pci/controller/pcie-apple-h9p.c b/drivers/pci/controller/pcie-apple-h9p.c
+index 9b85daeaa..89f4c6c2f 100644
+--- a/drivers/pci/controller/pcie-apple-h9p.c
++++ b/drivers/pci/controller/pcie-apple-h9p.c
+@@ -155,6 +155,7 @@
+ #define H9P_NVMMU_SART_PA_BASE		0x002c
+ 
+ #define H9P_NVMMU_TCB_BYTES		0x80
++#define H9P_NVMMU_TCB_COUNT		128
+ #define H9P_NVMMU_TCB_DWORDS		(H9P_NVMMU_TCB_BYTES / sizeof(u32))
+ #define H9P_NVMMU_SGL_WORDS		APPLE_ANS_NVMMU_MAX_PAGES
+ #define H9P_NVMMU_FLATDMA_BASE		0x40000000ULL
+@@ -1164,10 +1165,12 @@ static int apple_h9p_setup_nvmmu(struct apple_h9p_pcie *pcie)
+ 	size = resource_size(&res);
+ 	if (size < H9P_NVMMU_SART_ALIGNMENT || size > U32_MAX ||
+ 	    !IS_ALIGNED(res.start, H9P_NVMMU_SART_ALIGNMENT) ||
++	    !IS_ALIGNED(size, H9P_NVMMU_SART_ALIGNMENT) ||
+ 	    !IS_ALIGNED(iova, H9P_NVMMU_SART_ALIGNMENT) ||
+ 	    iova < 0x80000000U ||
+ 	    iova > U32_MAX - (H9P_NVMMU_SART_ALIGNMENT - 1) ||
+-	    size > U32_MAX - iova - (H9P_NVMMU_SART_ALIGNMENT - 1)) {
++	    size > U32_MAX - iova - (H9P_NVMMU_SART_ALIGNMENT - 1) ||
++	    (u64)iova + size - H9P_NVMMU_SART_ALIGNMENT > 0xbff00000ULL) {
+ 		ret = -EINVAL;
+ 		goto out_put_node;
+ 	}
+@@ -1184,7 +1187,8 @@ static int apple_h9p_setup_nvmmu(struct apple_h9p_pcie *pcie)
+ 	nvmmu->pa_base = res.start;
+ 	nvmmu->va_base = iova;
+ 	nvmmu->size = size;
+-	nvmmu->tcb_size = round_up(APPLE_ANS_NVMMU_MAX_REQS *
++	/* Hardware can index all 128 TCBs, independently of software slots. */
++	nvmmu->tcb_size = round_up(H9P_NVMMU_TCB_COUNT *
+ 				   H9P_NVMMU_TCB_BYTES, PAGE_SIZE);
+ 	nvmmu->tcb_table_size = PAGE_SIZE * 16;
+ 	nvmmu->tcb_sgl_size = round_up(APPLE_ANS_NVMMU_MAX_REQS *

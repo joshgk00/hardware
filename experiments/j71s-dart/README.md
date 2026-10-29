@@ -1474,3 +1474,16 @@ modified NVMe PCI and ANS objects linked as `nvme.o` in the extracted J71b
 kernel tree. The patch does not add a J71s PCI host, change kernel/device-tree
 boot configuration, or start the NVMe driver. It has not been exercised on
 hardware and is not proof that DMA can be stopped or that the controller works.
+
+The current [upstream J71t PCIe/NVMe proposal](https://github.com/OrchardLinux/hardware/pull/6)
+allocates 128 TCB entries because the hardware may index that many, even though
+software uses fewer request slots. It also requires a MiB-aligned scratch size
+and bounds the SART window. `h9p-nvmmu-bounds.patch` carries these two checks into
+the extracted J71b-based experimental driver. The actual scratch-range
+predicate passes boundary/misalignment tests, TCB sizing covers all 128 entries
+for both 4 KiB and 16 KiB kernel pages, and the modified H9P object compiles.
+The tested iPad kernel uses 16 KiB pages, so its previous page-rounded TCB
+allocation was already 16 KiB; this change makes the hardware requirement
+explicit and covers smaller page sizes. The checks and 128-entry assumption
+come from the related J71t implementation and are not independently proven for
+S8000. This patch does not start the controller or test physical DMA.
