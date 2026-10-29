@@ -26,6 +26,12 @@ static bool j71s_identify_window_contains(dma_addr_t addr, size_t size)
         addr < J71S_IDENTIFY_IOVA_END && size <= J71S_IDENTIFY_IOVA_END - addr;
 }
 
+static bool j71s_identify_payload_physical_valid(u64 addr)
+{
+ return IS_ALIGNED(addr, SZ_4K) &&
+        addr <= DMA_BIT_MASK(36) - (NVME_IDENTIFY_DATA_SIZE - 1);
+}
+
 static void j71s_identify_build_command(struct nvme_command *cmd)
 {
  memset(cmd, 0, sizeof(*cmd));
@@ -84,7 +90,7 @@ static int __maybe_unused j71s_identify_prepare(struct device *dev,
  p->payload_phys = sg_phys(sgt.sgl);
  sg_free_table(&sgt);
  ret = -ERANGE;
- if (!IS_ALIGNED(p->payload_phys, SZ_4K) || (p->payload_phys >> 12) > U32_MAX)
+ if (!j71s_identify_payload_physical_valid(p->payload_phys))
   goto fail;
  cmd = &p->sq[0];
  j71s_identify_build_command(cmd);

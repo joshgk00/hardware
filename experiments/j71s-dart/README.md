@@ -1893,3 +1893,10 @@ experimental guard, not proof against all kernel shutdown, device removal,
 power or hardware-reset paths. It has not been run on the iPad and does not
 replace the need for a physical reset; the earlier descriptor preflight image
 predates this fix.
+
+The Identify response buffer's candidate physical page is now required to fit
+entirely below the 36-bit limit used for the host TCB and scratch allocations,
+in addition to the existing alignment and DART IOVA checks. The host-side
+boundary test and the Identify, scratch, bridge and endpoint policy simulations
+pass; the combined diagnostic object compiles. These are address and software
+checks, not proof of the S8000 translation path.
