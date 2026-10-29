@@ -1,0 +1,24 @@
+--- a/drivers/pci/controller/pcie-j71s-diagnostic.c
++++ b/drivers/pci/controller/pcie-j71s-diagnostic.c
+@@ -32,6 +32,7 @@
+ #include "j71s-identify-descriptor.h"
+ #include "j71s-identify-scratch.h"
+ #include "j71s-identify-root-master.h"
++#include "j71s-identify-observer-wait.h"
+ #include "j71s-dart-window-private.h"
+ #include "j71s-endpoint-map.h"
+ #include "j71s-msi-domain-test.h"
+--- a/drivers/pci/controller/j71s-scan-private.h
++++ b/drivers/pci/controller/j71s-scan-private.h
+@@ -198,6 +198,11 @@
+ 			dev_info(&pdev->dev, "J71s Identify descriptor: ret=%d published=%d controller-disabled=%d\n",
+ 				 descriptor_ret, data->descriptor.published,
+ 				 !readl(data->bar + 0x14) && !readl(data->bar + 0x1c));
++			if (!descriptor_ret &&
++			    of_property_read_bool(host->dev.parent->of_node, "orchard,identify-once")) {
++				dev_info(&pdev->dev, "J71s Identify stage: waiting-for-observer\n");
++				j71s_identify_wait_observer(&j71s_identify_start, 600);
++			}
+ 			if (!descriptor_ret && READ_ONCE(j71s_identify_start) &&
+ 			    of_property_read_bool(host->dev.parent->of_node,
+ 						  "orchard,identify-once")) {

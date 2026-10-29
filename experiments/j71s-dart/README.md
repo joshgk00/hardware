@@ -1962,3 +1962,12 @@ coordinator simulation covers a false start parameter, and the kernel object
 compiled. This reduces the chance of an unobserved test; it does not guarantee
 log delivery, and any privileged process could set the parameter. The gate
 and new observer have not yet been tested with physical storage DMA.
+
+`j71s-identify-observer-wait.patch` changes the explicit Identify experiment
+to wait up to 60 seconds for the runtime start signal after its descriptor
+preflight, instead of checking the signal only once. If the signal does not
+arrive, the command is skipped and the already-armed one-shot resources remain
+held for physical reset. The actual bounded wait helper has host tests for an
+immediate signal, delayed signal, timeout and null input. The diagnostic build
+is being prepared with this candidate; the wait has not been exercised on the
+iPad or with physical storage DMA.
