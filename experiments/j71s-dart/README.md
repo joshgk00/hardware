@@ -1755,3 +1755,14 @@ or interpret a response; the FIFO, DMA stream and ownership issues remain
 unresolved. A host test checks exact command bytes and DMA-window boundaries,
 and the diagnostic object compiles with the header. It has not been run on
 hardware, and no storage command has been sent.
+
+`j71s-identify-preflight.patch` integrates the preparation helper into the
+one-shot diagnostic after its endpoint and MSI checks. It allocates the admin
+queues and response buffer using the endpoint's provisional bounded DART window,
+checks their layout, then frees them before the existing TCB initialization
+experiment. If preparation fails, the TCB experiment is skipped. A combined
+kernel containing the earlier one-cell window, FIFO one-shot changes and this
+preflight compiled successfully. It has not been booted, and this preflight does
+not send a command or prove physical DMA; it only prepares the specific buffers
+needed by a later controller test. The device-derived window fragment remains
+private and must be supplied separately.
