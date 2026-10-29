@@ -2068,3 +2068,16 @@ whether the device reset, stalled, lost power, or was unplugged. The user later
 reported that the iPad returned to iPadOS, but the host had not yet detected it
 again. The device's screen and cable/battery state must be checked before the
 next physical test.
+
+
+A second J71s attempt used the link-check and additional doorbell markers. The
+endpoint mapping preflight, buffer and descriptor preparation, scratch setup,
+root setup, endpoint master enable and controller-ready stages were reported.
+The last captured message was again the pre-doorbell `submitting-command`
+marker; neither the subsequent host-link-up nor the doorbell-write-returned
+marker appeared before the USB diagnostic connection disappeared. The user
+reported a black screen. These observations may place the failure before or
+around the doorbell path, but missing output does not prove where execution
+stopped, whether a posted write reached hardware, or that no DMA occurred.
+No completion, response, or fault was captured. Do not retry automatically;
+inspect and physically restart the device first, and keep the raw log private.

@@ -21,13 +21,14 @@ useful reference, but it is not evidence that J71s works.
   descriptor with the controller disabled. The allocations and descriptor are
   retained for the one-shot session until physical reset.
 
-The observer-gated Identify diagnostic has now been booted once on J71s. The
-controller reported ready and the last captured message was emitted immediately
-before the submission-doorbell write. The USB diagnostic connection disappeared;
-no completion or response was captured. The result does not establish whether
-the doorbell write completed or whether any physical DMA occurred. Omarchy is
-not installed, and DMA isolation, reset behavior and translation retirement
-remain unverified.
+The observer-gated Identify diagnostic has now been booted twice on J71s. In
+both attempts the controller reported ready, and the last captured message was
+emitted before the submission-doorbell write; the USB diagnostic connection
+then disappeared. The second attempt added a short delay and further markers
+around the write, but those later markers were not captured. No completion or
+response was captured. Neither result establishes whether the doorbell write
+completed or whether any physical DMA occurred. Omarchy is not installed, and
+DMA isolation, reset behavior and translation retirement remain unverified.
 
 ## Next step
 
