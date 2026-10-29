@@ -1504,3 +1504,24 @@ readback only, not proof that the NVMMU can fetch these buffers or that
 restoring register values reverses every possible side effect. The experiment
 and mock are `driver-patch/j71s-tcb-address-test.h` and
 `test-j71s-tcb-address.py`.
+
+An **unbooted** one-shot NVMMU initialization experiment has been prepared.
+It requires controller CC/CSTS and PCI bus mastering off, a host device without
+an IOMMU domain, 36-bit DMA masks, and independently checked identity mappings
+for two zeroed Linux-owned buffers. It saves and checks the four table address
+registers before writing candidate addresses. Immediately before the candidate
+`0x10000` initialization command it requires a special test kernel with kexec
+loading disabled from startup and no preloaded normal or crash image. Once the
+command is issued, both buffers remain allocated for the rest of that kernel's
+lifetime, including on timeout; the diagnostic platform driver also suppresses
+sysfs bind/unbind. A physical reset is required before running another test.
+Before arming, error paths restore the saved fields and retain buffers if
+restoration is uncertain. The bounded poll checks both the bit used by the
+related J71b driver and the different bit used by the J71t driver; a clear
+readback alone would not prove physical DMA or successful initialization.
+Host mocks cover the guards, non-identity DMA, allocation failures, readback
+failure and retained buffers on both apparent completion and timeout. The
+kernel compiled locally, but this experiment has not been run on an iPad and
+is not a production safety or teardown mechanism. The one-shot helper and
+mock are `driver-patch/j71s-tcb-init-test.h` and `test-j71s-tcb-init.py`; the
+helper depends on the special local kernel's kexec guard.
