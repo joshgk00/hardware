@@ -1431,3 +1431,18 @@ was sent; vector allocation does not validate actual interrupt delivery, MSI
 message data or the PCI MSI domain. The general test source and mock are
 `driver-patch/j71s-msi-domain-test.h` and `test-j71s-msi-domain.py`;
 device-derived constants remain private.
+
+A read-only PCI capability inspection found a standard 64-bit MSI capability
+with up to eight vectors and no MSI-X capability on this endpoint. An
+experimental port-0 PCI MSI parent domain was then created with the candidate
+AIC range and doorbell, attached to the diagnostic host bridge, and exposed to
+the endpoint. On the iPad the domain creation succeeded and the bound
+register-only endpoint driver observed an MSI domain; active unbind removed the
+endpoint and domain, and tested PCIe/DART cleanup passed. Battery was 48%,
+discharging. Host mocks cover one-vector allocation/free, rejected devices and
+multiple vectors, exhaustion and parent-allocation rollback. No MSI vector was
+allocated by the PCI endpoint, no MSI capability was enabled, and no interrupt
+was delivered. The domain's message encoding and physical interrupt routing
+remain unverified, and it is not yet a production PCI host implementation.
+The source and mock are `driver-patch/j71s-msi-host-test.h` and
+`test-j71s-msi-host.py`; device-derived values remain private.
