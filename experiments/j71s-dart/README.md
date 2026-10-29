@@ -1942,3 +1942,11 @@ covers both failure cases and a plausible response. These checks avoid treating
 an untouched buffer as a valid response, but a matching field alone would still
 not prove all returned Identify data or sustained storage operation. The
 modified diagnostic object compiled and has not been run on hardware.
+
+`test-j71s-identify-descriptor.py` now exercises the actual descriptor wrapper
+and shared builder with mocked DMA allocation. It checks locked-state refusal,
+allocation failure, invalid DMA addresses, failed scatterlist lookup, nonidentity
+mappings, invalid payload pages, successful direction/count/page publication,
+and refusal to reuse the published descriptor. This is a software failure-path
+test; the physical preflight and unresolved hardware DMA limitations above
+remain unchanged.
