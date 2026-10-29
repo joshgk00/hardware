@@ -1379,3 +1379,15 @@ storage operation remain unverified. The dynamic changeset and forced
 instantiation are test infrastructure, not a proposed production binding.
 The experiment is `driver-patch/j71s-dart-map-test.h`, with
 `test-j71s-dart-map.py`.
+
+With the candidate endpoint-to-DART software attachment active, the PCI
+endpoint's diagnostic driver allocated a RAM page and mapped it with the DMA
+API. `iommu_iova_to_phys()` returned the expected first and last physical
+bytes; after unmap the lookup returned zero. Bus mastering and controller
+CC/CSTS remained off. The PCI/DART diagnostic unbound, its DT changes reverted
+and tested PCIe cleanup passed; battery was 50%, discharging. Host mocks cover
+missing domains, allocation and mapping failure, mismatched lookups, unmap and
+page cleanup. These lookups inspect software page tables; they do not test
+hardware DMA, validate the physical stream selection, or issue disk commands.
+The experiment and mock are `driver-patch/j71s-endpoint-map.h` and
+`test-j71s-endpoint-map.py`.
