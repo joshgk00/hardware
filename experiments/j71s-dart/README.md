@@ -2116,5 +2116,9 @@ A new comparison candidate continues from the ten-second no-doorbell observation
 through the same barrier, pre-submission marker, delay and host-link check as the
 command path, then records `doorbell-skipped` instead of writing the doorbell.
 This isolates more of the preceding path but still permits DMA from controller
-enable; it is not yet device-tested. Mocks verify the skipped write and link-loss
-handling.
+enable. Mocks verify the skipped write and link-loss handling. A physical test
+reached the pre-submission marker, host-link check and `doorbell-skipped`, then
+returned successfully with no valid completion expected. The USB log remained
+responsive long enough to capture those markers. This comparison narrows the
+difference with command-path failures, but missing asynchronous markers in the
+earlier runs cannot prove whether the write happened or whether DMA succeeded.

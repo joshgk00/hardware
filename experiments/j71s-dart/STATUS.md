@@ -38,7 +38,10 @@ a submission-doorbell write. This is not proof of successful DMA or storage.
 Physically restart the iPad before the next diagnostic, because the controller
 and buffers were left armed. A subsequent command-path test completed the same warmup but lost its USB
 connection after the pre-submission marker, without a captured completion. This
-does not establish whether the doorbell was written or DMA occurred. A successful Identify
+does not establish whether the doorbell was written or DMA occurred. A later
+physical comparison reached the same pre-submission link check and returned
+successfully when it skipped the doorbell write; the controller was still armed,
+so a physical reset is needed. A successful Identify
 response would still not prove reliable storage or a safe installer.
 
 Device-specific captures, boot artifacts, serial output and generated Apple
