@@ -11,8 +11,10 @@ maintainer tested the upstream implementation on iPad 6; that does not prove
 J71s DMA. `j71s-dart-distinct-tcr-lock.patch` updates our older experimental
 kernel after the original patch to use a dedicated lock. The separate test
 `test-tcr-distinct-lock.py` checks the real function when the general lock is
-already held, concurrent updates, and bounds. Do not use the original patch
-alone as the basis for new experiments.
+already held, concurrent updates, and bounds. The separately extracted J71b
+storage-driver tree already had the field correction but lacked locking;
+`j71b-dart-distinct-tcr-lock.patch` records its corresponding update. Do not use
+the original patch alone as the basis for new experiments.
 
 At Hoolock kernel revision `6831bc701a6ce059e71e5aaa9488c9195bea6927`,
 `apple_dart_s5l8960x_write_tcr()` reads a shared register containing four
