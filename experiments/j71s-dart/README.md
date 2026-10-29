@@ -1913,3 +1913,10 @@ checks proves actual DMA isolation, storage safety, bridge forwarding, or the
 NVMMU semantics. Physical reset of the existing one-shot session is required
 before this candidate could be tested; results must not be described as an
 installation.
+
+The candidate Identify path now emits non-identifying stage markers before
+scratch setup, bridge setup, queue handoff, endpoint master enable, controller
+readiness and command submission, and on a completion. These markers are for
+troubleshooting and do not prove hardware execution by themselves. The
+one-shot and coordinator simulations pass; the modified code is not yet tested
+on the iPad. `j71s-identify-stage-markers.patch` contains the probe-level markers.

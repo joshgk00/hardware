@@ -46,6 +46,7 @@ typedef uint64_t u64; typedef uint32_t u32; typedef uint16_t u16; typedef uint64
 #define le16_to_cpu(x) (x)
 #define lower_32_bits(x) ((u32)(x))
 #define upper_32_bits(x) ((u32)((u64)(x)>>32))
+#define pr_info(...) ((void)0)
 #define dma_wmb() ((void)0)
 #define dma_rmb() ((void)0)
 #define usleep_range(a,b) ((void)0)

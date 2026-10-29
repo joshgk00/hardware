@@ -1,0 +1,13 @@
+--- a/drivers/pci/controller/j71s-scan-private.h
++++ b/drivers/pci/controller/j71s-scan-private.h
+@@ -204,7 +204,10 @@
+ 				u16 nvme_status = U16_MAX;
+ 				int test_ret;
+ 
++				dev_info(&pdev->dev, "J71s Identify stage: setup-scratch\n");
+ 				test_ret = j71s_identify_setup_scratch(pdev, data->bar, &data->scratch);
++				if (!test_ret)
++					dev_info(&pdev->dev, "J71s Identify stage: setup-root\n");
+ 				if (!test_ret)
+ 					test_ret = j71s_identify_root_master(state->ecam, data->bar,
+ 						&data->prepared, &data->scratch, &data->root_master_attempted);

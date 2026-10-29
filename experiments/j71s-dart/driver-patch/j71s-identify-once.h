@@ -49,6 +49,7 @@ static int __maybe_unused j71s_identify_once(struct pci_dev *pdev, void __iomem 
 
  /* From here on even failed writes require holding every resource until reset. */
  p->armed = true;
+ pr_info("J71s Identify stage: queues-armed\n");
  dma_wmb();
  writel(U32_MAX, bar + NVME_REG_INTMS);
  writel((depth - 1) | ((depth - 1) << 16), bar + NVME_REG_AQA);
@@ -60,13 +61,16 @@ static int __maybe_unused j71s_identify_once(struct pci_dev *pdev, void __iomem 
  if (pci_read_config_word(pdev, PCI_COMMAND, &pci_command) ||
      !(pci_command & PCI_COMMAND_MASTER))
   return -EIO;
+ pr_info("J71s Identify stage: endpoint-master-enabled\n");
  writel(NVME_CC_ENABLE | NVME_CC_IOSQES | NVME_CC_IOCQES, bar + NVME_REG_CC);
  ret = readl_poll_timeout(bar + NVME_REG_CSTS, csts,
                           csts == U32_MAX || (csts & (NVME_CSTS_RDY | NVME_CSTS_CFS)),
                           1000, 5000000);
  if (ret || csts == U32_MAX || (csts & NVME_CSTS_CFS) || !(csts & NVME_CSTS_RDY))
   return ret ? ret : -EIO;
+ pr_info("J71s Identify stage: controller-ready\n");
  dma_wmb();
+ pr_info("J71s Identify stage: submitting-command\n");
  writel(1, bar + NVME_REG_DBS);
  for (i = 0; i < 5000; i++) {
   status = le16_to_cpu(READ_ONCE(p->cq[0].status));
@@ -76,6 +80,7 @@ static int __maybe_unused j71s_identify_once(struct pci_dev *pdev, void __iomem 
        le16_to_cpu(p->cq[0].sq_id) != 0)
     return -EIO;
    *nvme_status = status >> 1;
+   pr_info("J71s Identify stage: completion-received\n");
    return 0;
   }
   usleep_range(1000, 2000);
