@@ -1345,3 +1345,19 @@ and bus mastering needed by ANS preinitialization. The diagnostic therefore
 cannot run the unmodified storage driver merely by binding it; normal PCI
 configuration, DMA attachment and interrupts remain to be implemented and
 tested.
+
+A temporary combined PCIe/DART diagnostic explicitly created the disabled
+DART node as a platform device only while the already-tested PCIe link and
+power sequence were active. The DART driver initialized, then the diagnostic
+host discovered and bound its register-only driver to the storage endpoint
+with bus mastering off. The DART was present but the PCI endpoint had no
+IOMMU group: the host did not supply a requester-to-DART mapping. Stopping the
+host removed the endpoint, unregistered the DART before releasing the tested
+PCIe controls, and reported successful tested restoration; the DART device
+was absent afterward. Battery was 51% and discharging. Host mocks cover device
+creation failure, existing-device and node guards, unbound driver, and cleanup.
+This bypass of the disabled-node status is a controlled experiment, not a
+production DT or lifecycle design; it did not attach an endpoint to the DART,
+perform physical DMA, or issue a storage command. The isolated lifecycle
+snippet and mock are `driver-patch/j71s-dart-coexist.h` and
+`test-j71s-dart-coexist.py`.
