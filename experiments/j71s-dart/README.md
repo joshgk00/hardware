@@ -30,9 +30,10 @@ arguments. It requires a host C compiler and a separately patched kernel tree.
 It also runs simultaneous mocked updates from four threads using a real host
 mutex to exercise the shared-register read/modify/write path; this is not an
 on-device concurrency or DMA test.
-`prepare-dart.sh` applies the fix to a disposable checkout at the pinned
-revision only after checking the source and patch hashes, runs the mock test
-on a staged copy, and checks the resulting hash. It refuses reapplication and
+`prepare-dart.sh` applies the historical field correction and then the separate
+TCR-lock follow-up to a disposable checkout at the pinned revision. It verifies
+the source and both patch hashes, runs the corresponding mock tests on a staged
+copy, and checks the resulting hash before updating the checkout. It refuses reapplication and
 does not create a device-tree node or access hardware.
 
 The J71s Apple tree identifies a 4 KiB-page S8000 PCIe DART; the kernel's
