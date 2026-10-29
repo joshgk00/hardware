@@ -12,7 +12,7 @@
 static int __maybe_unused j71s_identify_once(struct pci_dev *pdev, void __iomem *bar,
                       struct j71s_identify_preparation *p, u32 *tcb, u32 *sgl,
                       dma_addr_t sgl_dma, u32 scratch_iova, u32 scratch_size,
-                      bool ownership_proven, u16 *nvme_status)
+                      bool ownership_proven, bool no_doorbell, u16 *nvme_status)
 {
  const u32 depth = J71S_IDENTIFY_QUEUE_DEPTH;
  struct nvme_command expected;
@@ -102,6 +102,20 @@ static int __maybe_unused j71s_identify_once(struct pci_dev *pdev, void __iomem 
   goto out_port;
  }
  pr_info("J71s Identify stage: controller-ready\n");
+ if (no_doorbell) {
+  pr_info("J71s Identify stage: controller-only-observation\n");
+  for (i = 0; i < 100; i++) {
+   link_status = readl(port + 0x88);
+   if (link_status == U32_MAX || !(link_status & BIT(0))) {
+    ret = -ENOLINK;
+    goto out_port;
+   }
+   msleep(100);
+  }
+  pr_info("J71s Identify stage: controller-only-survived\n");
+  ret = 0;
+  goto out_port;
+ }
  dma_wmb();
  pr_info("J71s Identify stage: submitting-command\n");
  /* Give the USB observer time to drain the last marker before the write. */

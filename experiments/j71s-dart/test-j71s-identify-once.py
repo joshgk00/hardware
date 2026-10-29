@@ -76,29 +76,35 @@ int main(void) {
  u32 tcb[32]={0},sgl[256]={0}; u64 sgl_dma=0x200000; u16 status=999; u32 cap_lo=0x10003ff,cap_hi=0x20,scratch=0xbc000000,size=0xe00000;
  memcpy(registers,&cap_lo,4);memcpy(registers+4,&cap_hi,4);memcpy(registers+0x1810,&scratch,4);memcpy(registers+0x1818,&size,4);
  tcb[0]=0x200;tcb[1]=1;tcb[2]=0x100;sgl[0]=0x100;memcpy(&tcb[4],&sgl_dma,8);j71s_identify_build_command(sq);active=&p;
- if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,false,&status)!=-EINVAL || writes || p.armed)abort();
+ if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,false,false,&status)!=-EINVAL || writes || p.armed)abort();
  sq[0].identify.rest[2]=9;
- if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,&status)!=-EINVAL || writes || p.armed)abort();
+ if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,false,&status)!=-EINVAL || writes || p.armed)abort();
  j71s_identify_build_command(sq);port_unmaps=0;link_reads=0;endpoint_reads=0;cfg_reads=0;link_fail_at=1;
- if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,&status)!=-ENOLINK || p.armed || writes || port_unmaps!=1 || endpoint_reads || cfg_reads)abort();
+ if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,false,&status)!=-ENOLINK || p.armed || writes || port_unmaps!=1 || endpoint_reads || cfg_reads)abort();
  link_fail_at=2;link_reads=0;
- if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,&status)!=-ENOLINK || !p.armed || writes!=7 || port_unmaps!=2 || endpoint_reads!=reads_at_enable)abort();
+ if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,false,&status)!=-ENOLINK || !p.armed || writes!=7 || port_unmaps!=2 || endpoint_reads!=reads_at_enable)abort();
  memset(registers+0x14,0,4);memset(registers+0x1c,0,4);p.armed=false;d.command=PCI_COMMAND_MEMORY;writes=0;link_fail_at=0;link_reads=0;d.reject_master=true;
- if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,&status)!=-EIO || !p.armed || writes!=6)abort();
+ if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,false,&status)!=-EIO || !p.armed || writes!=6)abort();
  memset(registers+0x14,0,4);memset(registers+0x1c,0,4);p.armed=false;d.reject_master=false;d.command=PCI_COMMAND_MEMORY;writes=0;link_fail_at=3;link_reads=0;sleeps=0;
- if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,&status)!=-ENOLINK || !p.armed || writes!=7 || sleeps!=1)abort();
+ if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,false,&status)!=-ENOLINK || !p.armed || writes!=7 || sleeps!=1)abort();
  memset(registers+0x14,0,4);memset(registers+0x1c,0,4);p.armed=false;d.command=PCI_COMMAND_MEMORY;writes=0;link_fail_at=0;link_reads=0;sleeps=0;complete=1;payload_mode=1;
- if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,&status) || !p.armed || status!=0 || !(d.command&PCI_COMMAND_MASTER) || sleeps!=2)abort();
- if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,&status)!=-EINVAL)abort();
+ if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,false,&status) || !p.armed || status!=0 || !(d.command&PCI_COMMAND_MASTER) || sleeps!=2)abort();
+ if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,false,&status)!=-EINVAL)abort();
  memset(registers+0x14,0,4);memset(registers+0x1c,0,4);memset(cq,0,sizeof(cq));memset(payload,0,sizeof(payload));
  p.armed=false;d.command=PCI_COMMAND_MEMORY;complete=0;
- if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,&status)!=-ETIMEDOUT || !p.armed)abort();
+ if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,false,&status)!=-ETIMEDOUT || !p.armed)abort();
  memset(registers+0x14,0,4);memset(registers+0x1c,0,4);memset(cq,0,sizeof(cq));memset(payload,0,sizeof(payload));
  p.armed=false;d.command=PCI_COMMAND_MEMORY;complete=1;payload_mode=0;
- if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,&status)!=-EBADMSG || !p.armed)abort();
+ if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,false,&status)!=-EBADMSG || !p.armed)abort();
  memset(registers+0x14,0,4);memset(registers+0x1c,0,4);memset(cq,0,sizeof(cq));memset(payload,0,sizeof(payload));
  p.armed=false;d.command=PCI_COMMAND_MEMORY;payload_mode=2;
- if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,&status)!=-EBADMSG || !p.armed)abort();
+ if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,false,&status)!=-EBADMSG || !p.armed)abort();
+ memset(registers+0x14,0,4);memset(registers+0x1c,0,4);memset(cq,0,sizeof(cq));memset(payload,0,sizeof(payload));
+ p.armed=false;d.command=PCI_COMMAND_MEMORY;writes=0;sleeps=0;status=999;complete=1;payload_mode=1;
+ if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,true,&status) || !p.armed || writes!=7 || sleeps!=100 || status!=999 || cq[0].status)abort();
+ memset(registers+0x14,0,4);memset(registers+0x1c,0,4);memset(cq,0,sizeof(cq));memset(payload,0,sizeof(payload));
+ p.armed=false;d.command=PCI_COMMAND_MEMORY;writes=0;sleeps=0;link_reads=0;link_fail_at=3;
+ if(j71s_identify_once(&d,registers,&p,tcb,sgl,sgl_dma,scratch,size,true,true,&status)!=-ENOLINK || !p.armed || writes!=7 || sleeps)abort();
 }
 '''
 with tempfile.TemporaryDirectory() as d:

@@ -1,0 +1,13 @@
+--- a/drivers/pci/controller/j71s-scan-private.h
++++ b/drivers/pci/controller/j71s-scan-private.h
+@@ -225,7 +225,9 @@
+ 					test_ret = j71s_identify_once(pdev, data->bar, &data->prepared,
+ 						data->descriptor.tcb, data->descriptor.sgl,
+ 						data->descriptor.sgl_dma, J71S_SCRATCH_IOVA,
+-						J71S_SCRATCH_BYTES, true, &nvme_status);
++						J71S_SCRATCH_BYTES, true,
++						of_property_read_bool(host->dev.parent->of_node,
++								      "orchard,identify-no-doorbell"), &nvme_status);
+ 					state->identify_opted_in = false;
+ 				}
+ 				dev_info(&pdev->dev, "J71s Identify once: ret=%d status-valid=%d status=%u retained=1\n",

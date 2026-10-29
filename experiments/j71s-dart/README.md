@@ -2081,3 +2081,17 @@ around the doorbell path, but missing output does not prove where execution
 stopped, whether a posted write reached hardware, or that no DMA occurred.
 No completion, response, or fault was captured. Do not retry automatically;
 inspect and physically restart the device first, and keep the raw log private.
+
+
+After the second lost-USB attempt, the experimental one-shot helper gained an
+explicit controller-only comparison mode selected by
+`orchard,identify-no-doorbell`. Following controller-ready it checks the candidate
+host-link indicator for ten seconds and does not write the submission doorbell.
+`j71s-identify-no-doorbell-coordinator.patch` passes that device-tree property to
+the helper. The actual-function mock verifies no doorbell write, a bounded
+wait and link-loss handling; the coordinator mock verifies mode selection, and
+the diagnostic object compiled. This is a diagnostic comparison, not working
+storage. Enabling the controller can itself cause DMA even without a submitted
+command; all one-shot resources remain retained until physical reset. The new
+mode has not been run on the iPad and cannot by itself prove when the previous
+connection losses occurred.

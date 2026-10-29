@@ -35,7 +35,10 @@ DMA isolation, reset behavior and translation retirement remain unverified.
 Inspect the iPad's physical screen and recover with a physical restart before
 any new hardware boot. Preserve the partial log and investigate the lost USB
 connection; do not automatically repeat the command. If the iPad returns to
-normal, check battery level before further tests. A successful Identify response
+normal, check battery level before further tests. A candidate comparison test
+holds the enabled controller for ten seconds without writing the submission
+doorbell; this can help distinguish controller-enable failure from a command
+submission problem, but enabling the controller may itself initiate DMA. A successful Identify response
 would still be only a first hardware result, not evidence of reliable storage or
 a safe installer.
 

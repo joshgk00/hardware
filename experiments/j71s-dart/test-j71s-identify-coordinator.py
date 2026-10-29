@@ -10,10 +10,13 @@ gate_patch=(Path(__file__).parent/'j71s-identify-observer-gate.patch').read_text
 assert '+\t\t\tif (!descriptor_ret && READ_ONCE(j71s_identify_start) &&' in gate_patch
 block=block.replace('if (!descriptor_ret && of_property_read_bool',
                     'if (!descriptor_ret && READ_ONCE(j71s_identify_start) && of_property_read_bool',1)
+block=block.replace('J71S_SCRATCH_BYTES, true, &nvme_status);',
+                    'J71S_SCRATCH_BYTES, true, of_property_read_bool(host->dev.parent->of_node, "orchard,identify-no-doorbell"), &nvme_status);',1)
 preamble=r'''
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 typedef uint16_t u16;typedef uint64_t dma_addr_t;
 #define U16_MAX UINT16_MAX
 #define J71S_SCRATCH_IOVA 0xbc000000U
@@ -26,11 +29,11 @@ struct j71s_identify_scratch {int value;};
 struct data {void *bar;struct j71s_identify_preparation prepared;struct j71s_identify_descriptor descriptor;struct j71s_identify_scratch scratch;bool root_master_attempted;};
 struct j71s_scan_state {void *ecam;struct j71s_identify_preparation *identify_owner;struct j71s_identify_scratch *identify_scratch;bool identify_opted_in;};
 struct device {void *of_node;};struct bridge {struct {struct device *parent;} dev;};struct bus {void *sysdata;};struct pci_dev {struct bus *bus;struct device dev;};
-static int property,scratch_ret,root_ret,once_ret,steps,root_calls,once_calls;static bool j71s_identify_start;
-static bool of_property_read_bool(void *node,const char *name){(void)node;(void)name;return property;}
+static int property,scratch_ret,root_ret,once_ret,steps,root_calls,once_calls,no_doorbell,observed_mode;static bool j71s_identify_start;
+static bool of_property_read_bool(void *node,const char *name){(void)node;return !strcmp(name,"orchard,identify-no-doorbell") ? no_doorbell : property;}
 static int j71s_identify_setup_scratch(struct pci_dev *d,void *b,struct j71s_identify_scratch *s){(void)d;(void)b;(void)s;steps=steps*10+1;return scratch_ret;}
 static int j71s_identify_root_master(void *e,void *b,struct j71s_identify_preparation *p,struct j71s_identify_scratch *s,bool *a){(void)e;(void)b;(void)p;(void)s;(void)a;steps=steps*10+2;root_calls++;return root_ret;}
-static int j71s_identify_once(struct pci_dev *dev,void *bar,struct j71s_identify_preparation *p,int *t,int *s,dma_addr_t d,unsigned int i,unsigned int z,bool owner,u16 *status){(void)bar;(void)t;(void)s;(void)d;(void)i;(void)z;struct j71s_scan_state *st=dev->bus->sysdata;if(!owner||!st->identify_opted_in||st->identify_owner!=p||!st->identify_scratch)abort();steps=steps*10+3;once_calls++;*status=0;return once_ret;}
+static int j71s_identify_once(struct pci_dev *dev,void *bar,struct j71s_identify_preparation *p,int *t,int *s,dma_addr_t d,unsigned int i,unsigned int z,bool owner,bool nodoorbell,u16 *status){(void)bar;(void)t;(void)s;(void)d;(void)i;(void)z;struct j71s_scan_state *st=dev->bus->sysdata;if(!owner||!st->identify_opted_in||st->identify_owner!=p||!st->identify_scratch)abort();steps=steps*10+3;once_calls++;observed_mode=nodoorbell;*status=0;return once_ret;}
 static void run(struct pci_dev *pdev,struct bridge *host,struct data *data,int descriptor_ret){
 '''
 test=r'''
@@ -43,6 +46,7 @@ int main(void){struct j71s_scan_state state={0};struct bus bus={.sysdata=&state}
  scratch_ret=0;root_ret=-1;steps=0;run(&pdev,&host,&data,0);if(steps!=12||root_calls!=1||once_calls||state.identify_opted_in)abort();
  root_ret=0;steps=0;run(&pdev,&host,&data,0);if(steps!=123||root_calls!=2||once_calls!=1||state.identify_opted_in)abort();
  once_ret=-1;steps=0;run(&pdev,&host,&data,0);if(steps!=123||state.identify_opted_in)abort();
+ no_doorbell=1;steps=0;run(&pdev,&host,&data,0);if(steps!=123||!observed_mode||state.identify_opted_in)abort();
 }
 '''
 with tempfile.TemporaryDirectory() as d:
