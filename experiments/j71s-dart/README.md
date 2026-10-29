@@ -1920,3 +1920,14 @@ readiness and command submission, and on a completion. These markers are for
 troubleshooting and do not prove hardware execution by themselves. The
 one-shot and coordinator simulations pass; the modified code is not yet tested
 on the iPad. `j71s-identify-stage-markers.patch` contains the probe-level markers.
+
+`j71s-identify-log-delay.patch` delays only the opt-in Identify test from three
+to fifteen seconds, allowing a host to attach the RAM serial log observer
+before the candidate controller sequence begins. The normal diagnostic delay
+is unchanged. `observe-j71s-identify-kmsg.sh` follows selected messages for a
+bounded time and reports DART translation faults without printing their raw
+addresses. A shortened observer was verified against the current J71s RAM
+session and captured the Identify-preparation, TCB-init and descriptor messages.
+The delayed Identify build compiled, but neither the delay nor log capture has
+been validated during an actual storage command, and a hard hang can still
+prevent output or leave only a partial host log.
