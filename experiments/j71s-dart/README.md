@@ -1869,3 +1869,15 @@ does not by itself prove the PCI core, host, DART domain or power state cannot b
 removed. The device tree, physical DMA stream, bridge semantics, controller and
 NVMMU lifetime still require validation before the opt-in is used. No storage
 command has been issued, and the prepared DFU image predates this coordinator.
+
+The combined descriptor diagnostic was subsequently booted directly from DFU
+on J71s. The endpoint's Linux DART map reported first/last matches, unmapping,
+the candidate aperture and an IOVA in that window. The specific Identify
+preparation returned 0 with the controller disabled; TCB initialization returned
+from its poll with retained buffers, and the Identify descriptor preparation
+returned 0 with `published=1` and the controller still disabled. Kexec loading
+was disabled and the diagnostic remained bound. Battery reported 35% and
+discharging. This validates the allocations and descriptor preparation on this
+iPad, not a hardware translation, a DMA transfer, a completed invalidation or
+an NVMe command. The one-shot resources require a physical restart before
+another hardware boot.
