@@ -2047,3 +2047,15 @@ with the controller disabled, but were not kept active during the failed
 Identify attempt. J71t additionally checks host link and fault state around
 endpoint MMIO. These are hypotheses and debugging leads, not evidence that any
 one difference caused the disconnect or that S8003 semantics apply to S8000.
+
+The candidate one-shot helper now maps the SoC-side port and checks its `0x88`
+bit-0 link indicator before endpoint configuration/BAR reads, before each CSTS
+poll, and immediately before the submission-doorbell write. If that indicator
+is clear or reads all ones, it stops the one-shot path and retains any armed
+resources. Earlier controller-disabled J71s diagnostics observed bit 0 rise
+with the negotiated link; its meaning during active storage I/O remains a
+hypothesis. The actual-function mock covers a down link before any endpoint
+read, link loss after arming without another CSTS read, cleanup of the temporary
+CPU mapping, and existing completion/failure cases. The diagnostic object
+compiled. This check has not been run with physical storage DMA and cannot
+prevent an endpoint access from stalling if the link drops after a check.

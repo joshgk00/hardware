@@ -17,7 +17,8 @@ static int __maybe_unused j71s_identify_once(struct pci_dev *pdev, void __iomem 
  const u32 depth = J71S_IDENTIFY_QUEUE_DEPTH;
  struct nvme_command expected;
  u64 cap, stored_sgl;
- u32 csts;
+ u32 csts, link_status;
+ void __iomem *port;
  u16 pci_command, status;
  unsigned int i;
  int ret;
@@ -25,19 +26,33 @@ static int __maybe_unused j71s_identify_once(struct pci_dev *pdev, void __iomem 
  if (!ownership_proven || !j71s_test_kexec_locked() || !pdev || !bar || !p ||
      !p->sq || !p->cq || !p->payload || p->armed || !p->descriptor_published ||
      !tcb || !sgl || !nvme_status ||
-     !scratch_size || scratch_iova != 0xbc000000U || scratch_size != 0xe00000U ||
-     pci_read_config_word(pdev, PCI_COMMAND, &pci_command) ||
-     (pci_command & PCI_COMMAND_MASTER) || !(pci_command & PCI_COMMAND_MEMORY) ||
-     readl(bar + NVME_REG_CC) || readl(bar + NVME_REG_CSTS))
+     !scratch_size || scratch_iova != 0xbc000000U || scratch_size != 0xe00000U)
   return -EINVAL;
+ /* Check the SoC-side port before any endpoint config or BAR read. */
+ port = ioremap(0x601000000ULL, 0x1000);
+ if (!port)
+  return -ENOMEM;
+ link_status = readl(port + 0x88);
+ if (link_status == U32_MAX || !(link_status & BIT(0))) {
+  ret = -ENOLINK;
+  goto out_port;
+ }
+ if (pci_read_config_word(pdev, PCI_COMMAND, &pci_command) ||
+     (pci_command & PCI_COMMAND_MASTER) || !(pci_command & PCI_COMMAND_MEMORY) ||
+     readl(bar + NVME_REG_CC) || readl(bar + NVME_REG_CSTS)) {
+  ret = -EINVAL;
+  goto out_port;
+ }
  cap = (u64)readl(bar + NVME_REG_CAP) | ((u64)readl(bar + NVME_REG_CAP + 4) << 32);
  if (cap == U64_MAX || NVME_CAP_MQES(cap) + 1 < depth ||
      NVME_CAP_MPSMIN(cap) > 0 || !(NVME_CAP_CSS(cap) & NVME_CAP_CSS_NVM) ||
      readl(bar + 0x1810) != scratch_iova || readl(bar + 0x1814) ||
      readl(bar + 0x1818) != scratch_size ||
      !j71s_identify_window_contains(p->sq_dma, PAGE_SIZE) ||
-     !j71s_identify_window_contains(p->cq_dma, PAGE_SIZE))
-  return -EINVAL;
+     !j71s_identify_window_contains(p->cq_dma, PAGE_SIZE)) {
+  ret = -EINVAL;
+  goto out_port;
+ }
  j71s_identify_build_command(&expected);
  memcpy(&stored_sgl, &tcb[4], sizeof(stored_sgl));
  if (memchr_inv(p->cq, 0, PAGE_SIZE) ||
@@ -45,9 +60,10 @@ static int __maybe_unused j71s_identify_once(struct pci_dev *pdev, void __iomem 
      memcmp(&p->sq[0], &expected, sizeof(expected)) ||
      READ_ONCE(tcb[0]) != 0x200 || READ_ONCE(tcb[1]) != 1 ||
      READ_ONCE(tcb[2]) != (p->payload_phys >> 12) ||
-     READ_ONCE(sgl[0]) != (p->payload_phys >> 12) || stored_sgl != sgl_dma)
-  return -EINVAL;
-
+     READ_ONCE(sgl[0]) != (p->payload_phys >> 12) || stored_sgl != sgl_dma) {
+  ret = -EINVAL;
+  goto out_port;
+ }
  /* From here on even failed writes require holding every resource until reset. */
  p->armed = true;
  pr_info("J71s Identify stage: queues-armed\n");
@@ -60,20 +76,42 @@ static int __maybe_unused j71s_identify_once(struct pci_dev *pdev, void __iomem 
  writel(upper_32_bits(p->cq_dma), bar + NVME_REG_ACQ + 4);
  pci_set_master(pdev);
  if (pci_read_config_word(pdev, PCI_COMMAND, &pci_command) ||
-     !(pci_command & PCI_COMMAND_MASTER))
-  return -EIO;
+     !(pci_command & PCI_COMMAND_MASTER)) {
+  ret = -EIO;
+  goto out_port;
+ }
  pr_info("J71s Identify stage: endpoint-master-enabled\n");
  writel(NVME_CC_ENABLE | NVME_CC_IOSQES | NVME_CC_IOCQES, bar + NVME_REG_CC);
- ret = readl_poll_timeout(bar + NVME_REG_CSTS, csts,
-                          csts == U32_MAX || (csts & (NVME_CSTS_RDY | NVME_CSTS_CFS)),
-                          1000, 5000000);
- if (ret || csts == U32_MAX || (csts & NVME_CSTS_CFS) || !(csts & NVME_CSTS_RDY))
-  return ret ? ret : -EIO;
+ for (i = 0; i < 5000; i++) {
+  link_status = readl(port + 0x88);
+  if (link_status == U32_MAX || !(link_status & BIT(0))) {
+   ret = -ENOLINK;
+   goto out_port;
+  }
+  csts = readl(bar + NVME_REG_CSTS);
+  if (csts == U32_MAX || (csts & NVME_CSTS_CFS)) {
+   ret = -EIO;
+   goto out_port;
+  }
+  if (csts & NVME_CSTS_RDY)
+   break;
+  usleep_range(1000, 2000);
+ }
+ if (i == 5000) {
+  ret = -ETIMEDOUT;
+  goto out_port;
+ }
  pr_info("J71s Identify stage: controller-ready\n");
  dma_wmb();
  pr_info("J71s Identify stage: submitting-command\n");
  /* Give the USB observer time to drain the last marker before the write. */
  msleep(100);
+ link_status = readl(port + 0x88);
+ if (link_status == U32_MAX || !(link_status & BIT(0))) {
+  ret = -ENOLINK;
+  goto out_port;
+ }
+ pr_info("J71s Identify stage: host-link-up-before-doorbell\n");
  writel(1, bar + NVME_REG_DBS);
  /* A returned MMIO write can still be posted; this is not a completion. */
  pr_info("J71s Identify stage: doorbell-write-returned\n");
@@ -83,8 +121,10 @@ static int __maybe_unused j71s_identify_once(struct pci_dev *pdev, void __iomem 
   if (status & 1) {
    dma_rmb();
    if (p->cq[0].command_id != cpu_to_le16(1) ||
-       le16_to_cpu(p->cq[0].sq_id) != 0)
-    return -EIO;
+       le16_to_cpu(p->cq[0].sq_id) != 0) {
+    ret = -EIO;
+    goto out_port;
+   }
    *nvme_status = status >> 1;
    pr_info("J71s Identify stage: completion-received\n");
    if (!*nvme_status) {
@@ -95,12 +135,18 @@ static int __maybe_unused j71s_identify_once(struct pci_dev *pdev, void __iomem 
 
     pr_info("J71s Identify response: nonzero=%d vendor-match=%d\n",
             changed, vendor_matches);
-    if (!changed || !vendor_matches)
-     return -EBADMSG;
+    if (!changed || !vendor_matches) {
+     ret = -EBADMSG;
+     goto out_port;
+    }
    }
-   return 0;
+   ret = 0;
+   goto out_port;
   }
   usleep_range(1000, 2000);
  }
- return -ETIMEDOUT;
+ ret = -ETIMEDOUT;
+out_port:
+ iounmap(port);
+ return ret;
 }
