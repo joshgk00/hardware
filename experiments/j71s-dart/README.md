@@ -1416,3 +1416,18 @@ not evidence of delivered interrupts. In particular, the relationship between
 the Apple vector offset, PCI MSI message data, and Linux AIC interrupt
 numbering still needs verification on S8000 before enabling MSI. The
 extraction code does not configure or write any hardware.
+
+The candidate port-0 MSI range was compared offline with interrupt words in
+the captured Apple DT; none fell within the range. This is a conservative
+word-level comparison, not proof of system-wide ownership. A RAM-only kernel
+used the AIC domain to translate and temporarily allocate all eight candidate
+vectors, rejecting an existing mapping and disposing newly allocated mappings
+in reverse order. The iPad reported eight allocated out of eight, with no
+error; the subsequent PCI endpoint still attached and bus mastering remained
+off. The diagnostic host and DART stopped, the temporary IOMMU changes reverted
+and tested PCIe cleanup passed. Battery was 49%, discharging. Host mocks cover
+conflict and partial-allocation cleanup. No handler was registered and no MSI
+was sent; vector allocation does not validate actual interrupt delivery, MSI
+message data or the PCI MSI domain. The general test source and mock are
+`driver-patch/j71s-msi-domain-test.h` and `test-j71s-msi-domain.py`;
+device-derived constants remain private.
