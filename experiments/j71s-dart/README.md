@@ -1989,3 +1989,12 @@ size and alignment in addition to the prior failure paths, and the diagnostic
 object compiled. Earlier J71s controller-disabled observations reported a
 14 MiB request with 4 KiB alignment; these new runtime checks have not yet run
 on the iPad or established physical DMA.
+
+`j71s-identify-require-dart-map.patch` makes the candidate require a successful
+endpoint software-mapping test and the expected provisional DMA aperture before
+allocating Identify buffers or arming the translation-table experiment. It
+rejects an out-of-window IOVA or mismatched aperture before looking up the
+mapped addresses and still unmaps/frees the test page. The bounded mock test
+covers these failures as well as mapping and cleanup failures, and the diagnostic
+object compiled. Earlier J71s preflight reported these checks successful, but
+passing them still does not prove physical DMA isolation or hardware routing.

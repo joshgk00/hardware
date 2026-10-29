@@ -1,0 +1,46 @@
+--- a/drivers/pci/controller/j71s-endpoint-map.h
++++ b/drivers/pci/controller/j71s-endpoint-map.h
+@@ -26,6 +26,15 @@
+   __free_page(page);
+   return -EIO;
+  }
++ if (domain->geometry.aperture_start != J71S_DART_WINDOW_START ||
++     domain->geometry.aperture_end != J71S_DART_WINDOW_START + J71S_DART_WINDOW_LENGTH - 1 ||
++     dma < J71S_DART_WINDOW_START ||
++     dma > J71S_DART_WINDOW_START + J71S_DART_WINDOW_LENGTH - PAGE_SIZE) {
++  dma_unmap_page(dev, dma, PAGE_SIZE, DMA_BIDIRECTIONAL);
++  __free_page(page);
++  dev_info(dev, "experimental endpoint page map: window-check-failed\n");
++  return -ERANGE;
++ }
+  first = iommu_iova_to_phys(domain, dma);
+  last = iommu_iova_to_phys(domain, dma + PAGE_SIZE - 1);
+  dma_unmap_page(dev, dma, PAGE_SIZE, DMA_BIDIRECTIONAL);
+--- a/drivers/pci/controller/j71s-scan-private.h
++++ b/drivers/pci/controller/j71s-scan-private.h
+@@ -151,7 +151,7 @@
+ 	struct j71s_pci_test_data *data;
+ 	u16 command;
+ 	u32 version;
+-	int ret;
++	int ret, map_ret;
+ 
+ 	if (!host || !host->dev.parent || !host->dev.parent->of_node ||
+ 	    !of_device_is_compatible(host->dev.parent->of_node, "orchard,j71s-pcie-diagnostic") ||
+@@ -179,13 +179,14 @@
+ 	j71s_test_reserved_scratch(&pdev->dev);
+ 	j71s_observe_nvmmu(&pdev->dev);
+ 	j71s_test_nvmmu_window(pdev, data->bar);
+-	dev_info(&pdev->dev, "experimental endpoint page map: ret=%d\n", j71s_endpoint_map_test(pdev, data->bar));
++	map_ret = j71s_endpoint_map_test(pdev, data->bar);
++	dev_info(&pdev->dev, "experimental endpoint page map: ret=%d\n", map_ret);
+ 	j71s_test_dma_allocations(pdev, data->bar, &pdev->dev);
+ 	j71s_test_dma_allocations(pdev, data->bar, host->dev.parent);
+ 	j71s_test_tcb_addresses(pdev, data->bar, host->dev.parent);
+ 	j71s_test_msi_allocation(pdev, data->bar);
+ 	{
+-		int prep_ret = j71s_identify_prepare(&pdev->dev, &data->prepared);
++		int prep_ret = map_ret ? map_ret : j71s_identify_prepare(&pdev->dev, &data->prepared);
+ 		int descriptor_ret = -EINVAL;
+ 
+ 		dev_info(&pdev->dev, "J71s Identify preparation: ret=%d controller-disabled=%d\n",
