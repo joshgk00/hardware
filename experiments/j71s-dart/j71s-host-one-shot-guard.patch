@@ -1,0 +1,108 @@
+--- a/include/linux/kexec.h
++++ b/include/linux/kexec.h
+@@ -448,6 +448,7 @@
+ extern struct kimage *kexec_crash_image;
+ 
+ bool kexec_load_permitted(int kexec_image_type);
++bool j71s_test_kexec_locked(void);
+ 
+ #ifndef kexec_flush_icache_page
+ #define kexec_flush_icache_page(page)
+--- a/kernel/kexec_core.c
++++ b/kernel/kexec_core.c
+@@ -1032,7 +1032,13 @@
+ 
+ struct kimage *kexec_image;
+ struct kimage *kexec_crash_image;
+-static int kexec_load_disabled;
++/* Local J71s one-shot image: do not let another kernel reuse live DMA RAM. */
++static int kexec_load_disabled = 1;
++bool j71s_test_kexec_locked(void)
++{
++ return kexec_load_disabled == 1 && !kexec_image && !kexec_crash_image;
++}
++EXPORT_SYMBOL_GPL(j71s_test_kexec_locked);
+ 
+ #ifdef CONFIG_SYSCTL
+ static int kexec_limit_handler(const struct ctl_table *table, int write,
+--- a/drivers/pci/controller/pcie-apple-h9p.c
++++ b/drivers/pci/controller/pcie-apple-h9p.c
+@@ -26,6 +26,9 @@
+ #include <linux/iopoll.h>
+ #include <linux/ioport.h>
+ #include <linux/kernel.h>
++#include <linux/kexec.h>
++#include <linux/iommu.h>
++#include <linux/scatterlist.h>
+ #include <linux/module.h>
+ #include <linux/msi.h>
+ #include <linux/of.h>
+@@ -1132,6 +1135,25 @@
+ 	return IRQ_HANDLED;
+ }
+ 
++/* The one-shot experiment requires controller-visible addresses to be physical. */
++static bool j71s_host_dma_identity(struct device *dev, void *cpu,
++                                   dma_addr_t dma, size_t size)
++{
++ struct sg_table sgt;
++ bool valid;
++ int ret;
++
++ if (!IS_ALIGNED(dma, SZ_4K) || size > DMA_BIT_MASK(36) ||
++     dma > DMA_BIT_MASK(36) - (size - 1))
++  return false;
++ ret = dma_get_sgtable_attrs(dev, &sgt, cpu, dma, size, DMA_ATTR_WRITE_COMBINE);
++ if (ret)
++  return false;
++ valid = sgt.nents == 1 && sgt.sgl->length >= size && sg_phys(sgt.sgl) == dma;
++ sg_free_table(&sgt);
++ return valid;
++}
++
+ static int apple_h9p_setup_nvmmu(struct apple_h9p_pcie *pcie)
+ {
+ 	struct apple_h9p_nvmmu *nvmmu = &pcie->nvmmu;
+@@ -1154,6 +1176,16 @@
+ 	}
+ 	if (!(pcie->enabled_ports & BIT(0)) || !nvmmu->base)
+ 		return 0;
++
++	if (of_machine_is_compatible("apple,j71s")) {
++#if IS_ENABLED(CONFIG_KEXEC_CORE)
++		if (!j71s_test_kexec_locked() || !dev->dma_mask ||
++		    iommu_get_domain_for_dev(dev))
++			return dev_err_probe(dev, -EPERM, "J71s one-shot ownership guard failed\n");
++#else
++		return dev_err_probe(dev, -EOPNOTSUPP, "J71s one-shot requires kexec lock check\n");
++#endif
++	}
+ 
+ 	mem_np = of_parse_phandle(dev->of_node, "apple,nvme-hmb", 0);
+ 	if (!mem_np)
+@@ -1228,6 +1260,25 @@
+ 	if (!nvmmu->tcb_sgl) {
+ 		ret = -ENOMEM;
+ 		goto out_put_node;
++	}
++
++	if (of_machine_is_compatible("apple,j71s")) {
++		if (!j71s_host_dma_identity(dev, nvmmu->tcb, nvmmu->tcb_dma, nvmmu->tcb_size) ||
++		    !j71s_host_dma_identity(dev, nvmmu->tcb_table, nvmmu->tcb_table_dma, nvmmu->tcb_table_size) ||
++		    !j71s_host_dma_identity(dev, nvmmu->tcb_sgl, nvmmu->tcb_sgl_dma, nvmmu->tcb_sgl_size)) {
++			ret = -EPERM;
++			goto out_put_node;
++		}
++		if (readl(nvmmu->base + H9P_NVMMU_TCB_CTRL) ||
++		    readl(nvmmu->base + H9P_NVMMU_SART_CTRL)) {
++			ret = -EBUSY;
++			goto out_put_node;
++		}
++		/* Pin the module for the whole physical boot before arming hardware. */
++		if (!try_module_get(THIS_MODULE)) {
++			ret = -EBUSY;
++			goto out_put_node;
++		}
+ 	}
+ 
+ 	h9p_writel_flush(lower_32_bits(nvmmu->tcb_dma),

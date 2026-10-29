@@ -1703,3 +1703,18 @@ that the write reached the hardware or that a cached translation was retired.
 Concurrency, DMA teardown, the status semantics and safe reuse remain
 unverified. The H9P object compiled; this candidate has not been run on J71s
 and is not an I/O-ready driver.
+
+
+`j71s-host-one-shot-guard.patch` is a local experiment layered on the
+candidate FIFO and descriptor patches, not a general-purpose upstream kernel
+change. It starts the experimental kernel with kexec loading disabled, checks
+that no kexec image is loaded and that the PCI host is not using an IOMMU,
+checks the three host-allocated descriptor buffers have identity DMA addresses
+within 36 bits, and requires the candidate NVMMU and SART control registers to
+be zero before table addresses are written. It pins the host module before
+arming; the existing host code retains its table allocations. This closes some
+early ownership gaps before NVMe setup, but it does not establish that the
+NVMMU, SART, PCI device, queues or later teardown are safe. The candidate
+register semantics and live DMA remain unverified. The host and kernel objects
+compile; the patch has not been booted or tested on the iPad. A physical reboot
+is required after a one-shot test that arms hardware.
