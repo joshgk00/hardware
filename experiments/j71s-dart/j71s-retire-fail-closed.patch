@@ -1,0 +1,31 @@
+--- a/drivers/pci/controller/pcie-apple-h9p.c
++++ b/drivers/pci/controller/pcie-apple-h9p.c
+@@ -1361,9 +1361,12 @@
+                                 value != U32_MAX && (value & BIT(0)), 1, 20000);
+  if (ret)
+   goto poison;
+- goto out;
++ /* An idle read does not prove a posted invalidate reached the hardware.
++  * Keep the slot and payload until a physical reset, even on a clear FIFO.
++  */
++ ret = -EIO;
+ poison:
+- nvmmu->j71s_poisoned = true;
++ WRITE_ONCE(nvmmu->j71s_poisoned, true);
+ out:
+  spin_unlock_irqrestore(&nvmmu->j71s_inv_lock, flags);
+  return ret;
+--- a/drivers/nvme/host/pci.c
++++ b/drivers/nvme/host/pci.c
+@@ -1386,6 +1386,11 @@
+ out_unmap_data:
+ 	if (blk_rq_nr_phys_segments(req))
+ 		nvme_unmap_data(req);
++	if (nvme_pci_j71b_is_failed()) {
++		/* An uncertain retirement must keep the request and its payload. */
++		nvme_start_request(req);
++		return BLK_STS_OK;
++	}
+ out_free_cmd:
+ 	nvme_cleanup_cmd(req);
+ 	return ret;

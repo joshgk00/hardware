@@ -1731,3 +1731,15 @@ posted write reaches the hardware, and there was no cached translation or DMA
 operation to verify. Consequently this result does **not** prove command
 completion, invalidation, safe reuse, or storage I/O. A physical restart is
 required before the next hardware boot.
+
+
+`j71s-retire-fail-closed.patch` follows the FIFO and one-shot ownership
+candidates. Because the observed empty bit cannot prove the posted invalidate
+completed, a J71s retirement now returns an error and poisons the path even if
+both FIFO polls pass. The descriptor slot and caller's payload must remain
+allocated until a physical reset. It also fixes the NVMe metadata-mapping
+failure path to retain a request if data retirement failed during cleanup.
+The modified PCI host and NVMe objects compile. This deliberately prevents a
+normal completed storage request: a separate controlled observation mechanism
+and evidence of safe retirement are still needed. It does not make the current
+experimental driver safe to boot as a complete storage stack.
