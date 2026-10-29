@@ -114,10 +114,9 @@ static int __maybe_unused j71s_identify_once(struct pci_dev *pdev, void __iomem 
  }
  if (no_doorbell) {
   pr_info("J71s Identify stage: controller-only-survived\n");
-  ret = 0;
-  goto out_port;
+ } else {
+  pr_info("J71s Identify stage: controller-warmup-complete\n");
  }
- pr_info("J71s Identify stage: controller-warmup-complete\n");
  dma_wmb();
  pr_info("J71s Identify stage: submitting-command\n");
  /* Give the USB observer time to drain the last marker before the write. */
@@ -128,6 +127,11 @@ static int __maybe_unused j71s_identify_once(struct pci_dev *pdev, void __iomem 
   goto out_port;
  }
  pr_info("J71s Identify stage: host-link-up-before-doorbell\n");
+ if (no_doorbell) {
+  pr_info("J71s Identify stage: doorbell-skipped\n");
+  ret = 0;
+  goto out_port;
+ }
  writel(1, bar + NVME_REG_DBS);
  /* A returned MMIO write can still be posted; this is not a completion. */
  pr_info("J71s Identify stage: doorbell-write-returned\n");

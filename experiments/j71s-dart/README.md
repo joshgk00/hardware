@@ -2110,3 +2110,11 @@ completion or response was captured. The delay did not change the observed failu
 missing asynchronous log output cannot establish whether the write was executed
 or whether DMA occurred. Preserve the private capture and physically reset before
 any further diagnostic.
+
+
+A new comparison candidate continues from the ten-second no-doorbell observation
+through the same barrier, pre-submission marker, delay and host-link check as the
+command path, then records `doorbell-skipped` instead of writing the doorbell.
+This isolates more of the preceding path but still permits DMA from controller
+enable; it is not yet device-tested. Mocks verify the skipped write and link-loss
+handling.
