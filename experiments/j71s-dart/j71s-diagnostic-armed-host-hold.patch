@@ -1,0 +1,63 @@
+--- a/drivers/pci/controller/j71s-tcb-init-test.h
++++ b/drivers/pci/controller/j71s-tcb-init-test.h
+@@ -20,6 +20,7 @@
+ 
+ /* Retained until physical reboot; never valid when init polling failed. */
+ static u32 *j71s_once_ready_tcb;
++static bool j71s_once_tcb_armed;
+ 
+ static void j71s_test_tcb_init(struct pci_dev *pdev, void __iomem *bar,
+                                struct device *host)
+@@ -37,7 +38,7 @@
+  bool tcb_changed, table_changed;
+  int ret;
+ 
+- if (!j71s_test_kexec_locked() || !host->dma_mask ||
++ if (j71s_once_tcb_armed || !j71s_test_kexec_locked() || !host->dma_mask ||
+      iommu_get_domain_for_dev(host) ||
+      pci_read_config_word(pdev, PCI_COMMAND, &cmd) ||
+      (cmd & PCI_COMMAND_MASTER) || readl(bar + 0x14) || readl(bar + 0x1c)) {
+@@ -92,6 +93,7 @@
+  /* Ownership is permanent before issuing the undocumented command. */
+  armed = true;
+  retained = true;
++ WRITE_ONCE(j71s_once_tcb_armed, true);
+  dma_wmb();
+  writel(0x10000, mmu + 0x04);
+  ret = readl_poll_timeout(mmu + 0x04, ctrl,
+--- a/drivers/pci/controller/j71s-scan-private.h
++++ b/drivers/pci/controller/j71s-scan-private.h
+@@ -131,7 +131,7 @@
+ 
+ 	if (!data)
+ 		return;
+-	if (data->prepared.descriptor_published || data->scratch.retained ||
++	if (READ_ONCE(j71s_once_tcb_armed) || data->prepared.descriptor_published || data->scratch.retained ||
+ 	    data->root_master_attempted || data->prepared.armed) {
+ 		dev_crit(&pdev->dev, "J71s one-shot resources retained until physical reset\n");
+ 		return;
+@@ -345,7 +345,8 @@
+ 					dev_info(dev, "experimental PCI driver: binding=%d\n", endpoint->dev.driver == &j71s_pci_test_driver.driver);
+ 					dev_info(dev, "experimental PCI hold: active until stop\n");
+ 					pci_unlock_rescan_remove();
+-					wait_event(ctx->stop_wq, READ_ONCE(ctx->stop));
++					wait_event(ctx->stop_wq, READ_ONCE(ctx->stop) &&
++						   !READ_ONCE(j71s_once_tcb_armed));
+ 					pci_lock_rescan_remove();
+ 					dev_info(dev, "experimental PCI hold: stop requested\n");
+ 				}
+--- a/drivers/pci/controller/pcie-j71s-diagnostic.c
++++ b/drivers/pci/controller/pcie-j71s-diagnostic.c
+@@ -764,6 +764,12 @@
+ {
+ 	struct j71s_diag_work *ctx = platform_get_drvdata(pdev);
+ 
++	/* The experimental MMU may still access retained buffers. */
++	if (READ_ONCE(j71s_once_tcb_armed)) {
++		dev_crit(&pdev->dev, "J71s one-shot host held until physical reset\n");
++		return;
++	}
++
+ 	WRITE_ONCE(ctx->stop, true);
+ 	wake_up(&ctx->stop_wq);
+ 	cancel_delayed_work_sync(&ctx->work);

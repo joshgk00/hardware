@@ -1881,3 +1881,15 @@ discharging. This validates the allocations and descriptor preparation on this
 iPad, not a hardware translation, a DMA transfer, a completed invalidation or
 an NVMe command. The one-shot resources require a physical restart before
 another hardware boot.
+
+`j71s-diagnostic-armed-host-hold.patch` addresses a lifetime gap in the local
+one-shot diagnostic: its platform shutdown/remove callback could wake the
+worker and trigger PCI bus, MSI-domain and DART cleanup after TCB initialization
+was issued. The candidate latches the armed state before that MMIO write, rejects
+another initialization, holds the worker instead of following the normal stop
+path, and skips diagnostic PCI and platform cleanup after arming. The object
+compiled and the related Identify/scratch simulations passed. It is an
+experimental guard, not proof against all kernel shutdown, device removal,
+power or hardware-reset paths. It has not been run on the iPad and does not
+replace the need for a physical reset; the earlier descriptor preflight image
+predates this fix.
