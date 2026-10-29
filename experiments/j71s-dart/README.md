@@ -1743,3 +1743,15 @@ The modified PCI host and NVMe objects compile. This deliberately prevents a
 normal completed storage request: a separate controlled observation mechanism
 and evidence of safe retirement are still needed. It does not make the current
 experimental driver safe to boot as a complete storage stack.
+
+`driver-patch/j71s-identify-preparation.h` prepares a one-command Identify
+Controller admin queue, completion queue, and 4 KiB payload allocation. It
+requires candidate endpoint DMA addresses inside the provisional DART window,
+extracts and bounds-checks the payload's physical page for the candidate
+FlatDMA descriptor, and encodes a tag-zero candidate FlatDMA command. The
+allocation-release helper is only for the unarmed state. The code does not
+program a descriptor, enable bus mastering or the controller, ring a doorbell,
+or interpret a response; the FIFO, DMA stream and ownership issues remain
+unresolved. A host test checks exact command bytes and DMA-window boundaries,
+and the diagnostic object compiles with the header. It has not been run on
+hardware, and no storage command has been sent.
