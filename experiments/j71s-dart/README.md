@@ -1566,3 +1566,16 @@ remain allocated in this kernel; physical reset is required before further
 kernel tests. The compiled image was also regenerated from its `vmlinux` and
 matched byte-for-byte; GDB showed the built-in kexec lock set and bind/unbind
 suppression enabled.
+
+A reusable, hardware-independent ANS TCB builder is provided in
+`driver-patch/include/linux/apple-ans-tcb.h`, with a follow-up integration diff
+`h9p-tcb-builder.patch` against the extracted J71b driver after the earlier page
+validation and NVMMU bounds changes. It prepares the same TCB, SGL and FlatDMA
+values as that driver while rejecting invalid tags, unaligned or unrepresentable
+physical pages and SGL-address overflow before modifying the buffers. The
+existing unmap/invalidate path remains with the caller. Golden-value tests
+cover ordinary and maximum requests, invalid inputs and failure atomicity; the
+modified H9P object compiled and the integration patch replay matched its source.
+This is software preparation only. The descriptor format and DMA behavior have
+not been validated on J71s, and the header and patch do not provide a working
+PCI host or storage driver by themselves.
