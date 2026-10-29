@@ -2,6 +2,7 @@
 /* Candidate HMB/SART setup for a one-shot test; never tears down after writes. */
 #include <linux/ioport.h>
 #include <linux/of_reserved_mem.h>
+#include <asm/cacheflush.h>
 
 #define J71S_SCRATCH_IOVA 0xbc000000U
 #define J71S_SCRATCH_BYTES 0xe00000U
@@ -60,6 +61,8 @@ static int __maybe_unused j71s_identify_setup_scratch(struct pci_dev *pdev,
  values[1] = J71S_SCRATCH_IOVA + J71S_SCRATCH_BYTES - 0x80100000U;
  values[2] = r->base >> 20;
  memset(s->cpu, 0, r->size);
+ /* no-map RAM has no linear mapping; clean the actual memremap VA to PoC. */
+ dcache_clean_poc((unsigned long)s->cpu, (unsigned long)s->cpu + r->size);
  wmb();
  if (!j71s_test_kexec_locked() || pci_read_config_word(pdev, PCI_COMMAND, &command) ||
      (command & PCI_COMMAND_MASTER) || readl(bar + NVME_REG_CC) ||

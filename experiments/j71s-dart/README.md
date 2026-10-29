@@ -1971,3 +1971,12 @@ held for physical reset. The actual bounded wait helper has host tests for an
 immediate signal, delayed signal, timeout and null input. The diagnostic build
 is being prepared with this candidate; the wait has not been exercised on the
 iPad or with physical storage DMA.
+
+The candidate scratch setup now cleans the zeroed write-back mapping to the
+ARM64 point of coherency before programming the candidate SART window. The
+reservation is `no-map`, so the implementation cleans the actual `memremap`
+virtual address rather than assuming a linear physical mapping. The mock test
+checks that the clean follows zeroing and precedes MMIO writes, including all
+seven write-failure cases; the diagnostic object compiled. This addresses CPU
+cache visibility in the candidate only. It does not demonstrate that the
+storage hardware can access the scratch window or that S8000 is coherent.
