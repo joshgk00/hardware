@@ -1,5 +1,5 @@
 diff --git a/drivers/nvme/host/pci-apple-ans.c b/drivers/nvme/host/pci-apple-ans.c
-index b4152e0..75e116f 100644
+index b4152e0..742f447 100644
 --- a/drivers/nvme/host/pci-apple-ans.c
 +++ b/drivers/nvme/host/pci-apple-ans.c
 @@ -30,11 +30,9 @@
@@ -17,7 +17,7 @@ index b4152e0..75e116f 100644
  #define APPLE_ANS_NVME_MAX_SECTORS \
  	(APPLE_ANS_NVMMU_MAX_PAGES * APPLE_ANS_NVMMU_PAGE_SIZE >> SECTOR_SHIFT)
  
-@@ -158,6 +156,23 @@ static int nvme_pci_apple_ans_reset_dma(struct nvme_dev *dev)
+@@ -158,6 +156,25 @@ static int nvme_pci_apple_ans_reset_dma(struct nvme_dev *dev)
  	return 0;
  }
  
@@ -30,8 +30,10 @@ index b4152e0..75e116f 100644
 +
 + if (!ltr || !l1ss)
 +  return -ENODEV;
-+ if (pci_write_config_byte(pdev, PCI_LATENCY_TIMER, 0x40) != PCIBIOS_SUCCESSFUL ||
-+     pci_write_config_dword(pdev, ltr + PCI_LTR_MAX_SNOOP_LAT, APPLE_ANS_LTR_VALUE) != PCIBIOS_SUCCESSFUL ||
++ /* J71s readback did not accept the legacy timer value; leave it unchanged. */
++ if (!s8000 && pci_write_config_byte(pdev, PCI_LATENCY_TIMER, 0x40) != PCIBIOS_SUCCESSFUL)
++  return -EIO;
++ if (pci_write_config_dword(pdev, ltr + PCI_LTR_MAX_SNOOP_LAT, APPLE_ANS_LTR_VALUE) != PCIBIOS_SUCCESSFUL ||
 +     pci_write_config_dword(pdev, l1ss + PCI_L1SS_CTL2, 0) != PCIBIOS_SUCCESSFUL ||
 +     pci_write_config_dword(pdev, l1ss + PCI_L1SS_CTL1, ctl1) != PCIBIOS_SUCCESSFUL)
 +  return -EIO;
@@ -41,7 +43,7 @@ index b4152e0..75e116f 100644
  static int nvme_pci_apple_ans_preinit(struct nvme_dev *dev)
  {
  	struct apple_ans_nvme *ans = nvme_pci_apple_ans(dev);
-@@ -169,17 +184,9 @@ static int nvme_pci_apple_ans_preinit(struct nvme_dev *dev)
+@@ -169,17 +186,9 @@ static int nvme_pci_apple_ans_preinit(struct nvme_dev *dev)
  	if (!ans)
  		return 0;
  

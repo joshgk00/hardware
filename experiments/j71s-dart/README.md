@@ -1666,3 +1666,11 @@ are config-register readbacks, not proof the settings are correct during I/O.
 The diagnostic and mocks are `driver-patch/j71s-ans-config-test.h`,
 `driver-patch/j71s-ans-config-policy.h`, `test-j71s-ans-config-test.py`, and
 `test-j71s-ans-config-experiment-policy.py`.
+
+The experimental ANS PCI configuration patch now leaves the legacy latency
+timer unchanged on J71s, following the readback mismatch above. J71b retains
+its previous timer write. The three J71s candidate LTR/L1SS values have passed
+one disabled-controller write/read/restore test, but remain unproven during
+actual storage I/O. The updated capability and failure-path mock passed for
+both variants, and the modified NVMe object compiled; the full NVMe driver has
+not been run on this iPad.

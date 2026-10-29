@@ -30,9 +30,9 @@ static int pci_write_config_dword(struct pci_dev*p,int off,u32 v){(void)p;return
 '''
 t=r'''
 int main(void){struct pci_dev p={0};
- for(int variant=0;variant<2;variant++) {mode=fail=used=0;if(apple_ans_configure_pci(&p,variant)||used!=4||offs[0]!=0xd||offs[1]!=0x204||offs[2]!=0x30c||offs[3]!=0x308||vals[3]!=(variant?0x40440000:0x40550000))abort();}
+ for(int variant=0;variant<2;variant++) {int shift=variant?0:1;mode=fail=used=0;if(apple_ans_configure_pci(&p,variant)||used!=3+shift||(shift && offs[0]!=0xd)||offs[shift]!=0x204||offs[shift+1]!=0x30c||offs[shift+2]!=0x308||vals[shift+2]!=(variant?0x40440000:0x40550000))abort();}
  for(mode=1;mode<=2;mode++){fail=used=0;if(apple_ans_configure_pci(&p,1)!=-ENODEV||used)abort();}
- mode=0;for(fail=1;fail<=4;fail++){used=0;if(apple_ans_configure_pci(&p,1)!=-EIO||used!=fail)abort();}
+ mode=0;for(int variant=0;variant<2;variant++)for(fail=1;fail<=(variant?3:4);fail++){used=0;if(apple_ans_configure_pci(&p,variant)!=-EIO||used!=fail)abort();}
 }
 '''
 with tempfile.TemporaryDirectory() as d:
