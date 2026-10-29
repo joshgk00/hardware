@@ -1718,3 +1718,16 @@ NVMMU, SART, PCI device, queues or later teardown are safe. The candidate
 register semantics and live DMA remain unverified. The host and kernel objects
 compile; the patch has not been booted or tested on the iPad. A physical reboot
 is required after a one-shot test that arms hardware.
+
+
+A one-shot J71s RAM diagnostic issued the J71t-derived tag-0 invalidation
+command after initializing zeroed retained TCB tables. The endpoint's bus
+master and controller remained disabled. The candidate FIFO status polled
+empty before and after the write (`before=0 submitted=1 after=0
+status-valid=1 empty-bit=1`); the test's kexec lockdown was enabled and its
+buffers were retained. `j71s-tcb-fifo-once.patch` captures this follow-up
+against the prior one-shot test source. The status may read empty before a
+posted write reaches the hardware, and there was no cached translation or DMA
+operation to verify. Consequently this result does **not** prove command
+completion, invalidation, safe reuse, or storage I/O. A physical restart is
+required before the next hardware boot.

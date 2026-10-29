@@ -1,0 +1,32 @@
+--- a/drivers/pci/controller/j71s-tcb-init-test.h
++++ b/drivers/pci/controller/j71s-tcb-init-test.h
+@@ -100,6 +100,29 @@
+  dev_info(host, "TCB init experiment: armed=1 poll=%d ctrl-zero=%d bit16=%d bit4=%d all-ones=%d tcb-changed=%d table-changed=%d buffers-retained=1\n",
+           ret, ctrl == 0, !!(ctrl & 0x10000), !!(ctrl & 0x10), ctrl == U32_MAX,
+           tcb_changed, table_changed);
++ if (!ret && j71s_test_kexec_locked() &&
++     !pci_read_config_word(pdev, PCI_COMMAND, &cmd) && !(cmd & PCI_COMMAND_MASTER) &&
++     !readl(bar + 0x14) && !readl(bar + 0x1c) && !readl(mmu + 0x20)) {
++  void __iomem *port = ioremap(0x601000000ULL, 0x1000);
++  u32 fifo = 0;
++  int before = -ENODEV, after = -ENODEV;
++  bool submitted = false;
++  if (port) {
++   before = readl_poll_timeout(port + 0x22c, fifo,
++                               fifo != U32_MAX && (fifo & 1), 10, 20000);
++   if (!before) {
++    /* Tag 0 has no mapping and the controller remains disabled. */
++    dma_wmb();
++    writel(0, mmu + 0x04);
++    submitted = true;
++    after = readl_poll_timeout(port + 0x22c, fifo,
++                               fifo != U32_MAX && (fifo & 1), 10, 20000);
++   }
++   iounmap(port);
++  }
++  dev_info(host, "TCB FIFO experiment: before=%d submitted=%d after=%d status-valid=%d empty-bit=%d retained=1\n",
++           before, submitted, after, fifo != U32_MAX, !!(fifo & 1));
++ }
+  goto out;
+ restore:
+  if (readl(mmu + 0x04) || readl(mmu + 0x20)) {
