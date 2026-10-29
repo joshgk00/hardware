@@ -1590,3 +1590,25 @@ flags; it must not be mistaken for a verified J71s request mode. Tests exercise
 both single-direction encodings, legacy encoding, publication ordering and
 failure atomicity, and the modified H9P object compiled. The S8000 hardware
 semantics and safe slot retirement remain unverified.
+
+The current J71t driver constrains one-cell PCI DART consumers to a DMA IOVA
+window distinct from the FlatDMA, scratch and MSI ranges. Without a comparable
+constraint, our earlier software-only endpoint mappings could use addresses
+that are unsuitable for real controller traffic. The J71s Apple DT's DART0
+`vm-offset` contains two 32-bit offsets and one shared `vm-size`; the first
+candidate and size match the related J71t window. The storage endpoint refers
+to the expected DART0 mapper, but the relationship between the two Apple
+metadata offsets and the actual S8000 requester stream is not established.
+
+`extract-dart-window.py` checks the private tree's mapper relationship and
+candidate shape and writes a new private mode-0600 fragment. The experimental
+`dart-one-cell-window.patch` and
+`driver-patch/include/linux/apple-dart-dma-window.h` add a validated optional
+`apple,dma-range` to a private test DART driver and use it for one-cell
+consumers; five-cell consumers retain their explicit-window path. Host tests
+cover malformed metadata, alignment, arithmetic overflow and masks; the
+modified DART object and a private test kernel compiled. This device-tree
+property and the temporary test changeset are experimental, not an upstream
+binding. A private RAM boot image with the candidate has been assembled but not
+yet run. None of the software evidence proves the physical stream mapping,
+hardware DMA or storage functionality.
