@@ -1766,3 +1766,13 @@ preflight compiled successfully. It has not been booted, and this preflight does
 not send a command or prove physical DMA; it only prepares the specific buffers
 needed by a later controller test. The device-derived window fragment remains
 private and must be supplied separately.
+
+A private DFU image for the combined preflight was assembled locally by
+verifying and retaining the loader, one-CPU boot arguments, device tree and
+initramfs from the previously booted bounded-window image, then replacing the
+compressed kernel with the newly built combined diagnostic. The rebuilt image
+and every component were hashed and rechecked, including a decompression check
+of the kernel. This establishes package consistency, not boot or hardware
+behavior. The image retains the one-shot test's kexec lockdown; a physical
+restart is required after the currently running one-shot diagnostic before
+booting it, and another restart would be required after a successful TCB arm.
