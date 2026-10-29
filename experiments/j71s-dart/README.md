@@ -1361,3 +1361,21 @@ production DT or lifecycle design; it did not attach an endpoint to the DART,
 perform physical DMA, or issue a storage command. The isolated lifecycle
 snippet and mock are `driver-patch/j71s-dart-coexist.h` and
 `test-j71s-dart-coexist.py`.
+
+A follow-up temporary changeset enabled the already-created DART node and
+added a candidate PCI `iommu-map` for requester 0x100 to DART stream 0, using
+the related J71b mapping as a hypothesis. With the test PCIe host active,
+Linux placed endpoint 0000:01:00.0 in IOMMU group 0, and the endpoint's five
+coherent allocations completed with CPU-side pattern and alignment checks.
+The kernel also logged that requester ID 0x0 (the root bus device) had no
+translation; the test did not map it. Bus mastering stayed off. On unbind the
+PCI devices and DART were removed, the changeset reverted successfully, the
+temporary properties were absent, DART status returned to disabled, and the
+tested PCIe restoration checks passed. Battery was 50% and discharging.
+Host mocks exercise the candidate mapping values and lifecycle/failure guards.
+This establishes Linux's software attachment and allocator behavior only:
+the physical requester-to-stream relationship, actual DMA translation and
+storage operation remain unverified. The dynamic changeset and forced
+instantiation are test infrastructure, not a proposed production binding.
+The experiment is `driver-patch/j71s-dart-map-test.h`, with
+`test-j71s-dart-map.py`.
