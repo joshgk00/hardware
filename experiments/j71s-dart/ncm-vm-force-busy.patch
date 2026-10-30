@@ -1,6 +1,14 @@
 --- a/drivers/usb/gadget/function/f_ncm.c
 +++ b/drivers/usb/gadget/function/f_ncm.c
-@@ -1144,12 +1144,24 @@
+@@ -13,6 +13,7 @@
+ 
+ #include <linux/cleanup.h>
+ #include <linux/kernel.h>
++#include <linux/ktime.h>
+ #include <linux/interrupt.h>
+ #include <linux/module.h>
+ #include <linux/device.h>
+@@ -1144,12 +1145,29 @@
   * The transmit should only be run if no skb data has been sent
   * for a certain duration.
   */
@@ -12,6 +20,9 @@
 +static unsigned int ncm_test_busy_at, ncm_test_next_at;
 +module_param_named(test_busy_at, ncm_test_busy_at, uint, 0444);
 +module_param_named(test_next_at, ncm_test_next_at, uint, 0444);
++static unsigned long long ncm_test_busy_ns, ncm_test_next_ns;
++module_param_named(test_busy_ns, ncm_test_busy_ns, ullong, 0444);
++module_param_named(test_next_ns, ncm_test_next_ns, ullong, 0444);
 +
  static enum hrtimer_restart ncm_tx_timeout(struct hrtimer *data)
  {
@@ -20,17 +31,20 @@
  	netdev_tx_t ret;
  
 +	WRITE_ONCE(ncm_test_callback_count, READ_ONCE(ncm_test_callback_count) + 1);
-+	if (READ_ONCE(ncm_test_busy_at) && !READ_ONCE(ncm_test_next_at))
++	if (READ_ONCE(ncm_test_busy_at) && !READ_ONCE(ncm_test_next_at)) {
++		WRITE_ONCE(ncm_test_next_ns, ktime_get_ns());
 +		WRITE_ONCE(ncm_test_next_at, READ_ONCE(ncm_test_callback_count));
++	}
  	if (netdev) {
  		/* XXX This allowance of a NULL skb argument to ndo_start_xmit
  		 * XXX is not sane.  The gadget layer should be redesigned so
-@@ -1159,7 +1171,11 @@
+@@ -1159,7 +1177,12 @@
  		 *
  		 * This will call directly into u_ether's eth_start_xmit()
  		 */
 -		ret = netdev->netdev_ops->ndo_start_xmit(NULL, netdev);
 +		if (xchg(&ncm_test_force_busy, 0)) {
++			WRITE_ONCE(ncm_test_busy_ns, ktime_get_ns());
 +			WRITE_ONCE(ncm_test_busy_at, READ_ONCE(ncm_test_callback_count));
 +			ret = NETDEV_TX_BUSY;
 +		} else

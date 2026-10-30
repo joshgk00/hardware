@@ -58,6 +58,12 @@ if [ -w "$fault" ]; then
   printf 'VM_BUSY_AT '; cat "$busy"
   printf 'VM_NEXT_AT '; cat "$next"
  fi
+ busy_ns=/sys/module/usb_f_ncm/parameters/test_busy_ns
+ next_ns=/sys/module/usb_f_ncm/parameters/test_next_ns
+ if [ -r "$busy_ns" ] && [ -r "$next_ns" ]; then
+  start=$(cat "$busy_ns"); end=$(cat "$next_ns")
+  if [ "$start" -gt 0 ] && [ "$end" -ge "$start" ]; then printf 'VM_RETRY_DELAY_NS %s\n' "$((end - start))"; fi
+ fi
 else
  echo VM_FAULT_HOOK_ABSENT
 fi
