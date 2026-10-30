@@ -181,3 +181,5 @@ The running upstream-based boot exposes an `apple-vxd` video4linux device and Pi
 A read-only V4L2 format query of that device advertised H.264 parsed slice input (`S264`) and NV12 capture output. This verifies the advertised interface only; no encoded video was submitted and hardware decoding has not been demonstrated.
 
 The installed GStreamer inspection command did not find a `v4l2codecs` plugin, and the displayed FFmpeg decoder list included `h264_v4l2m2m`. No compatibility between that FFmpeg wrapper and the driver's parsed-slice interface was established. An appropriate stateless client and a decode fixture are still needed before claiming hardware playback.
+
+The private root contains the recipe's `apple/vxd-deva.bin` at the firmware path requested by the driver; firmware loading was not observed. The `libgstv4l2codecs.so` file was not found in its GStreamer plugin directory. The video node reports stateless H.264 controls including frame-based decode mode. These are file and interface checks, not a decode test.
