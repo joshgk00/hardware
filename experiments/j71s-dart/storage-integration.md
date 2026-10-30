@@ -81,6 +81,13 @@ extractor requires the latter format and an exact provisional storage window,
 so it cannot be reused for port 1 without a separately justified decoder and
 validation of the different window size.
 
+For this J71s snapshot, each DART's first saved `vm-offset` word and `vm-size`
+match the corresponding start and size encoded in the upstream S8003
+`iommu-map` (including its different port-1 size). This is a comparison of
+selected raw fields only; it does not establish how the second offset, mapper
+record or S8000 requester and stream IDs should be translated into a Linux
+mapping. The S8003 mapping must not be applied solely on this basis.
+
 For the related Wi-Fi path, the saved private J71s ADT has the WLAN reg-on and
 interrupt properties and the PCIe port-1 CLKREQ, device-wake and PERST
 properties. As a preliminary comparison, each corresponding raw property
