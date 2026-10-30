@@ -118,3 +118,11 @@ selector instead finds the interface under the same selected USB device. For
 the physical test, use a temporary NetworkManager profile bound to that
 verified interface, with the isolated /30 and no default route, and remove it
 afterward. This setup has not yet been exercised on the iPad.
+
+During the no-doorbell diagnostic, a later read-only check at approximately
+47 minutes of uptime found no matching DART translation-fault, storage-port
+NVMMU-fault, or kernel-panic lines in the currently retained kernel log. The
+battery interface reported 84% and discharging. This is an idle observation;
+the ring buffer may have overwritten earlier messages, and it does not prove
+working command execution or physical DMA. Resources remain armed until a
+physical reset.
