@@ -252,6 +252,9 @@ time. This remains bounded and does not guarantee the observer survives an
 arbitrarily slow preflight or a USB disconnect. The modified observer has not
 been run on the iPad. The script opens the diagnostic start gate when it is
 available and therefore must only be used for a deliberately prepared test.
+It also prints an explicit marker when its observer exits; that marker does not
+distinguish a timeout from a reader failure or establish command completion.
+If the USB connection fails first, the host may not receive the marker at all.
 
 ## Upstream initialization comparison
 

@@ -24,4 +24,5 @@ else
  printf 'J71s Identify start gate unavailable; no command requested.\n'
 fi
 wait "$observer" || true
+printf 'J71s Identify observation window ended; this does not confirm command completion.\n'
 exec 3<&-
