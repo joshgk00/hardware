@@ -108,6 +108,12 @@ offset/mask/value tuples only, not complete initialization sequences or MMIO
 semantics. In particular, it is evidence against assuming the S8003 tables
 can simply be reused wholesale for S8000.
 
+In that literal comparison, both S8003 root-port offsets and masks appeared in
+the J71s table, but only one complete tuple matched. None of the four S8003 PHY
+offsets appeared in the saved J71s PHY table. These counts do not prove that
+the blocks have equivalent address bases or that any differing value is safe;
+register mapping and the device-specific sequence still require validation.
+
 The offline `extract-pcie-tunables.py` converter now accepts `--port 1`, while
 retaining port 0 as its default. On the saved private J71s ADT it validated
 and emitted all four candidate tables to a mode-0600 private fragment, and a
