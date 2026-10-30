@@ -45,8 +45,10 @@ unbind and kexec; prevent freeing memory while hardware can still access it;
 and verify the S8000 port and controller configuration against the device.
 The eventual test needs observable controller DMA and a bounded, read-only
 storage command before any installer or write operation. MSI delivery and
-error handling need separate verification. No disk command has been executed
-in the diagnostic to date.
+error handling need separate verification. Earlier command attempts lost the
+diagnostic connection before a doorbell return or completion was observed;
+whether the controller received a command is unknown, and no successful disk
+command has been demonstrated.
 
 ## Upstream initialization comparison
 
