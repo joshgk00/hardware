@@ -91,6 +91,14 @@ checked compatible data did not itself contain the candidate PCI device ID or
 the `4355c0` revision string. This is family-level source evidence only; actual
 PCI enumeration and firmware selection remain unverified.
 
+The saved J71s ADT has both port-0 and port-1 configuration and root-port
+tuning tables. For this one device, the corresponding port-0 and port-1 raw
+tables are byte-identical (six configuration records and two root-port
+records). This is a useful lead for a separate port-1 experiment, not proof
+that other port settings, power sequencing, DMA, or Wi-Fi are interchangeable.
+The raw device-derived tables remain private and have not been applied to
+port 1 in the current desktop boot.
+
 Before issuing commands, a combined implementation must establish ownership
 and teardown of DMA buffers and translation tables across failures, reset,
 unbind and kexec; prevent freeing memory while hardware can still access it;
