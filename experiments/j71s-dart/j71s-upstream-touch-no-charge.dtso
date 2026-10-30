@@ -1,0 +1,7 @@
+/dts-v1/;
+/plugin/;
+
+/* Test-only: J71s charging has not been qualified. */
+&tristar_charger {
+	status = "disabled";
+};
