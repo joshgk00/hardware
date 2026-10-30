@@ -13,11 +13,13 @@ import struct
 WLAN = '/device-tree/arm-io/uart2/wlan'
 UART = '/device-tree/arm-io/uart2'
 PORT = '/device-tree/arm-io/apcie/pci-bridge1'
+WIFI_ENDPOINT = PORT + '/wlan'
 STORAGE_PORT = '/device-tree/arm-io/apcie/pci-bridge0'
 GPIO = '/device-tree/arm-io/gpio'
 PMIC = '/device-tree/arm-io/i2c0/pmu'
 DART0 = '/device-tree/arm-io/dart-apcie0'
 DART1 = '/device-tree/arm-io/dart-apcie1'
+MAPPER1 = DART1 + '/mapper-apcie1'
 CHECKS = (
     (WLAN, 'function-reg_on', PMIC, 14),
     (PORT, 'function-clkreq', GPIO, 165),
@@ -30,7 +32,7 @@ CHECKS = (
 
 def compare(root):
     entries = list(root.walk())
-    selected = {WLAN, UART, PORT, STORAGE_PORT, GPIO, PMIC, DART0, DART1}
+    selected = {WLAN, UART, PORT, WIFI_ENDPOINT, STORAGE_PORT, GPIO, PMIC, DART0, DART1, MAPPER1}
     nodes = {}
     for path, node in entries:
         if path in selected:
@@ -61,6 +63,17 @@ def compare(root):
         raw = nodes.get(path).properties.get('function-dart_force_active') if path in nodes else None
         result[name] = (raw is not None and len(raw) == 8 and
                         refs.get(struct.unpack_from('<I', raw)[0]) == {target})
+    parent = nodes.get(WIFI_ENDPOINT).properties.get('iommu-parent') if WIFI_ENDPOINT in nodes else None
+    result['wlan-mapper-reference'] = (parent is not None and len(parent) == 4 and
+                                       refs.get(struct.unpack('<I', parent)[0]) == {MAPPER1})
+    for name, path, expected_size in (('port0-window-candidate', DART0, 0x3c000000),
+                                       ('port1-window-candidate', DART1, 0x3ffff000)):
+        props = nodes[path].properties if path in nodes else {}
+        offset, size = props.get('vm-offset'), props.get('vm-size')
+        result[name] = (offset is not None and len(offset) == 8 and
+                        size is not None and len(size) == 4 and
+                        struct.unpack_from('<I', offset)[0] == 0x80000000 and
+                        struct.unpack('<I', size)[0] == expected_size)
     return result
 
 
@@ -77,7 +90,7 @@ def main():
         print(f'{name}: {"matches" if matches else "missing or differs"}')
     if not all(checks.values()):
         parser.exit(1, 'One or more candidate references did not match.\n')
-    print('Source comparison only; wiring, polarity and function remain unverified.')
+    print('Source comparison only; wiring, DMA isolation and function remain unverified.')
 
 
 if __name__ == '__main__':

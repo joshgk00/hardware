@@ -22,12 +22,18 @@ class Tree:
 
 
 def fixture():
-    nodes = {p: Node() for p in (check.WLAN, check.UART, check.PORT, check.STORAGE_PORT,
-                                 check.GPIO, check.PMIC, check.DART0, check.DART1)}
+    nodes = {p: Node() for p in (check.WLAN, check.UART, check.PORT, check.WIFI_ENDPOINT, check.STORAGE_PORT,
+                                 check.GPIO, check.PMIC, check.DART0, check.DART1, check.MAPPER1)}
     nodes[check.GPIO].properties['AAPL,phandle'] = struct.pack('<I', 1)
     nodes[check.PMIC].properties['AAPL,phandle'] = struct.pack('<I', 2)
     nodes[check.DART0].properties['AAPL,phandle'] = struct.pack('<I', 3)
     nodes[check.DART1].properties['AAPL,phandle'] = struct.pack('<I', 4)
+    nodes[check.MAPPER1].properties['AAPL,phandle'] = struct.pack('<I', 5)
+    nodes[check.WIFI_ENDPOINT].properties['iommu-parent'] = struct.pack('<I', 5)
+    nodes[check.DART0].properties.update({'vm-offset': struct.pack('<II', 0x80000000, 0x40000000),
+                                          'vm-size': struct.pack('<I', 0x3c000000)})
+    nodes[check.DART1].properties.update({'vm-offset': struct.pack('<II', 0x80000000, 0x40000000),
+                                          'vm-size': struct.pack('<I', 0x3ffff000)})
     nodes[check.STORAGE_PORT].properties['function-dart_force_active'] = struct.pack('<I4s', 3, b'test')
     nodes[check.PORT].properties['function-dart_force_active'] = struct.pack('<I4s', 4, b'test')
     for path, name, target, pin in check.CHECKS:
@@ -63,6 +69,14 @@ class SignalComparisonTests(unittest.TestCase):
         nodes = fixture()
         nodes[check.PORT].properties['function-dart_force_active'] = struct.pack('<I4s', 3, b'test')
         self.assertFalse(check.compare(Tree(list(nodes.items())))['port1-dart-reference'])
+
+    def test_window_and_mapper_mismatch_are_rejected(self):
+        nodes = fixture()
+        nodes[check.DART1].properties['vm-size'] = struct.pack('<I', 0x3c000000)
+        nodes[check.WIFI_ENDPOINT].properties['iommu-parent'] = struct.pack('<I', 3)
+        result = check.compare(Tree(list(nodes.items())))
+        self.assertFalse(result['port1-window-candidate'])
+        self.assertFalse(result['wlan-mapper-reference'])
 
     def test_duplicate_path_is_rejected(self):
         nodes = fixture()
