@@ -56,8 +56,11 @@ test; it does not claim that later revision was booted.
   Offline, Orchard's uncompressed IM4P parser accepted that container and its
   payload began with an OSSerializeBinary signature. The locally checked
   m1n1 OSSerialize parser stopped on unsupported object tag 8, so the firmware
-  array and segment layout have not been verified. The signature alone does
-  not establish compatibility with the J71b loader.
+  array could not be inspected with that parser. The [J71b rotation proposal's
+  bounded parser](https://github.com/dl-alexandre/omarchy-a/blob/6734dd5c548731db6888d82c737f766c243c9234/desktop/aop/firmware.py)
+  did parse the payload and found two firmware entries with header and data,
+  labeled `AOP` and `AOP_ext`. This checks the container's broad structure,
+  not the pinned J71b hashes, image internals, loading protocol or safety.
 - The tablet user wrote and synced 16 MiB to the NFS root with a checksum
   matching the host; a separate 16 MiB host-created file also matched when read
   by the tablet. Both files were removed. A 100-packet USB ping sample had no
