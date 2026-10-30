@@ -98,3 +98,8 @@ network interface under that same USB device;
 synthetic tests reject wrong or ambiguous identities. This is a convenience
 check, not the ECID-bound recovery identity protocol. The device still needs a
 physical reset before this RAM image can be booted.
+
+Offline ARM userspace emulation also exercised the staged BusyBox `stat -c`,
+`sha256sum`, `od -An -v -tx1`, `awk`, `timeout -s KILL`, and `ip link/address`
+syntax used by the NFS runtime. Actual NFS mounting still requires a device
+boot and remains unverified.
