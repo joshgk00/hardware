@@ -172,7 +172,9 @@ Later in the same boot, a private Wayland compositor screenshot showed the
 rendered desktop wallpaper and panel at 1536 by 2048. The temporary copy on
 the NFS root was removed; the screenshot remains private. This confirms the
 compositor output, not that the physical display showed it or that touch was
-responsive.
+responsive. A subsequent sysfs check reported the DRM connector connected and
+enabled, and the backlight powered with actual brightness 1569 of 2047. Those
+are driver-reported states, not direct observation of the panel.
 
 ALSA reports a playback and capture PCM for the speaker card, and the Bluetooth radio reports neither software nor hardware blocked. A first NFS write probe did not run because the rescue shell's restricted PATH omitted the utilities; no file was created. A retry using absolute paths wrote and synced 4 MiB of random data as the tablet user: tablet and host SHA-256 matched, and the host saw UID/GID 1000:1000 and mode 0600. The temporary file was removed. This verifies one transfer through the new kernel and NFS setup, not long-term storage reliability.
 
