@@ -18,7 +18,11 @@ unauthenticated; this arrangement is for an isolated, trusted host only.
   and 0004 from [hardware PR 6](https://github.com/OrchardLinux/hardware/pull/6)
   head `f764d95f70616adae483a97aaa7dae9f18cc8114`; later local changes include
   J71s matching and staged touch bring-up, plus battery-source work. These
-  must be compared with the later upstream integration before reuse. The tree
+  must be compared with the later upstream integration before reuse. Comparing
+  the eight added source/binding files against those two original PR patches
+  found seven byte-identical files. The local N1 driver adds a J71s compatible
+  and forces stage 3 for J71s; that experiment-specific forced stage needs
+  review before it can be proposed as supported behavior. The tree
   used for the patched build differs
   from the immediately preceding NFS build's tree in `f_ncm.c` by the two-line
   [proposed upstream NCM timer change](https://patchew.org/linux/20260727165441.1969927-1-flavra@baylibre.com/).
