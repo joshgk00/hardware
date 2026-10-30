@@ -35,6 +35,9 @@ logs remain private.
 - A 4 MiB random write as the tablet user matched the host checksum and
   ownership. At approximately 63 minutes, 100 USB pings had no loss and the
   retained kernel log had no NFS timeout lines. These are limited samples.
+- The tablet user could not read its journal: the observed journal file was
+  root-owned and lacked a user ACL after journald reported an unsupported ACL
+  operation. The exact NFS protocol cause has not been established.
 
 ## Remaining work
 
