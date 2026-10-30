@@ -36,6 +36,14 @@ nsenter -t "$ns" -n ip addr add 192.0.2.2/30 dev "$host"
 nsenter -t "$ns" -n ip link set "$host" up
 sleep 2
 if nsenter -t "$ns" -n ping -c 3 -W 2 192.0.2.1; then echo VM_NCM_PING_PASS; else echo VM_NCM_PING_FAIL; fi
+fault=/sys/module/usb_f_ncm/parameters/test_force_busy
+if [ -w "$fault" ]; then
+ echo 1 > "$fault"
+ if nsenter -t "$ns" -n ping -c 3 -W 2 192.0.2.1; then echo VM_FAULT_PING_PASS; else echo VM_FAULT_PING_FAIL; fi
+ if [ "$(cat "$fault")" = 0 ]; then echo VM_FAULT_CONSUMED; else echo VM_FAULT_NOT_CONSUMED; fi
+else
+ echo VM_FAULT_HOOK_ABSENT
+fi
 kill "$ns"
 echo VM_TEST_DONE
 exec /bin/sh
