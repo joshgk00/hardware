@@ -55,6 +55,14 @@ binding and match data as well as ANS selection; simply describing an S8000
 node would not bind this driver, and claiming S8003 compatibility without
 evidence could apply the wrong hardware sequence.
 
+Upstream S8003 deliberately brings up storage port 0 first and leaves other
+ports off if it fails: its source explains that PCI bus numbering otherwise
+could route the next port through the storage port's DART mapping. Endpoint
+power and late enumeration are separately sequenced. A J71s Wi-Fi-only probe
+must therefore explicitly establish port-to-bus and IOMMU routing rather than
+assuming upstream port-1 mappings remain valid when port 0 is absent. The
+S8003 rule is a design warning and does not prove S8000's mappings or behavior.
+
 For the related Wi-Fi path, the saved private J71s ADT has the WLAN reg-on and
 interrupt properties and the PCIe port-1 CLKREQ, device-wake and PERST
 properties. As a preliminary comparison, each corresponding raw property
