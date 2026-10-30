@@ -140,3 +140,5 @@ battery interface reported 84% and discharging. This is an idle observation;
 the ring buffer may have overwritten earlier messages, and it does not prove
 working command execution or physical DMA. Resources remain armed until a
 physical reset.
+
+A physical J71s test booted the prepared RAM image, reached its USB rescue shell, and successfully mounted and validated the NFS root read-only. Following the manual handoff, the rescue console reported PID 1 as `systemd`, the root filesystem as read-write NFSv4.0, and handoff state `ready`. The user observed ongoing systemd boot messages. During startup the kernel repeatedly reported the NFS server not responding and later recovering; host pings also showed substantial packet loss. A usable desktop and stable operation have not been verified. This is an experimental host-served root, not working internal storage.
