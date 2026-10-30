@@ -1,0 +1,54 @@
+# iPad 5 Wi-Fi (J71s) upstream-based RAM boot
+
+This is a single-device bring-up record, not an installation guide or a claim
+that J71s is supported. The tested device is an A1822 with the Samsung S8000
+SoC. J71t uses the related S8003; results cannot automatically be transferred
+between them.
+
+## Test setup
+
+One physical boot used Orchard hardware revision `0cfb17118261ac37e1d5019d45c63237fb550c73`,
+including the shared iPad 5 device tree and integrated `apple_z2` support,
+with its matching m1n1, privately extracted device firmware and calibration.
+The kernel additionally included Francesco Lavra's [proposed USB NCM timer
+change](https://patchew.org/linux/20260727165441.1969927-1-flavra@baylibre.com/).
+A test-only overlay disabled the J71s charging node. The device booted from
+RAM and used a host-served NFS root over a dedicated USB connection. The NFS
+export and rescue shell were unauthenticated and used only on a trusted,
+isolated link. This was not an internal-storage installation.
+
+## Observations
+
+- Systemd reported `running` without failed units. The compositor, on-screen
+  keyboard and Omarchy shell were running, and a compositor screenshot showed
+  the desktop. Physical display and touch interaction on this exact boot were
+  not independently confirmed.
+- The touchscreen registered with axes matching the display dimensions; the
+  live calibration property matched the private device calibration. This does
+  not establish orientation or touch accuracy.
+- The audio card, Bluetooth controller and ambient light sensor enumerated.
+  Bluetooth discovery started and stopped, a silent audio playback command
+  completed, and sensor readings changed. Audible sound, microphone capture,
+  pairing and sensor accuracy were not established.
+- The tablet user wrote and synced 16 MiB to the NFS root with a checksum
+  matching the host; a separate 16 MiB host-created file also matched when read
+  by the tablet. Both files were removed. A 100-packet USB ping sample had no
+  observed loss. These are bounded checks, not a long-term reliability claim.
+- The NFSv4 test mount rejected named-user POSIX ACLs. The tablet user could
+  not read its user journal after journald reported an unsupported ACL. The
+  tested Linux NFSv4 file operations lack a POSIX `set_acl` callback; this is
+  a limitation of this test setup, not evidence about local storage.
+
+## Remaining work
+
+Confirm the physical display, touch and sound on the integrated boot. S8000
+PCIe host matching, DMA translation, interrupt handling, internal storage,
+Wi-Fi and charging remain unqualified. Earlier isolated link diagnostics
+enumerated the storage endpoint but did not establish a completed storage
+command. The charging override is not charging support. No installer has been
+tested, and no support flag should be inferred from this record.
+
+The NCM timer proposal was included in the tested image; a successful boot
+alone does not establish that it caused the improvement or that its retry
+path is safe. Firmware, device identifiers, calibration and raw logs are not
+included in this document.
