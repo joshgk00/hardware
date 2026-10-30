@@ -63,6 +63,15 @@ J71t tree. This is only a raw-value comparison, not full property decoding or
 proof of wiring, polarity, electrical sequencing or functional Wi-Fi. The
 J71s root-complex and port-1 path still need independent validation.
 
+The local ADT parser's function-record layout identifies the first word as a
+phandle and the words after its four-character function name as arguments.
+On that basis, each of the four J71s WLAN function properties has the J71t
+candidate pin as its first argument. Their phandles resolve to the PMIC for
+reg-on and the SoC GPIO node for CLKREQ, device-wake and PERST; the first
+interrupt word also matches the J71t candidate. This strengthens the source
+comparison, but does not decode the remaining arguments or prove polarity,
+timing, actual electrical behavior or functional Wi-Fi.
+
 Before issuing commands, a combined implementation must establish ownership
 and teardown of DMA buffers and translation tables across failures, reset,
 unbind and kexec; prevent freeing memory while hardware can still access it;
