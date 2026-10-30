@@ -22,8 +22,9 @@ logs remain private.
 ## Observations
 
 - Systemd reached `running` with no failed units at the sample; `labwc`, the
-  on-screen keyboard and Omarchy shell processes were present. Visual and
-  interactive confirmation of this newer desktop remains pending.
+  on-screen keyboard and Omarchy shell processes were present. A private
+  compositor screenshot showed the rendered desktop; confirmation on the
+  physical screen and interactive touch remain pending.
 - The touchscreen enumerated with X 0–1535 and Y 0–2047 axes, matching the
   display dimensions. That does not establish correct orientation or touch.
 - The speaker card, Bluetooth controller and calibrated ambient light sensor

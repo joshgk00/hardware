@@ -168,6 +168,12 @@ The user restarted into iPadOS, where the battery reported 55%, and put the iPad
 
 On this upstream-based physical boot, read-only inventory found an `iPad6,11 Touchscreen` input device, a sound card named `iPad5 Speakers`, an `hci0` Bluetooth controller and a `ct819` IIO light sensor. The log reports that the sensor loaded LSCI v2 calibration and was found; one illuminance read returned zero. `labwc`, the on-screen keyboard, PipeWire and `omarchy-shell` were running. These observations show detection and processes, not working touch interaction, sound playback, Bluetooth pairing or accurate light readings. The user observed startup text before stepping away; visual desktop confirmation remains pending.
 
+Later in the same boot, a private Wayland compositor screenshot showed the
+rendered desktop wallpaper and panel at 1536 by 2048. The temporary copy on
+the NFS root was removed; the screenshot remains private. This confirms the
+compositor output, not that the physical display showed it or that touch was
+responsive.
+
 ALSA reports a playback and capture PCM for the speaker card, and the Bluetooth radio reports neither software nor hardware blocked. A first NFS write probe did not run because the rescue shell's restricted PATH omitted the utilities; no file was created. A retry using absolute paths wrote and synced 4 MiB of random data as the tablet user: tablet and host SHA-256 matched, and the host saw UID/GID 1000:1000 and mode 0600. The temporary file was removed. This verifies one transfer through the new kernel and NFS setup, not long-term storage reliability.
 
 Bluetooth's userspace controller reports powered on, but pairing and transfers remain untested. PipeWire reported a default built-in stereo sink. A raw silent-stream attempt exited 1 without a useful error; a separate one-second silent WAV played through `pw-play` as the tablet user and exited 0. Its temporary file was removed. The latter verifies the command completed through PipeWire; it does not prove audible speaker output or microphone capture.
