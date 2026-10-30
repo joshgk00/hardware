@@ -1,5 +1,6 @@
 #!/bin/sh
 /bin/busybox --install -s /bin
+set -eu
 mount -t devtmpfs devtmpfs /dev
 mount -t proc proc /proc
 mount -t sysfs sysfs /sys
