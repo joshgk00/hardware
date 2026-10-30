@@ -182,6 +182,11 @@ Bluetooth's userspace controller reports powered on, but pairing and transfers r
 
 At a later sample in the same boot, the CT819 sensor reported illuminance input 180 and IR raw 59, after the earlier illuminance input of zero. This shows readable and changing values, but the lighting conditions and accuracy were not independently measured.
 
+The running Linux device tree's `apple,als-calibration` property also matched
+the saved private ADT's single `alsCalibration` property by length and digest.
+Together with the driver's LSCI v2 load message, this confirms the calibration
+input reached this boot; it does not establish illuminance accuracy.
+
 The new touchscreen input device reports both single-touch and multitouch coordinate ranges of X 0–1535 and Y 0–2047, matching the display's 1536-by-2048 pixel dimensions. This is an axis-range check; orientation, calibration and user interaction still need confirmation on the upstream-based boot.
 
 The live upstream-based Linux device tree contained one `apple,z2-cal-blob`.
