@@ -63,6 +63,13 @@ so a J71s implementation cannot assume the S8003 resource layout unchanged.
 The raw-word search alone does not establish translated address layout or
 prove that any other register is safe to access.
 
+The saved J71s PCIe ADT's four 32-bit port interrupt values match the first
+four port IRQ numbers in the upstream S8003 tree. Its MSI address, vector
+offset and controller vector count also match the upstream candidates. The
+J71s ADT property checked has four words, while the S8003 Linux tree also
+describes a separate NVMMU interrupt. These comparisons do not establish
+interrupt type, IRQ delivery, vector allocation or an S8000 NVMMU interrupt.
+
 Decoding the saved J71s PCIe `reg` property as 64-bit address/size pairs found
 exact counterparts for the upstream S8003 configuration, root-complex, PHY,
 port 0, port 1 and NVMMU ranges; the S8003 `phy-ip` range was absent from those
