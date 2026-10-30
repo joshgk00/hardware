@@ -158,3 +158,5 @@ The user subsequently confirmed that the desktop was loading on the physical iPa
 The user subsequently reported that touch appears responsive on the physical NFS desktop; a specific keyboard/text interaction remains to be checked. Another system check reported `running`, 66% battery and no retained NFS timeout messages. This remains a host-served experimental boot, with internal storage and Wi-Fi unresolved.
 
 The user confirmed the physical desktop on-screen keyboard opened, accepted typed characters and filtered results in the Super menu. Systemd still reported `running`, battery 66%, and no NFS server timeout messages were present in the retained kernel log at the subsequent check. This establishes that specific visible touch/keyboard interaction on the host-served boot, not complete hardware qualification or internal storage support.
+
+On the patched physical boot, a disposable file created on the NFS root as UID/GID 1000 had mode 0600 and matching contents and ownership when inspected on the host. The tablet user removed it, and the host confirmed it absent. This is a targeted write test, not an internal-storage test or a full filesystem qualification.
