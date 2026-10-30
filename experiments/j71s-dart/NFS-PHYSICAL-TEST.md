@@ -121,3 +121,5 @@ The separate clean reconstruction build stopped when compiler processes were kil
 The upstream m1n1 ADT lookup checks `/arm-io/<function>` and one level below each `/arm-io` child. The earlier private J71s ADT inspection found the touch node at `/arm-io/spi3/multi-touch`, which fits that lookup, and the prior stage-2 test used a nonblank 1024-byte calibration property from this device. This is a source-and-input compatibility check; it does not prove m1n1 will forward the property on the next physical boot.
 
 Source review of the upstream DWC2 VBUS-draw work found that it returns when the named power-supply provider is absent. This is consistent with the test-only disabled charging node not requiring a provider for that callback, but has not been runtime-tested on J71s and does not prove USB or charging behavior.
+
+A further read-only inventory of the running experimental boot found a backlight class device, but no entries in the sound class or IIO sensor directory; the battery reported discharging at 59%. Brightness control, sound and sensors were not functionally tested by this inventory.
