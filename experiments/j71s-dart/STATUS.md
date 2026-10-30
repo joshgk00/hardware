@@ -70,6 +70,8 @@ A private NFS RAM startup was staged with the previously verified J71s touch fir
 
 The loopback NFS client wrote and read temporary files in the private Omarchy test root as UID/GID 0 and 1000; ownership was correct. In a separate disposable export, a UID 1000 client was denied a root-owned mode-0600 file that UID 0 could read. Both servers were stopped and their probe files removed. This is narrow functionality evidence, not a security review or proof of all file permission behavior.
 
+The assembled kernel's configuration enables NFSv4, NCM, ACM, simpledrm and the N1 touch driver as built-ins. Its linked symbol map contains the NFSv4 filesystem, NCM and ACM bind functions, simpledrm driver and N1 driver. This checks that the components survived the build, not that they initialize or work together on the iPad.
+
 ## Upstream integration update
 
 The related J71t work was merged in [hardware PR 28](https://github.com/OrchardLinux/hardware/pull/28). Its author reported RAM-booted read-only storage, display, touch and Wi-Fi tests on S8003 J71t; installation was not tested and remains disabled. Upstream main at `ae1457e` still marks S8000 J71s storage and Wi-Fi unsupported. The J71t results are valuable comparisons, not a validation of this J71s hardware or our pending FIFO test. The new main also includes an independently validated T7000 host sequence; similarity does not establish S8000 compatibility.
