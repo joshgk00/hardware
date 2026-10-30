@@ -14,7 +14,12 @@ unauthenticated; this arrangement is for an isolated, trusted host only.
   diff, eight untracked source files and the config; a reverse/apply round trip
   reconstructed all 29 changed files byte-for-byte. A clean rebuild from that
   snapshot has not been performed, and the overlays need provenance and licensing
-  review before publication. The tree used for the patched build differs
+  review before publication. The touch/SmartIO starting point was patches 0003
+  and 0004 from [hardware PR 6](https://github.com/OrchardLinux/hardware/pull/6)
+  head `f764d95f70616adae483a97aaa7dae9f18cc8114`; later local changes include
+  J71s matching and staged touch bring-up, plus battery-source work. These
+  must be compared with the later upstream integration before reuse. The tree
+  used for the patched build differs
   from the immediately preceding NFS build's tree in `f_ncm.c` by the two-line
   [proposed upstream NCM timer change](https://patchew.org/linux/20260727165441.1969927-1-flavra@baylibre.com/).
   Credit for that change belongs to its upstream author.
