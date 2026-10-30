@@ -123,3 +123,7 @@ The upstream m1n1 ADT lookup checks `/arm-io/<function>` and one level below eac
 Source review of the upstream DWC2 VBUS-draw work found that it returns when the named power-supply provider is absent. This is consistent with the test-only disabled charging node not requiring a provider for that callback, but has not been runtime-tested on J71s and does not prove USB or charging behavior.
 
 A further read-only inventory of the running experimental boot found a backlight class device, but no entries in the sound class or IIO sensor directory; the battery reported discharging at 59%. Brightness control, sound and sensors were not functionally tested by this inventory.
+
+The user confirmed that both touch and on-screen keyboard input work in the running desktop session. This is a functional observation of the current experimental image, not yet of the upstream-based candidate.
+
+The upstream shared iPad 5 device tree describes a CS42L81 audio codec, an S8000 MCA interface and a TSL2581-compatible ambient light sensor. The corrected upstream build configuration enables the corresponding codec, MCA, simple-audio-card and TSL2583 drivers as modules. These source and configuration checks identify candidates for the next hardware inventory; they do not demonstrate successful probing, sound output or light sensing on J71s.
