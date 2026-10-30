@@ -66,6 +66,23 @@ static void j71s_test_tcb_init(struct pci_dev *pdev, void __iomem *bar,
  mmu = ioremap(0x601004000ULL, 0x1000);
  if (!mmu || readl(mmu + 0x04) != 0 || readl(mmu + 0x20) != 0)
   goto out;
+ /* Candidate S8000 interpretation, based on the related S8003 path.
+  * Check before any address programming or initialization; fail closed.
+  */
+ {
+  void __iomem *port = ioremap(0x601000000ULL, 0x1000);
+  u32 fifo = U32_MAX;
+  int fifo_ret = -ENODEV;
+  if (port) {
+   fifo_ret = readl_poll_timeout(port + 0x22c, fifo,
+                                 fifo != U32_MAX && (fifo & 1), 10, 20000);
+   iounmap(port);
+  }
+  dev_info(host, "TCB pre-init FIFO: ret=%d status-valid=%d empty-bit=%d\n",
+           fifo_ret, fifo != U32_MAX, fifo != U32_MAX && !!(fifo & 1));
+  if (fifo_ret)
+   goto out;
+ }
  for (i = 0; i < ARRAY_SIZE(offsets); i++) {
   saved[i] = readl(mmu + offsets[i]);
   if (saved[i] == U32_MAX)

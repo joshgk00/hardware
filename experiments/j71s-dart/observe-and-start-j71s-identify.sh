@@ -10,7 +10,7 @@ exec 3< /dev/kmsg || exit 1
 busybox timeout 50 busybox cat <&3 | while IFS= read -r line; do
  case "$line" in
   *'translation fault:'*) printf 'DART translation fault detected (details remain on device)\n' ;;
-  *'J71s Identify'*|*'TCB init experiment'*|*'TCB FIFO experiment'*|*'storage-port NVMMU fault'*) printf '%s\n' "$line" ;;
+  *'J71s Identify'*|*'TCB pre-init FIFO'*|*'TCB init experiment'*|*'TCB FIFO experiment'*|*'storage-port NVMMU fault'*) printf '%s\n' "$line" ;;
  esac
 done &
 observer=$!

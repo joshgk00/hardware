@@ -2160,3 +2160,12 @@ experiment runs after initialization. These are concrete sequence differences
 to investigate, not proof of a J71s defect or permission to assume S8003
 register semantics on S8000. The previous command-failure captures do not
 isolate either difference.
+
+
+The one-shot initialization candidate now checks the proposed port FIFO empty
+indicator before programming NVMMU addresses or issuing initialization, based on
+the related S8003 sequence. A missing mapping, all-ones status or timeout stops
+the test before those writes. The mock exercises the empty, nonempty and invalid
+status cases and verifies no initialization writes on failure. The meaning of
+this status bit on S8000 and any effect on storage remain unverified. The
+observer includes the new pre-init result without exposing device identifiers.
