@@ -39,7 +39,7 @@ static void dma_free_coherent(struct device*d,size_t n,void*p,dma_addr_t a){(voi
 static int dma_get_sgtable(struct device*d,struct sg_table*t,void*p,dma_addr_t a,size_t n){(void)d;(void)p;sg.length=n;sg.phys=mode==5?a+4096:a;t->nents=1;t->sgl=&sg;return 0;}
 static dma_addr_t sg_phys(struct scatterlist*s){return s->phys;}
 static void sg_free_table(struct sg_table*t){(void)t;sg_frees++;}
-static void *ioremap(u64 a,int n){(void)n;return a==0x601000000ULL?port_mmio:mmio;}
+static void *ioremap(u64 a,int n){(void)n;if(a==0x601000000ULL)return mode==11?NULL:port_mmio;return mmio;}
 static void iounmap(void*p){(void)p;}
 static u32 readl(void*p){u32 v;memcpy(&v,p,4);return v;}
 static void writel(u32 v,void*p){long off=(unsigned char*)p-mmio;writes++;if(mode==6&&off==8&&v)return;if(off==4&&v==0x10000){armed++;if(mode==8){((char*)buffers[0])[0]=1;((char*)buffers[1])[0]=1;}v=mode==7?0x10000:0;}memcpy(p,&v,4);}
@@ -48,7 +48,7 @@ static void dev_info(struct device *d,const char *fmt,...){(void)d;if(strstr(fmt
 '''
 t=r'''
 int main(void){u64 mask=0xffffffff;struct device d={&mask,0xffffffff};struct pci_dev p={0};unsigned char bar[64]={0};
- for(mode=0;mode<=10;mode++){memset(mmio,0,sizeof(mmio));memset(port_mmio,0,sizeof(port_mmio));u32 fifo=mode==9?0:mode==10?U32_MAX:1;memcpy(port_mmio+0x22c,&fifo,4);allocs=frees=writes=armed=sg_frees=report_tcb=report_table=0;mask=d.coherent_dma_mask=0xffffffff;j71s_test_tcb_init(&p,bar,&d);
+ for(mode=0;mode<=11;mode++){memset(mmio,0,sizeof(mmio));memset(port_mmio,0,sizeof(port_mmio));u32 fifo=mode==9?0:mode==10?U32_MAX:1;memcpy(port_mmio+0x22c,&fifo,4);allocs=frees=writes=armed=sg_frees=report_tcb=report_table=0;mask=d.coherent_dma_mask=0xffffffff;j71s_test_tcb_init(&p,bar,&d);
   if(mode==0 && (armed!=1||frees||allocs!=2||sg_frees!=2))abort();
   if(mode>=1&&mode<=3 && (armed||allocs))abort();
   if(mode==4 && (armed||frees!=1||writes))abort();
