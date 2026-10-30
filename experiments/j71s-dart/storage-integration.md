@@ -72,6 +72,14 @@ interrupt word also matches the J71t candidate. This strengthens the source
 comparison, but does not decode the remaining arguments or prove polarity,
 timing, actual electrical behavior or functional Wi-Fi.
 
+`check-wlan-signals.py` repeats this comparison locally with the unified
+Orchard ADT parser and prints only match status. It rejects duplicate selected
+paths, ambiguous phandles and malformed function records; it does not print
+the private tree or access hardware. Run it with the Orchard `src` directory
+on `PYTHONPATH` and the private ADT path as its argument. Synthetic tests cover
+matching records and several malformed or ambiguous inputs. The real J71s
+snapshot matched all seven checks; the same physical limitations apply.
+
 The saved J71s UART2 transmit and RTS function records also resolve to the
 SoC GPIO node and have first arguments matching the corresponding J71t WLAN
 UART pin candidates. Their remaining arguments, electrical operation and the
