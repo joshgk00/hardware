@@ -5,6 +5,15 @@ Wi-Fi J71s with the S8000 SoC. The root ran on a connected computer, not on
 internal iPad storage. The tested NFS export and post-handoff rescue shell are
 unauthenticated; this arrangement is for an isolated, trusted host only.
 
+## Current status
+
+The later upstream-based image has booted this J71s into an NFS-backed running
+system. It enumerated touchscreen, audio, Bluetooth, light-sensor and video
+devices; interactive touch and audible sound on this image remain unconfirmed.
+Internal storage, Wi-Fi, charging and installation are not established. The
+chronological entries below preserve what was known at each step; later entries
+supersede earlier statements that a build or boot was pending.
+
 ## Inputs
 
 - Kernel base: Orchard Linux `6831bc701a6ce059e71e5aaa9488c9195bea6927`,
@@ -12,8 +21,9 @@ unauthenticated; this arrangement is for an isolated, trusted host only.
   experiment. The source tree was modified; the base commit alone is not a
   complete reproduction recipe. A private snapshot now preserves the tracked
   diff, eight untracked source files and the config; a reverse/apply round trip
-  reconstructed all 29 changed files byte-for-byte. A clean rebuild from that
-  snapshot has not been performed, and the overlays need provenance and licensing
+  reconstructed all 29 changed files byte-for-byte. An incremental retry of a
+  reconstructed build later succeeded but did not reproduce the booted binary
+  byte-for-byte, as recorded below. The overlays need provenance and licensing
   review before publication. The touch/SmartIO starting point was patches 0003
   and 0004 from [hardware PR 6](https://github.com/OrchardLinux/hardware/pull/6)
   head `f764d95f70616adae483a97aaa7dae9f18cc8114`; later local changes include
@@ -63,7 +73,7 @@ or establish long-term stability. It does not establish working S8000 PCIe,
 internal storage, Wi-Fi, charging or an installer. Raw device logs, firmware,
 per-device identity and assembled images are intentionally kept private.
 
-## Current upstream integration lead
+## Upstream integration investigation, in chronological order
 
 Hardware main `0cfb171` no longer uses the separate `apple_n1` driver: its
 [integrated J71t touchscreen patch](https://github.com/OrchardLinux/hardware/blob/0cfb17118261ac37e1d5019d45c63237fb550c73/kernel/patches/drivers/input/0009-Input-apple_z2-Add-iPad-5-J71t-touchscreen-support.patch)
@@ -75,8 +85,8 @@ agree with the earlier J71s stage-2 discovery. Orchard's m1n1 patch forwards
 the unit calibration to the driver. These facts make an upstream-based J71s
 RAM touch boot the next integration comparison, not proof it will work: the
 upstream kernel, its J71s tree, m1n1 handoff, firmware and this exact device
-have not yet been tested together. Keep the existing working NFS session until
-a suitable image is prepared and verified.
+had not yet been tested together at that point. The later physical boot is
+recorded below.
 
 The previously extracted J71s mtprops from the installed iPadOS 16.7.16 build matched the upstream recipe’s pinned input SHA-256. Orchard CLI `a2dd45f` converted it using the J71s recipe parameters, and the generated Z2FW matched the upstream expected SHA-256. The resulting firmware remains private. This validates the input and conversion only; it does not prove calibration handoff or touch operation with the integrated driver.
 
