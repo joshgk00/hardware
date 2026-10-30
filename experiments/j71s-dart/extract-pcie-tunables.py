@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Convert J71s Apple DT PCIe tunables into a private DTS property fragment.
 
-Requires orchard_cli.apple.adt_tree on PYTHONPATH. Output contains device-derived
-configuration; review its destination and do not commit it to a public repo.
-The result is data only and does not enable PCIe or perform hardware writes.
+Requires the unified orchard.apple.adt_tree parser, or the older
+orchard_cli.apple.adt_tree parser. Output contains device-derived configuration;
+review its destination and do not commit it to a public repo. The result is data
+only and does not enable PCIe or perform hardware writes.
 """
 import argparse
 import os
@@ -57,7 +58,12 @@ def main():
     parser.add_argument('--port', type=int, choices=(0, 1), default=0,
                         help='candidate PCIe port to extract (default: 0)')
     args = parser.parse_args()
-    from orchard_cli.apple.adt_tree import parse
+    try:
+        from orchard.apple.adt_tree import parse
+    except ModuleNotFoundError as exc:
+        if exc.name not in ('orchard', 'orchard.apple', 'orchard.apple.adt_tree'):
+            raise
+        from orchard_cli.apple.adt_tree import parse
     nodes = dict(parse(args.adt.read_bytes()).walk())
     tables = []
     for path, prop, name, window in tables_for_port(args.port):

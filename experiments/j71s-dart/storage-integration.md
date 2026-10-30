@@ -111,6 +111,10 @@ device and no PCIe or Wi-Fi function was tested.
 After the extension, a default-port extraction from the same private J71s ADT
 was byte-identical to the previously saved port-0 fragment. This checks that
 the new option preserved this input's prior output, not every possible ADT.
+The extractor can now use either the unified `orchard` ADT parser or the older
+`orchard_cli` parser; both produced the same private port-1 fragment for this
+input. Other device trees and the complete current upstream workflow were not
+tested by that comparison.
 
 Before issuing commands, a combined implementation must establish ownership
 and teardown of DMA buffers and translation tables across failures, reset,
