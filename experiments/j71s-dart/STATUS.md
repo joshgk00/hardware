@@ -103,3 +103,9 @@ Offline ARM userspace emulation also exercised the staged BusyBox `stat -c`,
 `sha256sum`, `od -An -v -tx1`, `awk`, `timeout -s KILL`, and `ip link/address`
 syntax used by the NFS runtime. Actual NFS mounting still requires a device
 boot and remains unverified.
+
+While the no-doorbell diagnostic was still running, its battery interface
+reported 84% and discharging, with `current_now=-566000` microamps and
+`voltage_now=4052000` microvolts. This is one software reading, not a measured
+charger current or a reliable runtime estimate. The armed controller still
+requires a physical reset before another boot.
