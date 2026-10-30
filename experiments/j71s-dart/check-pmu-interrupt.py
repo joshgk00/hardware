@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare a private J71s ADT's PMU interrupt with the J71t candidate.
+"""Compare private J71s PMU and Tristar ADT records with J71t candidates.
 
 This checks only the number and parent, not flags, polarity or hardware behavior.
 Raw ADTs contain private device data; this tool prints only pass/fail results.
@@ -10,21 +10,25 @@ import struct
 
 PMU = '/device-tree/arm-io/i2c0/pmu'
 GPIO = '/device-tree/arm-io/gpio'
+TRISTAR = '/device-tree/arm-io/i2c0/tristar'
 
 
 def compare(root):
     entries = list(root.walk())
-    pmus = [node for path, node in entries if path == PMU]
-    if len(pmus) != 1:
-        return {'interrupt-number': False, 'interrupt-parent': False}
-    props = pmus[0].properties
+    nodes = {path: [node for candidate, node in entries if candidate == path]
+             for path in (PMU, TRISTAR)}
+    props = nodes[PMU][0].properties if len(nodes[PMU]) == 1 else {}
     irq = props.get('interrupts', b'')
     parent = props.get('interrupt-parent', b'')
     refs = {path for path, node in entries
             if len(parent) == 4 and any(node.properties.get(key) == parent
                                         for key in ('AAPL,phandle', 'phandle'))}
-    return {'interrupt-number': len(irq) == 8 and struct.unpack_from('<I', irq)[0] == 76,
-            'interrupt-parent': refs == {GPIO}}
+    result = {'interrupt-number': len(irq) == 8 and struct.unpack_from('<I', irq)[0] == 76,
+              'interrupt-parent': refs == {GPIO}}
+    for label, path, address in (('pmu-address', PMU, 0x3c), ('tristar-address', TRISTAR, 0x1a)):
+        reg = nodes[path][0].properties.get('reg', b'') if len(nodes[path]) == 1 else b''
+        result[label] = len(reg) == 16 and struct.unpack_from('<I', reg)[0] == address
+    return result
 
 
 def main():
@@ -40,7 +44,7 @@ def main():
         print(f'{name}: {"matches" if matches else "missing or differs"}')
     if not all(result.values()):
         parser.exit(1, 'Candidate did not match.\n')
-    print('Number and parent only; flags and hardware behavior remain unverified.')
+    print('Selected raw fields only; flags, chip revisions and hardware behavior remain unverified.')
 
 
 if __name__ == '__main__':

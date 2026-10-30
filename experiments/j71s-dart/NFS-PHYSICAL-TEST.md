@@ -132,6 +132,8 @@ For the integration note's specific question about the PMU event line, the priva
 
 The private J71s ADT also contains PMU and Tristar nodes under `i2c0`; their 16-byte `reg` properties have first little-endian words `0x3c` and `0x1a` respectively, matching the candidate I2C unit addresses in the shared upstream iPad 5 tree. This comparison does not decode the remaining words, identify the precise chip revisions, validate register semantics, or demonstrate charging.
 
+The PMU comparison helper now checks both address records as well as the interrupt number and parent. Four synthetic test cases passed, including wrong first words and malformed address lengths; the saved J71s ADT matched all four comparisons. The additional checks retain the same limitations as the raw-field comparison above.
+
 On the current physical boot, sysfs lists an I2C device with the upstream `apple,angel-pmic` and `apple,i2c-pmic` compatibles bound to `simple-mfd-i2c`. It also lists the `nxp,cbtl1610` I2C device without a separate I2C driver binding. The shared charging driver's source looks up the Tristar I2C device through its phandle, so the lack of a separate binding is not itself proof of a fault. The charging node remains disabled; enumeration and a PMIC binding do not verify charger operation, event delivery or safe current handling.
 
 The PMIC GPIO platform child also appears in sysfs and is bound to `apple-d2365-pmic-gpio` on this boot. A simple search of GPIO class labels for `pmic` or `d2365` returned no matching label, so no GPIO-chip or interrupt-domain conclusion is drawn from that search. Driver binding is not proof that GPIO interrupt delivery or charger withdrawal works.

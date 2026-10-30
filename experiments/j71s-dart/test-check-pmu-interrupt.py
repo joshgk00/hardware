@@ -23,7 +23,9 @@ class Tree:
 
 def fixture():
     handle = struct.pack('<I', 5)
-    return [(check.PMU, Node({'interrupts': struct.pack('<II', 76, 0), 'interrupt-parent': handle})),
+    return [(check.PMU, Node({'interrupts': struct.pack('<II', 76, 0), 'interrupt-parent': handle,
+                             'reg': struct.pack('<IIII', 0x3c, 0, 0, 0)})),
+            (check.TRISTAR, Node({'reg': struct.pack('<IIII', 0x1a, 0, 0, 0)})),
             (check.GPIO, Node({'AAPL,phandle': handle}))]
 
 
@@ -42,7 +44,16 @@ class ComparisonTests(unittest.TestCase):
         entries.append(('/duplicate', Node({'phandle': struct.pack('<I', 5)})))
         self.assertFalse(check.compare(Tree(entries))['interrupt-parent'])
         entries.append(entries[0])
-        self.assertFalse(any(check.compare(Tree(entries)).values()))
+        result = check.compare(Tree(entries))
+        self.assertFalse(result['interrupt-number'])
+        self.assertFalse(result['pmu-address'])
+
+    def test_address_requires_expected_length_and_first_word(self):
+        entries = fixture()
+        entries[1][1].properties['reg'] = struct.pack('<IIII', 0, 0x1a, 0, 0)
+        self.assertFalse(check.compare(Tree(entries))['tristar-address'])
+        entries[1][1].properties['reg'] = struct.pack('<I', 0x1a)
+        self.assertFalse(check.compare(Tree(entries))['tristar-address'])
 
 
 if __name__ == '__main__':
