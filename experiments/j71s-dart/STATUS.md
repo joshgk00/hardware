@@ -58,7 +58,7 @@ The pre-init FIFO guard was physically exercised in no-doorbell mode. It saw a v
 
 [Hardware PR 30](https://github.com/OrchardLinux/hardware/pull/30) adds an experimental USB NFS-root boot, physically demonstrated on an iPhone 6. It may provide a parallel route to a writable host-served Omarchy system while J71s internal storage is investigated. The J71s path is untested; it needs a matching kernel with NFS, a suitable server and an ownership-preserving root. Our previous J71s USB desktop and read-only Omarchy image are relevant foundations, not proof that this NFS path works.
 
-A separate NFS-capable kernel build is in progress using the previously tested J71s touch source. The verified Omarchy archive was extracted into a private rootless user namespace; root and systemd appeared as 0:0 there, and the tablet home as 1000:1000. A loopback-only rootless Ganesha/VFS probe started, but a userspace NFSv4 client received `NFS4ERR_PERM`; server debug logged `open_by_handle` failing with `EPERM`. The server was stopped. This server setup is therefore not ready for device use; privileged export access or a different server backend must be validated, and the private root must not be treated as a verified running system.
+A separate NFS-capable kernel and its modules were built using the previously tested J71s touch source, and the matching module tree was installed into the private root. The verified Omarchy archive was extracted into a private rootless user namespace; root and systemd appeared as 0:0 there, and the tablet home as 1000:1000. A loopback-only rootless Ganesha/VFS probe started, but a userspace NFSv4 client received `NFS4ERR_PERM`; server debug logged `open_by_handle` failing with `EPERM`. The server was stopped. This server setup is therefore not ready for device use; privileged export access or a different server backend must be validated, and the private root must not be treated as a verified running system.
 
 An alternative userspace NFSv4 server ([neilpang/nfsd](https://github.com/neilpang/nfsd), source `b9ac075`) was built and its nine unit tests passed in a separate container. In a loopback-only disposable export, a separate libnfs client listed and read files, wrote a root-owned file and a UID/GID 1000 file, and read them back. A nested `/orchard-root` path matching Orchard's staging requirements also worked. The server was stopped after testing. These are local smoke tests, not Linux-kernel mount, full systemd filesystem semantics, security review, or a J71s boot; its in-memory handles and restart behavior need consideration. No third-party code was added to this branch.
 
@@ -66,7 +66,7 @@ The private Omarchy root was staged with a J71s NFS identity receipt and a RAM s
 
 The private NFS test copy of the J71b Omarchy root had a getty dependency on a J71b-specific hardware guard and an enabled J71b charging lease. `prepare-nfs-test-root.py` replaces that getty dependency with a J71s-only guard requiring the matching kernel release, `apple,j71s`, successful NFS handoff and an NFS root; it disables the J71b charging lease in that copy and preserves the original getty drop-in. It was exercised on a disposable fixture and applied to the private test root, but has not been boot-tested. This does not provide J71s charging support or modify the original archive.
 
-A private NFS RAM startup was staged with the previously verified J71s touch firmware and calibration from the device-specific stage-3 diagnostic image. Its initramfs archive contains the USB, NFS validation and handoff scripts, ARM BusyBox and those private firmware files. The original stage-3 image manifest was verified before extraction. This image has not been assembled with the new kernel or boot-tested. The existing BusyBox applets were checked under ARM userspace emulation; NFS mount behavior on the iPad remains untested.
+A private NFS RAM startup was staged with the previously verified J71s touch firmware and calibration from the device-specific stage-3 diagnostic image. Its initramfs archive contains the USB, NFS validation and handoff scripts, ARM BusyBox and those private firmware files. The original stage-3 image manifest was verified before extraction. A private image has now been assembled with the separately built NFS kernel and verified component hashes; it has not been boot-tested. The existing BusyBox applets were checked under ARM userspace emulation; NFS mount behavior on the iPad remains untested.
 
 ## Upstream integration update
 
@@ -84,3 +84,10 @@ The related J71t work was merged in [hardware PR 28](https://github.com/OrchardL
 The broader J71s storage and device support in this experiment branch is not
 ready to claim as a working upstream contribution. Preserve tested findings and
 separate independently reviewable changes when their hardware behavior is known.
+
+The USB NFS image, root receipt and module index agree on the J71s profile and
+kernel release. A local selector identifies its rescue serial by product and
+staged root UUID, and finds the network interface under that same USB device;
+synthetic tests reject wrong or ambiguous identities. This is a convenience
+check, not the ECID-bound recovery identity protocol. The device still needs a
+physical reset before this RAM image can be booted.
