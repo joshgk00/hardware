@@ -2176,3 +2176,13 @@ previously verified no-doorbell device tree. Its device-tree properties and
 component hash were checked against the assembled image; the coordinator mock
 also verified no-doorbell mode selection. This still enables the controller,
 so it is not evidence that no DMA can occur. The physical run is pending.
+
+
+A review against the maintainer's integrated PCI patch 0004 found that the
+one-shot Identify descriptor uses the same candidate device-to-memory flag
+(0x200) and publishes the nonzero page count after a DMA write barrier. The
+reusable builder is only suitable for an exclusively owned, quiescent slot:
+its memset is not a substitute for the integration patch's retirement and
+invalidation ordering. The one-shot test retains its slot until physical
+reset; no safe live-slot reuse has been established. The builder and one-shot
+descriptor mocks passed this comparison, which does not validate DMA on J71s.
