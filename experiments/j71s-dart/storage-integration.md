@@ -46,3 +46,18 @@ The eventual test needs observable controller DMA and a bounded, read-only
 storage command before any installer or write operation. MSI delivery and
 error handling need separate verification. No disk command has been executed
 in the diagnostic to date.
+
+## Upstream initialization comparison
+
+In hardware main `0cfb171`, the S8003 path waits for its candidate invalidate
+FIFO to drain, explicitly writes zero to SART control, performs `dma_wmb()`,
+and programs the table address before the TCB base. The isolated J71s TCB
+initialization helper already checks its candidate FIFO, issues `dma_wmb()`
+and programs the table before the base; it checks that SART is zero but does
+not explicitly write zero. The physical no-doorbell test reached the guard and
+returned without a command. The helper's host mock passed again, including
+invalid and nonempty FIFO cases, but it cannot validate physical ordering,
+register semantics or DMA. An explicit SART-zero write remains an untested
+sequence difference; neither a redundant write nor the S8003 meaning can be
+assumed safe on S8000. The earlier disconnected command tests do not isolate
+this difference.
