@@ -53,6 +53,11 @@ test; it does not claim that later revision was booted.
   container. The J71s AOP ADT compatible is `iop,s8000`. These are discovery
   inputs only: firmware format, protocol version, loading, DMA and sensor
   operation have not been validated, and no firmware is included here.
+  Offline, Orchard's uncompressed IM4P parser accepted that container and its
+  payload began with an OSSerializeBinary signature. The locally checked
+  m1n1 OSSerialize parser stopped on unsupported object tag 8, so the firmware
+  array and segment layout have not been verified. The signature alone does
+  not establish compatibility with the J71b loader.
 - The tablet user wrote and synced 16 MiB to the NFS root with a checksum
   matching the host; a separate 16 MiB host-created file also matched when read
   by the tablet. Both files were removed. A 100-packet USB ping sample had no
