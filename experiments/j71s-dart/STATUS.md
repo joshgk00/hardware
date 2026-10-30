@@ -76,6 +76,8 @@ An additional libnfs NFSv4 loopback test on a disposable export exercised mkdir,
 
 A disposable x86-64 Debian 6.1 Linux VM subsequently mounted the loopback-only userspace NFS export using the kernel NFSv4.0 client and BusyBox, then created and read a file, changed its mode, created hard and symbolic links, renamed and removed the test files, and unmounted successfully. The server was stopped and the scratch directory was confirmed removed. This validates that limited kernel-client sequence, not the ARM kernel, systemd handoff, the full Omarchy filesystem, or J71s hardware. The VM init script is `nfs-kernel-vm-init.sh`.
 
+A second disposable Linux VM mounted the actual private Omarchy test root read-only over NFSv4.0. Through the kernel client it verified the receipt digest, AArch64 systemd ELF header, root ownership and mode of systemd, tablet UID/GID, and ownership of the matching kernel module index. It then unmounted and shut down, and the server was stopped. This is stronger than the user-space client check but does not boot systemd or exercise the iPad's ARM kernel or USB network.
+
 ## Upstream integration update
 
 The related J71t work was merged in [hardware PR 28](https://github.com/OrchardLinux/hardware/pull/28). Its author reported RAM-booted read-only storage, display, touch and Wi-Fi tests on S8003 J71t; installation was not tested and remains disabled. Upstream main at `ae1457e` still marks S8000 J71s storage and Wi-Fi unsupported. The J71t results are valuable comparisons, not a validation of this J71s hardware or our pending FIFO test. The new main also includes an independently validated T7000 host sequence; similarity does not establish S8000 compatibility.
