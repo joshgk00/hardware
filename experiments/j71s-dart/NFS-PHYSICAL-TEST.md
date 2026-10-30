@@ -184,6 +184,12 @@ At a later sample in the same boot, the CT819 sensor reported illuminance input 
 
 The new touchscreen input device reports both single-touch and multitouch coordinate ranges of X 0–1535 and Y 0–2047, matching the display's 1536-by-2048 pixel dimensions. This is an axis-range check; orientation, calibration and user interaction still need confirmation on the upstream-based boot.
 
+The live upstream-based Linux device tree contained one `apple,z2-cal-blob`.
+Its length and SHA-256 matched the `multi-touch-calibration` property in the
+saved private J71s ADT. This verifies that the calibration bytes reached the
+running Linux tree in this boot; the calibration itself and its digest remain
+private, and this does not prove touch accuracy or interaction.
+
 At approximately 48 minutes of uptime in the upstream-based boot, the rescue console reported systemd `running`, 41% battery and no `nfs: server` timeout lines in the retained kernel log. Three USB-network pings completed without loss. This is a point-in-time sample; the kernel ring buffer may not retain all earlier messages and it does not establish uninterrupted long-term reliability.
 
 At approximately 63 minutes of uptime in the same boot, a 100-packet USB
