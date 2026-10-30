@@ -178,6 +178,12 @@ The new touchscreen input device reports both single-touch and multitouch coordi
 
 At approximately 48 minutes of uptime in the upstream-based boot, the rescue console reported systemd `running`, 41% battery and no `nfs: server` timeout lines in the retained kernel log. Three USB-network pings completed without loss. This is a point-in-time sample; the kernel ring buffer may not retain all earlier messages and it does not establish uninterrupted long-term reliability.
 
+At approximately 63 minutes of uptime in the same boot, a 100-packet USB
+network sample had no observed packet loss. The rescue console then reported
+systemd `running`, 40% battery and no retained NFS server timeout lines. This
+is one short network sample and a log snapshot, not proof of long-term stability
+or a controlled comparison with an unpatched kernel.
+
 An upstream refresh found hardware main at `4f15a70`, a descendant of the tested `0cfb171`. The intervening history reorganizes the CLI and hardware Python code into one project. In the compared paths there are no changes to the kernel or m1n1 patch directories or the NFS runtime shell scripts; the NFS staging Python moved to `orchard.image.nfs` and now writes `orchard.local.toml`. Reproduction instructions must account for that interface change. This comparison does not test the newer tooling or establish equivalence outside the inspected paths.
 
 In a separate checkout of upstream `4f15a70`, all 13 NFS runtime tests passed. Staging the same private root identity, BusyBox, kernel and network parameters with `orchard.image.nfs` produced byte-identical runtime files to the physically booted staging output; the device-choice file's contents also matched under its new filename. This validates staging for these inputs, not a physical boot assembled with the newer project's complete build workflow.
