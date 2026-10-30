@@ -1,6 +1,6 @@
 --- a/drivers/usb/gadget/function/f_ncm.c
 +++ b/drivers/usb/gadget/function/f_ncm.c
-@@ -1144,12 +1144,19 @@
+@@ -1144,12 +1144,24 @@
   * The transmit should only be run if no skb data has been sent
   * for a certain duration.
   */
@@ -9,6 +9,9 @@
 +module_param_named(test_force_busy, ncm_test_force_busy, uint, 0600);
 +static unsigned int ncm_test_callback_count;
 +module_param_named(test_callback_count, ncm_test_callback_count, uint, 0444);
++static unsigned int ncm_test_busy_at, ncm_test_next_at;
++module_param_named(test_busy_at, ncm_test_busy_at, uint, 0444);
++module_param_named(test_next_at, ncm_test_next_at, uint, 0444);
 +
  static enum hrtimer_restart ncm_tx_timeout(struct hrtimer *data)
  {
@@ -17,17 +20,20 @@
  	netdev_tx_t ret;
  
 +	WRITE_ONCE(ncm_test_callback_count, READ_ONCE(ncm_test_callback_count) + 1);
++	if (READ_ONCE(ncm_test_busy_at) && !READ_ONCE(ncm_test_next_at))
++		WRITE_ONCE(ncm_test_next_at, READ_ONCE(ncm_test_callback_count));
  	if (netdev) {
  		/* XXX This allowance of a NULL skb argument to ndo_start_xmit
  		 * XXX is not sane.  The gadget layer should be redesigned so
-@@ -1159,7 +1166,10 @@
+@@ -1159,7 +1171,11 @@
  		 *
  		 * This will call directly into u_ether's eth_start_xmit()
  		 */
 -		ret = netdev->netdev_ops->ndo_start_xmit(NULL, netdev);
-+		if (xchg(&ncm_test_force_busy, 0))
++		if (xchg(&ncm_test_force_busy, 0)) {
++			WRITE_ONCE(ncm_test_busy_at, READ_ONCE(ncm_test_callback_count));
 +			ret = NETDEV_TX_BUSY;
-+		else
++		} else
 +			ret = netdev->netdev_ops->ndo_start_xmit(NULL, netdev);
  		if (ret == NETDEV_TX_BUSY) {
  			hrtimer_forward_now(data, TX_TIMEOUT_NSECS);

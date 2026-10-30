@@ -52,6 +52,12 @@ if [ -w "$fault" ]; then
  if nsenter -t "$ns" -n ping -c 1 -W 2 192.0.2.1; then echo VM_FAULT_PING_PASS; else echo VM_FAULT_PING_FAIL; fi
  if [ "$(cat "$fault")" = 0 ]; then echo VM_FAULT_CONSUMED; else echo VM_FAULT_NOT_CONSUMED; fi
  if [ -n "$before" ]; then after=$(cat "$counter"); printf 'VM_CALLBACK_DELTA %s\n' "$((after - before))"; fi
+ busy=/sys/module/usb_f_ncm/parameters/test_busy_at
+ next=/sys/module/usb_f_ncm/parameters/test_next_at
+ if [ -r "$busy" ] && [ -r "$next" ]; then
+  printf 'VM_BUSY_AT '; cat "$busy"
+  printf 'VM_NEXT_AT '; cat "$next"
+ fi
 else
  echo VM_FAULT_HOOK_ABSENT
 fi
