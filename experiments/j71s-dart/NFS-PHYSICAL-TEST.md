@@ -135,3 +135,5 @@ The reconstructed experimental kernel build completed successfully on its increm
 The upstream CLI RAM build test suite passed all 38 tests against the checked-out hardware tree. These use synthetic inputs and exercise the real initramfs packer and image assembler with mocked USB; they do not validate the forthcoming J71s image or a physical boot.
 
 As a staging preflight, the upstream module installer processed all 41 modules from the completed experimental rebuild and generated a populated `modules.dep` with 41 entries. This checks the local staging toolchain on real build output; the separate upstream candidate still needs its own modules staged and tested.
+
+The corrected upstream build later stopped with exit 2 after a compiler for `lib/sys_info.o` was killed with exit 137. A check of recent kernel logs did not identify an out-of-memory event, so the cause is not established. The same output directory and fixed build metadata were retained and an incremental single-worker retry was started; its result remains pending. The running iPad was not rebooted.
