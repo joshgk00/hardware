@@ -92,6 +92,10 @@ The two saved J71s DART `reg` records, decoded as 64-bit address and size,
 match the corresponding S8003 DART addresses and 0x4000-byte sizes, and both
 saved mapper `reg` values are zero. This is further source-level similarity;
 it does not prove stream IDs, register semantics, isolation or safe DMA.
+For both saved J71s DART nodes, the first 64-bit error-reflector word and the
+32-bit fetch and diagnostic configuration values also match the corresponding
+upstream S8003 properties. The remaining error-reflector data and any
+runtime sequencing were not validated by that comparison.
 
 For the related Wi-Fi path, the saved private J71s ADT has the WLAN reg-on and
 interrupt properties and the PCIe port-1 CLKREQ, device-wake and PERST
