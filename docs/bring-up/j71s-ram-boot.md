@@ -45,6 +45,9 @@ test; it does not claim that later revision was booted.
   Bluetooth discovery started and stopped, a silent audio playback command
   completed, and sensor readings changed. Audible sound, microphone capture,
   pairing and sensor accuracy were not established.
+  The separate [J71b speaker proposal](https://github.com/OrchardLinux/orchard/pull/38)
+  targets the iPad 6's MCA v5 path and says the S8000 MCA v4 path is retained;
+  it does not establish audible output on this J71s device.
 - The only IIO device found in a later inventory was the `ct819` light sensor;
   no accelerometer or angular-velocity IIO channel was present. Other sensor
   interfaces were not exhaustively surveyed, and rotation was not tested.
