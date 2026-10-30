@@ -8,6 +8,10 @@ The related [J71t iPad 5 pull request](https://github.com/OrchardLinux/hardware/
 targets another iPad 5 variant with S8003 (CPID `0x8003`). Its driver code is a
 useful reference, but it is not evidence that J71s works.
 
+## Current result
+
+An experimental Omarchy desktop has now booted on this J71s from a writable root served by the connected computer over USB NFS. The user confirmed touch, menu filtering, the on-screen keyboard and terminal typing. A patched NCM kernel has so far avoided the repeated NFS stalls seen in the prior boot, but causation and long-term stability are not established. Internal storage and Wi-Fi remain unresolved; this is not an installation. The sequence below is a historical record, and its earlier pending-step statements refer to the states at the time of those experiments.
+
 ## What has been observed on this J71s
 
 - A temporary Linux desktop was displayed, and touch responded to the user's
