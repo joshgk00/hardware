@@ -184,7 +184,9 @@ A later short Bluetooth discovery command reported that discovery started;
 after it stopped, the controller reported powered and not discovering. The
 temporary command output was removed and no discovered device details were
 included in this record. This checks start/stop of discovery, not reception,
-pairing, data transfer or persistence behavior of the Bluetooth daemon.
+pairing or data transfer. The daemon had written two cache files during the
+test window; those files were subsequently removed without recording their
+contents. Other daemon persistence behavior was not evaluated.
 
 At a later sample in the same boot, the CT819 sensor reported illuminance input 180 and IR raw 59, after the earlier illuminance input of zero. This shows readable and changing values, but the lighting conditions and accuracy were not independently measured.
 
