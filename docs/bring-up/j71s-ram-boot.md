@@ -44,6 +44,10 @@ test; it does not claim that later revision was booted.
 - The only IIO device found in a later inventory was the `ct819` light sensor;
   no accelerometer or angular-velocity IIO channel was present. Other sensor
   interfaces were not exhaustively surveyed, and rotation was not tested.
+  The private device ADT contains `accel`, `gyro` and `compass` nodes under an
+  AOP nub, a possible lead for motion-sensor bring-up. Their presence does not
+  identify the hardware protocol or establish compatibility with the proposed
+  T8010 AOP driver.
 - The tablet user wrote and synced 16 MiB to the NFS root with a checksum
   matching the host; a separate 16 MiB host-created file also matched when read
   by the tablet. Both files were removed. A 100-packet USB ping sample had no
