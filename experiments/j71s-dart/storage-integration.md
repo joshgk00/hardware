@@ -63,6 +63,13 @@ so a J71s implementation cannot assume the S8003 resource layout unchanged.
 The raw-word search alone does not establish translated address layout or
 prove that any other register is safe to access.
 
+Decoding the saved J71s PCIe `reg` property as 64-bit address/size pairs found
+exact counterparts for the upstream S8003 configuration, root-complex, PHY,
+port 0, port 1 and NVMMU ranges; the S8003 `phy-ip` range was absent from those
+raw pairs. This supports a narrower resource-layout comparison than a blind
+copy of S8003. It does not prove address translation, register semantics,
+required power state or that port-1 accesses are safe.
+
 Upstream S8003 deliberately brings up storage port 0 first and leaves other
 ports off if it fails: its source explains that PCI bus numbering otherwise
 could route the next port through the storage port's DART mapping. Endpoint
