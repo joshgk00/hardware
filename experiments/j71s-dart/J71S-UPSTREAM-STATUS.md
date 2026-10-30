@@ -30,7 +30,8 @@ logs remain private.
   device-tree calibration by length and digest. That does not establish
   correct orientation, accuracy or touch interaction.
 - The speaker card, Bluetooth controller and calibrated ambient light sensor
-  enumerated. Bluetooth reported powered; one silent WAV playback command
+  enumerated. Bluetooth reported powered and started and stopped discovery;
+  one silent WAV playback command
   completed; sensor values changed. Audible output, pairing, microphone and
   light-sensor accuracy remain untested.
 - The video decoder exposed stateless H.264 and NV12 formats. No video decode

@@ -180,6 +180,12 @@ ALSA reports a playback and capture PCM for the speaker card, and the Bluetooth 
 
 Bluetooth's userspace controller reports powered on, but pairing and transfers remain untested. PipeWire reported a default built-in stereo sink. A raw silent-stream attempt exited 1 without a useful error; a separate one-second silent WAV played through `pw-play` as the tablet user and exited 0. Its temporary file was removed. The latter verifies the command completed through PipeWire; it does not prove audible speaker output or microphone capture.
 
+A later short Bluetooth discovery command reported that discovery started;
+after it stopped, the controller reported powered and not discovering. The
+temporary command output was removed and no discovered device details were
+included in this record. This checks start/stop of discovery, not reception,
+pairing, data transfer or persistence behavior of the Bluetooth daemon.
+
 At a later sample in the same boot, the CT819 sensor reported illuminance input 180 and IR raw 59, after the earlier illuminance input of zero. This shows readable and changing values, but the lighting conditions and accuracy were not independently measured.
 
 The running Linux device tree's `apple,als-calibration` property also matched
