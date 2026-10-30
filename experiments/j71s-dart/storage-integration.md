@@ -75,6 +75,11 @@ different `vm-size` properties on this iPad; their mapper `reg` properties
 match. This rules out treating the two saved window descriptions as identical.
 The meanings of the mapper value and window properties in Linux, their relation
 to PCI requester IDs, and real DMA behavior remain unverified.
+The saved WLAN `iommu-parent` property contains only the four-byte phandle;
+the storage endpoint's property is twelve bytes. The existing port-0 window
+extractor requires the latter format and an exact provisional storage window,
+so it cannot be reused for port 1 without a separately justified decoder and
+validation of the different window size.
 
 For the related Wi-Fi path, the saved private J71s ADT has the WLAN reg-on and
 interrupt properties and the PCIe port-1 CLKREQ, device-wake and PERST
