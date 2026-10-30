@@ -74,7 +74,7 @@ timing, actual electrical behavior or functional Wi-Fi.
 
 `check-wlan-signals.py` repeats this comparison locally with the unified
 Orchard ADT parser and prints only match status. It rejects duplicate selected
-paths, ambiguous phandles and malformed function records; it does not print
+paths, ambiguous phandles and invalid function-record lengths; it does not print
 the private tree or access hardware. Run it with the Orchard `src` directory
 on `PYTHONPATH` and the private ADT path as its argument. Synthetic tests cover
 matching records and several malformed or ambiguous inputs. The real J71s
