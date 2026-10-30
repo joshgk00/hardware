@@ -2186,3 +2186,11 @@ its memset is not a substitute for the integration patch's retirement and
 invalidation ordering. The one-shot test retains its slot until physical
 reset; no safe live-slot reuse has been established. The builder and one-shot
 descriptor mocks passed this comparison, which does not validate DMA on J71s.
+
+
+A physical J71s test of the pre-init guard reported valid FIFO status with
+the candidate empty bit set before initialization, then completed the guarded
+controller-only path and explicitly skipped the command doorbell. This is one
+sample: it neither proves the S8000 meaning of that bit nor establishes that
+the earlier failures arose from FIFO initialization or that DMA works. All
+armed resources remain retained until a physical reset.

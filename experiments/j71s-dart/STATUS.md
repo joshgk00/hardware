@@ -54,6 +54,10 @@ Device Tree material are kept private. Do not commit them to a public branch.
 The detailed experiment history, candidate patches, limitations, and host tests
 are in [README.md](README.md).
 
+The pre-init FIFO guard was physically exercised in no-doorbell mode. It saw a valid status with the candidate empty bit set and the diagnostic returned successfully after skipping the doorbell. This does not establish working DMA or explain the command-path disconnects. Physical reset is required after the test.
+
+[Hardware PR 30](https://github.com/OrchardLinux/hardware/pull/30) adds an experimental USB NFS-root boot, physically demonstrated on an iPhone 6. It may provide a parallel route to a writable host-served Omarchy system while J71s internal storage is investigated. The J71s path is untested; it needs a matching kernel with NFS, a suitable server and an ownership-preserving root. Our previous J71s USB desktop and read-only Omarchy image are relevant foundations, not proof that this NFS path works.
+
 ## Upstream integration update
 
 The related J71t work was merged in [hardware PR 28](https://github.com/OrchardLinux/hardware/pull/28). Its author reported RAM-booted read-only storage, display, touch and Wi-Fi tests on S8003 J71t; installation was not tested and remains disabled. Upstream main at `ae1457e` still marks S8000 J71s storage and Wi-Fi unsupported. The J71t results are valuable comparisons, not a validation of this J71s hardware or our pending FIFO test. The new main also includes an independently validated T7000 host sequence; similarity does not establish S8000 compatibility.
