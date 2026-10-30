@@ -35,14 +35,15 @@ backup = dropin.with_suffix('.conf.disabled-j71s-nfs')
 for path in (checker, unit, backup):
     if path.exists() or path.is_symlink():
         parser.error('refusing to overwrite: ' + str(path))
-script = '''#!/bin/sh
+CHECK_TEMPLATE = '''#!/bin/sh
 # This guard applies only to the private J71s NFS-root experiment.
 set -eu
 [ "$(uname -r)" = '@RELEASE@' ]
 tr '\\000' '\\n' < /proc/device-tree/compatible | grep -Fxq apple,j71s
 [ "$(cat /run/orchard/nfs-handoff-state)" = ready ]
 awk '$5 == "/" { for (i=6; i<=NF; i++) if ($i == "-" && $(i+1) ~ /^nfs4?$/) found=1 } END { exit !found }' /proc/self/mountinfo
-'''.replace('@RELEASE@', release)
+'''
+script = CHECK_TEMPLATE.replace('@RELEASE@', release)
 checker.write_text(script)
 checker.chmod(0o755)
 unit.write_text('[Unit]\nDescription=Verify J71s experimental NFS boot\n'
