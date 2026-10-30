@@ -258,6 +258,8 @@ If the USB connection fails first, the host may not receive the marker at all.
 Before opening the start gate, the script now checks that the observer process
 still exists. This detects an observer that has already exited but cannot prove
 that the reader is functioning or will remain attached after the check.
+`test-observer-gate.py` exercises the exited and live process cases with fake
+BusyBox and temporary gate/log files; it never opens the hardware start gate.
 
 ## Upstream initialization comparison
 
