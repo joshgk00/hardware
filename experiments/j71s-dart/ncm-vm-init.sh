@@ -21,9 +21,17 @@ echo VM_NCM_NETWORK_DEVICES
 for p in /sys/class/net/*; do basename "$p"; done
 echo VM_NCM_UDC
 cat UDC
+[ -n "$(cat UDC)" ] || { echo VM_UDC_MISSING; exec /bin/sh; }
 gadget=$(cat functions/ncm.usb0/ifname)
 host=
-for p in /sys/class/net/*; do n=$(basename "$p"); [ "$n" = lo ] && continue; [ "$n" = "$gadget" ] && continue; [ -z "$host" ] || { echo VM_MULTIPLE_HOST_INTERFACES; exec /bin/sh; }; host=$n; done
+for p in /sys/class/net/*; do
+ n=$(basename "$p")
+ [ "$n" = "$gadget" ] && continue
+ driver=$(readlink "$p/device/driver" 2>/dev/null || true)
+ case "$driver" in */cdc_ncm) ;; *) continue ;; esac
+ [ -z "$host" ] || { echo VM_MULTIPLE_HOST_INTERFACES; exec /bin/sh; }
+ host=$n
+done
 [ -n "$host" ] || { echo VM_HOST_INTERFACE_MISSING; exec /bin/sh; }
 unshare -n sleep 180 &
 ns=$!
