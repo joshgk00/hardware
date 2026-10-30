@@ -28,9 +28,10 @@ PCI requester is attached to the correct stream. Register readbacks and
 ## Host-driver integration
 
 The active diagnostic host intentionally allows only endpoint BAR sizing,
-assignment and memory-only command writes. The actual ANS preinitialization
-also writes the latency timer and configuration offsets 0x17c, 0x18c and
-0x188; a real controller also needs bus mastering. These writes are rejected
+assignment and memory-only command writes. The upstream ANS preinitialization
+also writes the latency timer and discovers LTR and L1SS capability registers
+before configuring them; earlier J71s observations placed candidate registers
+at 0x17c, 0x18c and 0x188. A real controller also needs bus mastering. These writes are rejected
 by the current policy, as checked by `test-j71s-ans-config-policy.py`.
 The diagnostic also lacks the H9P host's MSI domain and interrupt setup.
 Consequently attaching the existing NVMe driver to this host cannot be treated
@@ -61,3 +62,13 @@ register semantics or DMA. An explicit SART-zero write remains an untested
 sequence difference; neither a redundant write nor the S8003 meaning can be
 assumed safe on S8000. The earlier disconnected command tests do not isolate
 this difference.
+
+The current upstream PCI ANS path also invokes a DMA-slot reset before enabling
+the controller and explicitly writes zero to the controller's regular-init
+register at `0x1800` before writing its host-memory-buffer registers. The J71s
+one-shot scratch helper checks that `0x1800` reads zero and programs its
+scratch registers, but does not make that explicit init-register write; its
+bounded path does not reproduce the upstream full slot-reset sequence. These
+are further source-level differences, not a demonstrated cause of the failed
+command. The effects of those writes and invalidations on S8000 remain
+unverified; no such hardware action was performed in this comparison.
