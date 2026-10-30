@@ -77,6 +77,12 @@ now emits a single cell and rejects addresses that cannot fit; its synthetic
 tests cover both the encoding and the overflow case. A private J71s fragment
 compiled and its property was four bytes. This fixes the offline candidate
 format for that interface, not MSI routing or delivery on S8000.
+The current upstream binding also declares this property `uint32`. A compiled
+comparison showed that the previous 64-bit encoding had two cells and a zero
+first cell, whereas the corrected encoding has one cell equal to the old low
+cell. Since the driver reads a single u32, the prior fragment would have
+provided zero to that interface. Neither fragment was used to establish MSI
+delivery in this check.
 
 Decoding the saved J71s PCIe `reg` property as 64-bit address/size pairs found
 exact counterparts for the upstream S8003 configuration, root-complex, PHY,
