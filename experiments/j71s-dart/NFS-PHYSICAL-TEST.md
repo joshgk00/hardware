@@ -115,3 +115,5 @@ Twelve J71s Wi-Fi firmware inputs were extracted from the locally saved iPadOS 1
 The video-decoder firmware extracted from the saved iPadOS kernel cache matched Orchard’s pinned J71s recipe and was staged only in the separate private test root. This prepares a firmware input; video decoding has not been tested or established.
 
 A final hash audit checked all 16 firmware outputs in the upstream J71s recipe against their files in the private test root: all matched, with none missing. This is input validation only; it does not establish that any hardware driver loads or functions.
+
+The separate clean reconstruction build stopped when compiler processes were killed with exit 137. The exact cause was not confirmed from the checked system logs; its resolved config still matched the saved config. The build was restarted incrementally with one low-priority worker in the same isolated output directory. This retry remains incomplete and does not change the running iPad or the corrected upstream build.
