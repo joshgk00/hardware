@@ -163,3 +163,5 @@ ALSA reports a playback and capture PCM for the speaker card, and the Bluetooth 
 Bluetooth's userspace controller reports powered on, but pairing and transfers remain untested. PipeWire reported a default built-in stereo sink. A raw silent-stream attempt exited 1 without a useful error; a separate one-second silent WAV played through `pw-play` as the tablet user and exited 0. Its temporary file was removed. The latter verifies the command completed through PipeWire; it does not prove audible speaker output or microphone capture.
 
 At a later sample in the same boot, the CT819 sensor reported illuminance input 180 and IR raw 59, after the earlier illuminance input of zero. This shows readable and changing values, but the lighting conditions and accuracy were not independently measured.
+
+The new touchscreen input device reports both single-touch and multitouch coordinate ranges of X 0–1535 and Y 0–2047, matching the display's 1536-by-2048 pixel dimensions. This is an axis-range check; orientation, calibration and user interaction still need confirmation on the upstream-based boot.
