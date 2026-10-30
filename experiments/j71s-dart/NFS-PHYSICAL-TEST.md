@@ -197,6 +197,12 @@ The local NFS server's VFS source says its `setAcl` does not store ACLs; how
 that implementation relates to this Linux client's specific ACL request has
 not been traced. No broader journal permissions were granted as a workaround.
 
+The client reports the per-user journal file as UID/GID 0:0, mode 0640, with
+only the basic owner/group/other ACL entries; the tablet user is in neither
+the root nor systemd-journal group. Those observed permissions explain why
+this user cannot read that file. The journal directories were traversable;
+the exact protocol-level reason for the failed ACL update remains unverified.
+
 An upstream refresh found hardware main at `4f15a70`, a descendant of the tested `0cfb171`. The intervening history reorganizes the CLI and hardware Python code into one project. In the compared paths there are no changes to the kernel or m1n1 patch directories or the NFS runtime shell scripts; the NFS staging Python moved to `orchard.image.nfs` and now writes `orchard.local.toml`. Reproduction instructions must account for that interface change. This comparison does not test the newer tooling or establish equivalence outside the inspected paths.
 
 In a separate checkout of upstream `4f15a70`, all 13 NFS runtime tests passed. Staging the same private root identity, BusyBox, kernel and network parameters with `orchard.image.nfs` produced byte-identical runtime files to the physically booted staging output; the device-choice file's contents also matched under its new filename. This validates staging for these inputs, not a physical boot assembled with the newer project's complete build workflow.
