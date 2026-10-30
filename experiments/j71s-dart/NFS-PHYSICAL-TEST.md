@@ -143,3 +143,5 @@ The resolved upstream configuration enables gzip initramfs unpacking, devtmpfs, 
 The upstream shared iPad 5 tree also describes a UART HDQ battery fuel gauge, and the resolved configuration builds the UART one-wire and BQ27xxx HDQ drivers in. The separate test override disables the Lightning charger node, not the fuel-gauge node. Battery reporting and charging behavior under the upstream candidate still require physical validation.
 
 During the prolonged experimental desktop session, a later attempt to run a read-only serial check timed out without receiving its start marker. The same USB network still answered ICMP and the NFS server remained running. These observations do not establish whether the desktop or rescue shell was responsive, nor do they identify the cause of the console timeout. No reboot was initiated for that check.
+
+After that timeout, the user confirmed that the desktop still responds to touch. This establishes that the visible interface was responsive at that later moment; the cause of the console timeout remains unknown.
