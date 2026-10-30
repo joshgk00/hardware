@@ -77,3 +77,5 @@ RAM touch boot the next integration comparison, not proof it will work: the
 upstream kernel, its J71s tree, m1n1 handoff, firmware and this exact device
 have not yet been tested together. Keep the existing working NFS session until
 a suitable image is prepared and verified.
+
+The previously extracted J71s mtprops from the installed iPadOS 16.7.16 build matched the upstream recipe’s pinned input SHA-256. Orchard CLI `a2dd45f` converted it using the J71s recipe parameters, and the generated Z2FW matched the upstream expected SHA-256. The resulting firmware remains private. This validates the input and conversion only; it does not prove calibration handoff or touch operation with the integrated driver.
