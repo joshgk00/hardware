@@ -172,6 +172,15 @@ bounds are used as candidate validation limits for port 1, not proven port-1
 resource sizes. This is data preparation only; no values were applied to the
 device and no PCIe or Wi-Fi function was tested.
 
+The earlier private link-only diagnostic hardcodes the storage port's MMIO,
+reset and clock-request handling, and consumes the port-0 properties. It is
+not a port-1 test by changing only the extracted table. A separate Wi-Fi
+diagnostic would also need independently validated port-1 resources, reset,
+clock-request and WLAN power sequencing, plus explicit DMA-disabled safeguards
+and teardown; upstream S8003 uses a fixed WLAN regulator and sequences endpoint
+power. The correct J71s behavior is not established and no such port-1
+hardware experiment has been run.
+
 After the extension, a default-port extraction from the same private J71s ADT
 was byte-identical to the previously saved port-0 fragment. This checks that
 the new option preserved this input's prior output, not every possible ADT.
