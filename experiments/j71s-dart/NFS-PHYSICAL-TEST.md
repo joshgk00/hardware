@@ -113,3 +113,5 @@ The J71s Bluetooth HCD stream was extracted from BlueTool in the locally saved i
 Twelve J71s Wi-Fi firmware inputs were extracted from the locally saved iPadOS 16.7.16 archive; each matched both the input and output SHA-256 in the upstream J71s recipe. They were installed only into the separate private upstream test root. This prepares firmware for future PCIe testing; S8000 PCIe and Wi-Fi are not working or validated.
 
 The video-decoder firmware extracted from the saved iPadOS kernel cache matched Orchard’s pinned J71s recipe and was staged only in the separate private test root. This prepares a firmware input; video decoding has not been tested or established.
+
+A final hash audit checked all 16 firmware outputs in the upstream J71s recipe against their files in the private test root: all matched, with none missing. This is input validation only; it does not establish that any hardware driver loads or functions.
