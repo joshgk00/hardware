@@ -175,3 +175,5 @@ In a separate checkout of upstream `4f15a70`, all 13 NFS runtime tests passed. S
 The newer module-staging recipe also processed the existing upstream kernel output and staged 69 modules. All 82 generated files in its module tree matched the previously staged module tree byte-for-byte. This comparison does not rebuild the kernel or validate the complete updated build workflow.
 
 The unified checkout's RAM build tests initially produced four CLI errors because the source-only test environment had no installed `orchard` package metadata. Supplying temporary metadata matching its declared version 0.2.0 allowed all 38 tests to pass. This is a source-checkout test with synthetic package metadata, not a test of installing the package or booting an image.
+
+The running upstream-based boot exposes an `apple-vxd` video4linux device and PipeWire lists it. The selected kernel-log search returned no matching VXD messages. Device enumeration does not prove video firmware initialization, supported formats or successful hardware decoding.
