@@ -1,17 +1,26 @@
 --- a/drivers/usb/gadget/function/f_ncm.c
 +++ b/drivers/usb/gadget/function/f_ncm.c
-@@ -1144,6 +1144,10 @@
+@@ -1144,12 +1144,19 @@
   * The transmit should only be run if no skb data has been sent
   * for a certain duration.
   */
 +/* VM-only fault injection: never use in a device kernel. */
 +static unsigned int ncm_test_force_busy;
 +module_param_named(test_force_busy, ncm_test_force_busy, uint, 0600);
++static unsigned int ncm_test_callback_count;
++module_param_named(test_callback_count, ncm_test_callback_count, uint, 0444);
 +
  static enum hrtimer_restart ncm_tx_timeout(struct hrtimer *data)
  {
  	struct f_ncm *ncm = container_of(data, struct f_ncm, task_timer);
-@@ -1159,7 +1163,10 @@
+ 	struct net_device *netdev = READ_ONCE(ncm->netdev);
+ 	netdev_tx_t ret;
+ 
++	WRITE_ONCE(ncm_test_callback_count, READ_ONCE(ncm_test_callback_count) + 1);
+ 	if (netdev) {
+ 		/* XXX This allowance of a NULL skb argument to ndo_start_xmit
+ 		 * XXX is not sane.  The gadget layer should be redesigned so
+@@ -1159,7 +1166,10 @@
  		 *
  		 * This will call directly into u_ether's eth_start_xmit()
  		 */

@@ -45,10 +45,13 @@ nsenter -t "$ns" -n ip link set "$host" up
 sleep 2
 if nsenter -t "$ns" -n ping -c 3 -W 2 192.0.2.1; then echo VM_NCM_PING_PASS; else echo VM_NCM_PING_FAIL; fi
 fault=/sys/module/usb_f_ncm/parameters/test_force_busy
+counter=/sys/module/usb_f_ncm/parameters/test_callback_count
 if [ -w "$fault" ]; then
+ if [ -r "$counter" ]; then before=$(cat "$counter"); else before=; fi
  echo 1 > "$fault"
- if nsenter -t "$ns" -n ping -c 3 -W 2 192.0.2.1; then echo VM_FAULT_PING_PASS; else echo VM_FAULT_PING_FAIL; fi
+ if nsenter -t "$ns" -n ping -c 1 -W 2 192.0.2.1; then echo VM_FAULT_PING_PASS; else echo VM_FAULT_PING_FAIL; fi
  if [ "$(cat "$fault")" = 0 ]; then echo VM_FAULT_CONSUMED; else echo VM_FAULT_NOT_CONSUMED; fi
+ if [ -n "$before" ]; then after=$(cat "$counter"); printf 'VM_CALLBACK_DELTA %s\n' "$((after - before))"; fi
 else
  echo VM_FAULT_HOOK_ABSENT
 fi
