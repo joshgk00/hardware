@@ -62,3 +62,18 @@ not prove that the NCM patch alone caused the improvement, qualify the server,
 or establish long-term stability. It does not establish working S8000 PCIe,
 internal storage, Wi-Fi, charging or an installer. Raw device logs, firmware,
 per-device identity and assembled images are intentionally kept private.
+
+## Current upstream integration lead
+
+Hardware main `0cfb171` no longer uses the separate `apple_n1` driver: its
+[integrated J71t touchscreen patch](https://github.com/OrchardLinux/hardware/blob/0cfb17118261ac37e1d5019d45c63237fb550c73/kernel/patches/drivers/input/0009-Input-apple_z2-Add-iPad-5-J71t-touchscreen-support.patch)
+folds the protocol into `apple_z2` and explicitly omits the original stage
+parameters. The J71s device tree includes the shared iPad 5 touch node using
+the J71t compatible, and its firmware recipe builds `j71s-fwstart.z2fw`. The
+matching shared driver's expected 40-by-30 sensor and 14745-by-19657 surface
+agree with the earlier J71s stage-2 discovery. Orchard's m1n1 patch forwards
+the unit calibration to the driver. These facts make an upstream-based J71s
+RAM touch boot the next integration comparison, not proof it will work: the
+upstream kernel, its J71s tree, m1n1 handoff, firmware and this exact device
+have not yet been tested together. Keep the existing working NFS session until
+a suitable image is prepared and verified.
