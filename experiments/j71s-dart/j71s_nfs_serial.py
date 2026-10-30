@@ -28,3 +28,22 @@ def find_nfs_serial(root_id, sys_root=Path('/sys'), dev_root=Path('/dev')):
     if len(candidates) != 1:
         raise RuntimeError(f'Expected one matching J71s NFS serial console, found {len(candidates)}')
     return candidates[0]
+
+
+def find_nfs_interface(root_id, sys_root=Path('/sys'), dev_root=Path('/dev')):
+    """Find the sole network interface belonging to the selected NFS console."""
+    serial = find_nfs_serial(root_id, sys_root, dev_root)
+    serial_device = (sys_root / 'class/tty' / serial.name / 'device').resolve(strict=True)
+    usb = next(p for p in (serial_device, *serial_device.parents)
+               if (p / 'idVendor').is_file() and (p / 'idProduct').is_file())
+    candidates = []
+    for net in (sys_root / 'class/net').iterdir():
+        try:
+            parent = (net / 'device').resolve(strict=True)
+            if usb in (parent, *parent.parents):
+                candidates.append(net.name)
+        except OSError:
+            continue
+    if len(candidates) != 1:
+        raise RuntimeError(f'Expected one matching J71s NFS interface, found {len(candidates)}')
+    return candidates[0]
