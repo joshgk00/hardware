@@ -17,6 +17,17 @@ RAM and used a host-served NFS root over a dedicated USB connection. The NFS
 export and rescue shell were unauthenticated and used only on a trusted,
 isolated link. This was not an internal-storage installation.
 
+The kernel base was `cee9395acd8043be0644b25c34bfa86623f2b935` with the
+ordered Orchard patches for that hardware revision and the additional NCM
+change above. The resolved config SHA-256 was
+`e3e1f8bd1732a6cc2a9c389af53b81c9ac3cfad0e934029eab3ce6c6f18b01ef`;
+the uncompressed kernel Image SHA-256 was
+`68688e636de6a05dc7006c603dcca0d74a058c3e3683a127969e095d501ff15e`.
+The boot release was `7.3.0-rc1-orchard-apple-16k`. The root was a private
+J71b Omarchy image adapted for this J71s experiment, with the J71b charging
+lease disabled. This record is on a later source revision than the physical
+test; it does not claim that later revision was booted.
+
 ## Observations
 
 - Systemd reported `running` without failed units. The compositor, on-screen
