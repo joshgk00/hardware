@@ -109,3 +109,12 @@ reported 84% and discharging, with `current_now=-566000` microamps and
 `voltage_now=4052000` microvolts. This is one software reading, not a measured
 charger current or a reliable runtime estimate. The armed controller still
 requires a physical reset before another boot.
+
+The earlier USB diagnostic links its ACM function before NCM; the new NFS
+startup links NCM before ACM. Linux interface names can therefore differ, so
+the old manually configured `j71s-ram-transfer` profile must not be applied
+blindly. It has autoconnect disabled and was not active when checked. The NFS
+selector instead finds the interface under the same selected USB device. For
+the physical test, use a temporary NetworkManager profile bound to that
+verified interface, with the isolated /30 and no default route, and remove it
+afterward. This setup has not yet been exercised on the iPad.
