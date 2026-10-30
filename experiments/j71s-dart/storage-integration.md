@@ -77,6 +77,12 @@ SoC GPIO node and have first arguments matching the corresponding J71t WLAN
 UART pin candidates. Their remaining arguments, electrical operation and the
 upstream WLAN UART integration have not been validated on J71s.
 
+Both saved J71s WLAN nodes include `4355` in their compatible data, consistent
+with the BCM4355 family named by the J71s firmware recipe and J71t tree. The
+checked compatible data did not itself contain the candidate PCI device ID or
+the `4355c0` revision string. This is family-level source evidence only; actual
+PCI enumeration and firmware selection remain unverified.
+
 Before issuing commands, a combined implementation must establish ownership
 and teardown of DMA buffers and translation tables across failures, reset,
 unbind and kexec; prevent freeing memory while hardware can still access it;
