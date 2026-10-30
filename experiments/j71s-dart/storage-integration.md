@@ -99,6 +99,15 @@ that other port settings, power sequencing, DMA, or Wi-Fi are interchangeable.
 The raw device-derived tables remain private and have not been applied to
 port 1 in the current desktop boot.
 
+An offline comparison against the tested upstream S8003 driver's literal
+tunable arrays found the J71s common table (34 records) and port-1 block table
+(six records) matched in order. The two-record root-port configuration table
+was not identical, and none of the four S8003 PHY-array records appeared as an
+identical tuple in the 41-record J71s PHY table. This compares literal
+offset/mask/value tuples only, not complete initialization sequences or MMIO
+semantics. In particular, it is evidence against assuming the S8003 tables
+can simply be reused wholesale for S8000.
+
 The offline `extract-pcie-tunables.py` converter now accepts `--port 1`, while
 retaining port 0 as its default. On the saved private J71s ADT it validated
 and emitted all four candidate tables to a mode-0600 private fragment, and a
