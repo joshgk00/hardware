@@ -54,6 +54,10 @@ Device Tree material are kept private. Do not commit them to a public branch.
 The detailed experiment history, candidate patches, limitations, and host tests
 are in [README.md](README.md).
 
+## Upstream integration update
+
+The related J71t work was merged in [hardware PR 28](https://github.com/OrchardLinux/hardware/pull/28). Its author reported RAM-booted read-only storage, display, touch and Wi-Fi tests on S8003 J71t; installation was not tested and remains disabled. Upstream main at `ae1457e` still marks S8000 J71s storage and Wi-Fi unsupported. The J71t results are valuable comparisons, not a validation of this J71s hardware or our pending FIFO test. The new main also includes an independently validated T7000 host sequence; similarity does not establish S8000 compatibility.
+
 ## Contributions already opened
 
 - [Fix packed S5L DART stream controls](https://github.com/OrchardLinux/linux/pull/1)
