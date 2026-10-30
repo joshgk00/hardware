@@ -21,6 +21,7 @@ def sample():
     }
 assert msi.decode(sample()) == (80, 32, 0xbffff000, [(0, 8), (8, 8)])
 assert 'AIC_IRQ 80 IRQ_TYPE_EDGE_RISING 32' in msi.render(msi.decode(sample()))
+assert 'apple,msi-doorbell = <0xbffff000>;' in msi.render(msi.decode(sample()))
 def reject(mutator):
     data=sample(); mutator(data)
     try: msi.decode(data)
@@ -28,6 +29,7 @@ def reject(mutator):
     raise AssertionError('invalid MSI metadata was accepted')
 reject(lambda d: d[msi.ROOT].properties.update({'msi-parent-controller':u32(9)}))
 reject(lambda d: d[msi.ROOT].properties.update({'msi-address':u64(3)}))
+reject(lambda d: d[msi.ROOT].properties.update({'msi-address':u64(0x100000000)}))
 reject(lambda d: d[msi.ROOT].properties.update({'#msi-vectors':b'bad'}))
 reject(lambda d: d[msi.ROOT+'/pci-bridge1'].properties.update({'msi-vector-base':u32(7)}))
 reject(lambda d: d[msi.ROOT+'/pci-bridge1'].properties.update({'msi-vector-base':u32(30)}))

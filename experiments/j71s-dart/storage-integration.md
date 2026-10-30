@@ -70,6 +70,14 @@ J71s ADT property checked has four words, while the S8003 Linux tree also
 describes a separate NVMMU interrupt. These comparisons do not establish
 interrupt type, IRQ delivery, vector allocation or an S8000 NVMMU interrupt.
 
+The experimental `extract-pcie-msi.py` previously emitted its candidate
+`apple,msi-doorbell` as a 64-bit DT value, but the current upstream H9P driver
+uses `of_property_read_u32` and its tree emits one 32-bit cell. The extractor
+now emits a single cell and rejects addresses that cannot fit; its synthetic
+tests cover both the encoding and the overflow case. A private J71s fragment
+compiled and its property was four bytes. This fixes the offline candidate
+format for that interface, not MSI routing or delivery on S8000.
+
 Decoding the saved J71s PCIe `reg` property as 64-bit address/size pairs found
 exact counterparts for the upstream S8003 configuration, root-complex, PHY,
 port 0, port 1 and NVMMU ranges; the S8003 `phy-ip` range was absent from those

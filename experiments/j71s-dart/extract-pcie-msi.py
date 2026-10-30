@@ -34,7 +34,8 @@ def decode(nodes):
     address = scalar(root, 'msi-address', 8)
     if not count or count > 256 or base + count > 0x100000000:
         raise ValueError('invalid root vector range')
-    if not address or address & 0xfff or address > 0xffffffffffffffff:
+    # The current H9P binding and driver consume one 32-bit DT cell.
+    if not address or address & 0xfff or address > 0xffffffff:
         raise ValueError('invalid MSI address')
     ranges = []
     for port in range(4):
@@ -59,7 +60,7 @@ def render(data):
     base, count, address, ranges = data
     lines = ['/* Candidate device-derived data; keep private and validate. */',
              f'msi-ranges = <&aic AIC_IRQ {base} IRQ_TYPE_EDGE_RISING {count}>;',
-             f'apple,msi-doorbell = /bits/ 64 <0x{address:x}>;',
+             f'apple,msi-doorbell = <0x{address:x}>;',
              '/* Port ranges are offsets into the root vector range: */']
     lines.extend(f'/* port range {start} + {count} */' for start, count in ranges)
     return '\n'.join(lines) + '\n'
@@ -70,7 +71,12 @@ def main():
     parser.add_argument('adt', type=Path)
     parser.add_argument('output', type=Path)
     args = parser.parse_args()
-    from orchard_cli.apple.adt_tree import parse
+    try:
+        from orchard.apple.adt_tree import parse
+    except ModuleNotFoundError as exc:
+        if exc.name not in ('orchard', 'orchard.apple', 'orchard.apple.adt_tree'):
+            raise
+        from orchard_cli.apple.adt_tree import parse
     try:
         result = decode(dict(parse(args.adt.read_bytes()).walk()))
     except ValueError as exc:
