@@ -55,6 +55,14 @@ binding and match data as well as ANS selection; simply describing an S8000
 node would not bind this driver, and claiming S8003 compatibility without
 evidence could apply the wrong hardware sequence.
 
+The upstream S8003 device-tree source explicitly distinguishes its `phy-ip`
+register window from S8000, which it says has no such region. In the saved
+J71s ADT's raw PCIe `reg` words, the upstream S8003 `phy-ip` base was not
+present. The S8003 host match sets `has_phy` and its setup uses that window,
+so a J71s implementation cannot assume the S8003 resource layout unchanged.
+The raw-word search alone does not establish translated address layout or
+prove that any other register is safe to access.
+
 Upstream S8003 deliberately brings up storage port 0 first and leaves other
 ports off if it fails: its source explains that PCI bus numbering otherwise
 could route the next port through the storage port's DART mapping. Endpoint
