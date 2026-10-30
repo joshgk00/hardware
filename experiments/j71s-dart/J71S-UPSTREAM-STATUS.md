@@ -41,7 +41,14 @@ logs remain private.
   retained kernel log had no NFS timeout lines. These are limited samples.
 - The tablet user could not read its journal: the observed journal file was
   root-owned and lacked a user ACL after journald reported an unsupported ACL
-  operation. The exact NFS protocol cause has not been established.
+  operation. A separate temporary file on this NFSv4 mount also rejected a
+  named-user POSIX ACL. The tested kernel's NFSv4 file operations lack a POSIX
+  `set_acl` callback, while the test server separately does not store NFSv4
+  ACLs. This narrows the limitation but does not qualify other filesystems.
+- At approximately 98 minutes, systemd still reported `running`, and a scan
+  of retained kernel messages found no NFS server, timer, watchdog or lockup
+  matches. This snapshot cannot establish uninterrupted operation or that the
+  USB networking patch's retry branch was exercised.
 
 ## Remaining work
 
@@ -61,3 +68,8 @@ logs remain private.
   feedback before proposing a focused contribution. The newer unified
   upstream staging interfaces have passed local checks, but the complete
   updated build workflow has not been physically tested.
+- Review and test the separate proposed NCM retry variant that advances the
+  timer before restarting. An isolated kernel image and 69 matching module
+  files were built and packaged with the previously tested boot components,
+  but the image has not been booted or subjected to controlled congestion,
+  suspend, disconnect or concurrent-timer testing.
