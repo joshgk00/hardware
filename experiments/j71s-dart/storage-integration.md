@@ -5,6 +5,8 @@ its BAR, but it is not a storage driver. This note records source-level
 integration requirements; none of the untested steps below is evidence of
 working DMA or disk I/O.
 
+The related [Hoolock A9 feature matrix](https://github.com/HoolockLinux/docs/blob/23ebe1fbc375599221553a7e1815e5de182a6b42/features/A9.md) lists basic A9 and iPad 5 support but does not list PCIe or NVMe as working features. That omission is not proof that no other implementation exists; it is not a basis for claiming internal storage works on S8000.
+
 ## Address paths
 
 The J71b H9P implementation allocates its NVMMU TCB, TCB table and SGL using
