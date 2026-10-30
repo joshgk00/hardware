@@ -176,4 +176,6 @@ The newer module-staging recipe also processed the existing upstream kernel outp
 
 The unified checkout's RAM build tests initially produced four CLI errors because the source-only test environment had no installed `orchard` package metadata. Supplying temporary metadata matching its declared version 0.2.0 allowed all 38 tests to pass. This is a source-checkout test with synthetic package metadata, not a test of installing the package or booting an image.
 
-The running upstream-based boot exposes an `apple-vxd` video4linux device and PipeWire lists it. The selected kernel-log search returned no matching VXD messages. Device enumeration does not prove video firmware initialization, supported formats or successful hardware decoding.
+The running upstream-based boot exposes an `apple-vxd` video4linux device and PipeWire lists it. The selected kernel-log search returned no matching VXD messages. Device enumeration does not prove video firmware initialization or successful hardware decoding.
+
+A read-only V4L2 format query of that device advertised H.264 parsed slice input (`S264`) and NV12 capture output. This verifies the advertised interface only; no encoded video was submitted and hardware decoding has not been demonstrated.
