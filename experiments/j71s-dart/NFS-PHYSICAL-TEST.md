@@ -165,3 +165,5 @@ Bluetooth's userspace controller reports powered on, but pairing and transfers r
 At a later sample in the same boot, the CT819 sensor reported illuminance input 180 and IR raw 59, after the earlier illuminance input of zero. This shows readable and changing values, but the lighting conditions and accuracy were not independently measured.
 
 The new touchscreen input device reports both single-touch and multitouch coordinate ranges of X 0–1535 and Y 0–2047, matching the display's 1536-by-2048 pixel dimensions. This is an axis-range check; orientation, calibration and user interaction still need confirmation on the upstream-based boot.
+
+At approximately 48 minutes of uptime in the upstream-based boot, the rescue console reported systemd `running`, 41% battery and no `nfs: server` timeout lines in the retained kernel log. Three USB-network pings completed without loss. This is a point-in-time sample; the kernel ring buffer may not retain all earlier messages and it does not establish uninterrupted long-term reliability.
