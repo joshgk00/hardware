@@ -118,6 +118,8 @@ For the integration note's specific question about the PMU event line, the priva
 
 `check-pmu-interrupt.py` repeats that limited comparison using the unified Orchard ADT parser, printing only match results. Three synthetic tests cover the match, malformed or wrong interrupt record, ambiguous parent reference and duplicate PMU path; the private J71s input matched both checks. The helper is an offline comparison, not a charging test.
 
+The private J71s ADT also contains PMU and Tristar nodes under `i2c0`; their 16-byte `reg` properties have first little-endian words `0x3c` and `0x1a` respectively, matching the candidate I2C unit addresses in the shared upstream iPad 5 tree. This comparison does not decode the remaining words, identify the precise chip revisions, validate register semantics, or demonstrate charging.
+
 An Orchard m1n1 loader for the upstream comparison was built from pinned source `c9ef56f7356e93e6f6cac116c529d31c277ef6a6` with all 52 hardware `0cfb171` loader patches. Its source locates the `touchscreen0` alias and forwards the unit’s `multi-touch-calibration` from the live ADT to `apple,z2-cal-blob`; the shared iPad 5 tree supplies that alias. The built loader has not been booted on J71s, so calibration handoff remains unverified in hardware.
 
 A separate upstream-test root was extracted from the hash-verified original Omarchy archive with root and tablet ownership checked. It has a fresh private J71s receipt for kernel `7.3.0-rc1-orchard-apple-16k`, the existing guarded test-root preparation, and the hash-verified J71s touch and S8000 SmartIO firmware. Matching kernel modules and a staged RAM startup are still required; the new root has not been booted. The currently running root was not modified.
