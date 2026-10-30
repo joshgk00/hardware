@@ -63,6 +63,12 @@ must therefore explicitly establish port-to-bus and IOMMU routing rather than
 assuming upstream port-1 mappings remain valid when port 0 is absent. The
 S8003 rule is a design warning and does not prove S8000's mappings or behavior.
 
+In the saved private J71s ADT, the `function-dart_force_active` phandles for
+PCIe ports 0 and 1 resolve to `dart-apcie0` and `dart-apcie1` respectively.
+This is evidence that the original device description associates separate DART
+nodes with the two ports. It does not establish Linux requester IDs, stream
+IDs, actual isolation or the correct `iommu-map`; those still need validation.
+
 For the related Wi-Fi path, the saved private J71s ADT has the WLAN reg-on and
 interrupt properties and the PCIe port-1 CLKREQ, device-wake and PERST
 properties. As a preliminary comparison, each corresponding raw property
