@@ -255,6 +255,9 @@ available and therefore must only be used for a deliberately prepared test.
 It also prints an explicit marker when its observer exits; that marker does not
 distinguish a timeout from a reader failure or establish command completion.
 If the USB connection fails first, the host may not receive the marker at all.
+Before opening the start gate, the script now checks that the observer process
+still exists. This detects an observer that has already exited but cannot prove
+that the reader is functioning or will remain attached after the check.
 
 ## Upstream initialization comparison
 

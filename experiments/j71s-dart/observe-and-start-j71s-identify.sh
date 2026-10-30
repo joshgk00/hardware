@@ -18,7 +18,9 @@ done &
 observer=$!
 sleep 1
 gate=/sys/module/pcie_j71s_diagnostic/parameters/identify_start
-if [ -w "$gate" ] && printf '1\n' > "$gate"; then
+if ! kill -0 "$observer" 2>/dev/null; then
+ printf 'J71s Identify observer exited; no command requested.\n'
+elif [ -w "$gate" ] && printf '1\n' > "$gate"; then
  printf 'J71s Identify observer attached; start gate enabled.\n'
 else
  printf 'J71s Identify start gate unavailable; no command requested.\n'
