@@ -52,7 +52,7 @@ def compare(root):
         first_arg = struct.unpack_from('<I', raw, 8)[0]
         result[name] = refs.get(phandle) == {target} and first_arg == pin
     raw = nodes.get(WLAN).properties.get('interrupts') if WLAN in nodes else None
-    result['wlan-interrupt-first-word'] = raw is not None and len(raw) >= 4 and struct.unpack_from('<I', raw)[0] == 113
+    result['wlan-interrupt-record'] = raw is not None and len(raw) == 8 and struct.unpack('<II', raw) == (113, 2)
     return result
 
 

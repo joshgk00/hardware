@@ -67,9 +67,9 @@ The local ADT parser's function-record layout identifies the first word as a
 phandle and the words after its four-character function name as arguments.
 On that basis, each of the four J71s WLAN function properties has the J71t
 candidate pin as its first argument. Their phandles resolve to the PMIC for
-reg-on and the SoC GPIO node for CLKREQ, device-wake and PERST; the first
-interrupt word also matches the J71t candidate. This strengthens the source
-comparison, but does not decode the remaining arguments or prove polarity,
+reg-on and the SoC GPIO node for CLKREQ, device-wake and PERST; the two-word
+interrupt record also matches the J71t ADT tuple documented upstream. This
+strengthens the source comparison, but does not decode the remaining arguments or prove polarity,
 timing, actual electrical behavior or functional Wi-Fi.
 
 `check-wlan-signals.py` repeats this comparison locally with the unified

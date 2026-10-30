@@ -47,7 +47,12 @@ class SignalComparisonTests(unittest.TestCase):
         del nodes[check.WLAN].properties['interrupts']
         result = check.compare(Tree(list(nodes.items())))
         self.assertFalse(result['function-perst'])
-        self.assertFalse(result['wlan-interrupt-first-word'])
+        self.assertFalse(result['wlan-interrupt-record'])
+
+    def test_interrupt_flags_must_match(self):
+        nodes = fixture()
+        nodes[check.WLAN].properties['interrupts'] = struct.pack('<II', 113, 3)
+        self.assertFalse(check.compare(Tree(list(nodes.items())))['wlan-interrupt-record'])
 
     def test_duplicate_path_is_rejected(self):
         nodes = fixture()
