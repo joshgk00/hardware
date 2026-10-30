@@ -14,7 +14,7 @@ echo virtual-test > strings/0x409/serialnumber
 echo isolated > strings/0x409/manufacturer
 echo ncm-test > strings/0x409/product
 echo ncm > configs/c.1/strings/0x409/configuration
-ln -s functions/ncm.usb0 configs/c.1/ncm.usb0
+ln -s "$PWD/functions/ncm.usb0" configs/c.1/ncm.usb0
 for u in /sys/class/udc/*; do [ -e "$u" ] || continue; basename "$u" > UDC; break; done
 sleep 3
 echo VM_NCM_NETWORK_DEVICES
