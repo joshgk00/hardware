@@ -1,0 +1,25 @@
+--- a/drivers/usb/gadget/function/f_ncm.c
++++ b/drivers/usb/gadget/function/f_ncm.c
+@@ -1144,6 +1144,10 @@
+  * The transmit should only be run if no skb data has been sent
+  * for a certain duration.
+  */
++/* VM-only fault injection: never use in a device kernel. */
++static unsigned int ncm_test_force_busy;
++module_param_named(test_force_busy, ncm_test_force_busy, uint, 0600);
++
+ static enum hrtimer_restart ncm_tx_timeout(struct hrtimer *data)
+ {
+ 	struct f_ncm *ncm = container_of(data, struct f_ncm, task_timer);
+@@ -1159,7 +1163,10 @@
+ 		 *
+ 		 * This will call directly into u_ether's eth_start_xmit()
+ 		 */
+-		ret = netdev->netdev_ops->ndo_start_xmit(NULL, netdev);
++		if (xchg(&ncm_test_force_busy, 0))
++			ret = NETDEV_TX_BUSY;
++		else
++			ret = netdev->netdev_ops->ndo_start_xmit(NULL, netdev);
+ 		if (ret == NETDEV_TX_BUSY) {
+ 			hrtimer_forward_now(data, TX_TIMEOUT_NSECS);
+ 			return HRTIMER_RESTART;
