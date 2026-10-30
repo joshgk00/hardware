@@ -2169,3 +2169,10 @@ the test before those writes. The mock exercises the empty, nonempty and invalid
 status cases and verifies no initialization writes on failure. The meaning of
 this status bit on S8000 and any effect on storage remain unverified. The
 observer includes the new pre-init result without exposing device identifiers.
+
+
+For the first physical run of this guard, the prepared RAM image uses the
+previously verified no-doorbell device tree. Its device-tree properties and
+component hash were checked against the assembled image; the coordinator mock
+also verified no-doorbell mode selection. This still enables the controller,
+so it is not evidence that no DMA can occur. The physical run is pending.
