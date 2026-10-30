@@ -73,3 +73,11 @@ logs remain private.
   files were built and packaged with the previously tested boot components,
   but the image has not been booted or subjected to controlled congestion,
   suspend, disconnect or concurrent-timer testing.
+
+The current upstream [contribution guide](https://github.com/OrchardLinux/hardware/blob/4f15a70b9c59687fe8cd72b6ea2fbb2823c54d92/CONTRIBUTING.md)
+welcomes measured bring-up findings in device documentation, keeps exploratory
+tools on forks, and requires testing the exact submitted device revision.
+Hardware/device changes and distribution changes belong in their respective
+repositories. Our private overlays and raw device data therefore remain local;
+this summary is evidence for a future focused contribution, not a claim that
+the current experiment is ready to merge.
