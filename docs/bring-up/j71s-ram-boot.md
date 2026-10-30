@@ -41,6 +41,9 @@ test; it does not claim that later revision was booted.
   Bluetooth discovery started and stopped, a silent audio playback command
   completed, and sensor readings changed. Audible sound, microphone capture,
   pairing and sensor accuracy were not established.
+- The only IIO device found in a later inventory was the `ct819` light sensor;
+  no accelerometer or angular-velocity IIO channel was present. Other sensor
+  interfaces were not exhaustively surveyed, and rotation was not tested.
 - The tablet user wrote and synced 16 MiB to the NFS root with a checksum
   matching the host; a separate 16 MiB host-created file also matched when read
   by the tablet. Both files were removed. A 100-packet USB ping sample had no
