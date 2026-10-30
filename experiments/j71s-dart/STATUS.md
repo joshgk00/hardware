@@ -89,7 +89,8 @@ separate independently reviewable changes when their hardware behavior is known.
 
 The USB NFS image, root receipt and module index agree on the J71s profile and
 kernel release. A local selector identifies its rescue serial by product and
-staged root UUID, and finds the network interface under that same USB device;
+staged root UUID and the physical USB location recorded at DFU, and finds the
+network interface under that same USB device;
 synthetic tests reject wrong or ambiguous identities. This is a convenience
 check, not the ECID-bound recovery identity protocol. The device still needs a
 physical reset before this RAM image can be booted.

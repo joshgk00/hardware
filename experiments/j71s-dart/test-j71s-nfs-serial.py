@@ -9,7 +9,7 @@ boot = '00000000-0000-4000-8000-000000000002'
 with TemporaryDirectory() as temporary:
     sys = Path(temporary) / 'sys'
     dev = Path(temporary) / 'dev'
-    usb = sys / 'devices/usb/test'
+    usb = sys / 'devices/usb/1-2.3'
     usb.mkdir(parents=True)
     tty = sys / 'class/tty/ttyACM4'
     tty.mkdir(parents=True)
@@ -18,18 +18,24 @@ with TemporaryDirectory() as temporary:
               'serial': f'PROFILE:j71s ROOT:{root} BOOT:{boot}'}
     for name, value in fields.items():
         (usb / name).write_text(value)
-    assert find_nfs_serial(root, sys, dev) == dev / 'ttyACM4'
+    assert find_nfs_serial(root, '1-2.3', sys, dev) == dev / 'ttyACM4'
+    try:
+        find_nfs_serial(root, '1-9', sys, dev)
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError('wrong physical port accepted')
     net = sys / 'class/net/usbtest'
     net.mkdir(parents=True)
     network_device = usb / 'network'
     network_device.mkdir()
     (net / 'device').symlink_to(network_device, target_is_directory=True)
-    assert find_nfs_interface(root, sys, dev) == 'usbtest'
+    assert find_nfs_interface(root, '1-2.3', sys, dev) == 'usbtest'
     extra = sys / 'class/net/other'
     extra.mkdir()
     (extra / 'device').symlink_to(network_device, target_is_directory=True)
     try:
-        find_nfs_interface(root, sys, dev)
+        find_nfs_interface(root, '1-2.3', sys, dev)
     except RuntimeError:
         pass
     else:
@@ -39,7 +45,7 @@ with TemporaryDirectory() as temporary:
     for value in (f'PROFILE:j71s ROOT:{boot} BOOT:{boot}', f'PROFILE:j71s ROOT:{root} BOOT:bad'):
         (usb / 'serial').write_text(value)
         try:
-            find_nfs_serial(root, sys, dev)
+            find_nfs_serial(root, '1-2.3', sys, dev)
         except RuntimeError:
             pass
         else:
