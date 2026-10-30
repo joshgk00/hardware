@@ -137,3 +137,5 @@ The upstream CLI RAM build test suite passed all 38 tests against the checked-ou
 As a staging preflight, the upstream module installer processed all 41 modules from the completed experimental rebuild and generated a populated `modules.dep` with 41 entries. This checks the local staging toolchain on real build output; the separate upstream candidate still needs its own modules staged and tested.
 
 The corrected upstream build later stopped with exit 2 after a compiler for `lib/sys_info.o` was killed with exit 137. A check of recent kernel logs did not identify an out-of-memory event, so the cause is not established. The same output directory and fixed build metadata were retained and an incremental single-worker retry was started; its result remains pending. The running iPad was not rebooted.
+
+The resolved upstream configuration enables gzip initramfs unpacking, devtmpfs, IPv4, DWC2 dual-role USB, configfs, and the ACM and NCM gadget functions built in. NFS and NFSv4 are modules and must be staged with their dependencies in the RAM runtime. This verifies required configuration choices only; it is not a boot or connectivity result.
