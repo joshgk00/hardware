@@ -124,6 +124,13 @@ selected raw fields only; it does not establish how the second offset, mapper
 record or S8000 requester and stream IDs should be translated into a Linux
 mapping. The S8003 mapping must not be applied solely on this basis.
 
+The older `extract-dart-window.py` emits an experimental `apple,dma-range`
+property used by the earlier investigation; the current upstream H9P tree
+instead expresses windows through `iommu-map`. The extractor and generated
+fragment now explicitly label that property as non-upstream and unsuitable for
+hardware DMA. Its existing synthetic guards passed, and the older and unified
+ADT parsers produced the same private output for this snapshot.
+
 The two saved J71s DART `reg` records, decoded as 64-bit address and size,
 match the corresponding S8003 DART addresses and 0x4000-byte sizes, and both
 saved mapper `reg` values are zero. This is further source-level similarity;
