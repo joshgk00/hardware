@@ -184,6 +184,19 @@ systemd `running`, 40% battery and no retained NFS server timeout lines. This
 is one short network sample and a log snapshot, not proof of long-term stability
 or a controlled comparison with an unpatched kernel.
 
+A later search of retained kernel messages for errors and failures returned a
+systemd-journald warning that setting an ACL on the tablet user's journal was
+not supported. No other matching lines were present in that sample. The system
+was reported running, but the effect on unprivileged journal access and the
+source of the unsupported ACL operation have not been established. Kernel
+ring-buffer retention and the search terms limit this observation. A subsequent
+`journalctl --user` check as the tablet user exited 1 and reported insufficient
+permission to open any journal files. This demonstrates the access failure in
+this setup, but does not by itself prove that the earlier ACL warning caused it.
+The local NFS server's VFS source says its `setAcl` does not store ACLs; how
+that implementation relates to this Linux client's specific ACL request has
+not been traced. No broader journal permissions were granted as a workaround.
+
 An upstream refresh found hardware main at `4f15a70`, a descendant of the tested `0cfb171`. The intervening history reorganizes the CLI and hardware Python code into one project. In the compared paths there are no changes to the kernel or m1n1 patch directories or the NFS runtime shell scripts; the NFS staging Python moved to `orchard.image.nfs` and now writes `orchard.local.toml`. Reproduction instructions must account for that interface change. This comparison does not test the newer tooling or establish equivalence outside the inspected paths.
 
 In a separate checkout of upstream `4f15a70`, all 13 NFS runtime tests passed. Staging the same private root identity, BusyBox, kernel and network parameters with `orchard.image.nfs` produced byte-identical runtime files to the physically booted staging output; the device-choice file's contents also matched under its new filename. This validates staging for these inputs, not a physical boot assembled with the newer project's complete build workflow.
