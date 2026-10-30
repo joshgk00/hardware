@@ -99,6 +99,15 @@ that other port settings, power sequencing, DMA, or Wi-Fi are interchangeable.
 The raw device-derived tables remain private and have not been applied to
 port 1 in the current desktop boot.
 
+The offline `extract-pcie-tunables.py` converter now accepts `--port 1`, while
+retaining port 0 as its default. On the saved private J71s ADT it validated
+and emitted all four candidate tables to a mode-0600 private fragment, and a
+synthetic DTS containing that fragment compiled. Synthetic tests cover port
+selection and rejection of unsupported ports. The existing port-0 window
+bounds are used as candidate validation limits for port 1, not proven port-1
+resource sizes. This is data preparation only; no values were applied to the
+device and no PCIe or Wi-Fi function was tested.
+
 Before issuing commands, a combined implementation must establish ownership
 and teardown of DMA buffers and translation tables across failures, reset,
 unbind and kexec; prevent freeing memory while hardware can still access it;

@@ -10,13 +10,19 @@ import os
 from pathlib import Path
 import struct
 
-TABLES = (
-    ('/device-tree/arm-io/apcie', 'apcie-common-tunables', 'orchard,s8000-common-tunables', 0x8000),
-    ('/device-tree/arm-io/apcie', 'apcie-phy-tunables', 'orchard,s8000-phy-tunables', 0x4000),
-    ('/device-tree/arm-io/apcie/pci-bridge0', 'apcie-config-tunables', 'orchard,s8000-port0-tunables', 0x4000),
-    ('/device-tree/arm-io/apcie/pci-bridge0', 'pcie-rc-tunables', 'orchard,s8000-root0-tunables', 0x1000),
-)
 RECORD = struct.Struct('<IIQQ')
+
+
+def tables_for_port(port):
+    if port not in (0, 1):
+        raise ValueError('unsupported PCIe port')
+    bridge = f'/device-tree/arm-io/apcie/pci-bridge{port}'
+    return (
+        ('/device-tree/arm-io/apcie', 'apcie-common-tunables', 'orchard,s8000-common-tunables', 0x8000),
+        ('/device-tree/arm-io/apcie', 'apcie-phy-tunables', 'orchard,s8000-phy-tunables', 0x4000),
+        (bridge, 'apcie-config-tunables', f'orchard,s8000-port{port}-tunables', 0x4000),
+        (bridge, 'pcie-rc-tunables', f'orchard,s8000-root{port}-tunables', 0x1000),
+    )
 
 
 def decode_table(raw, window):
@@ -48,11 +54,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('adt', type=Path, help='local Apple device tree file')
     parser.add_argument('output', type=Path, help='new private DTS fragment')
+    parser.add_argument('--port', type=int, choices=(0, 1), default=0,
+                        help='candidate PCIe port to extract (default: 0)')
     args = parser.parse_args()
     from orchard_cli.apple.adt_tree import parse
     nodes = dict(parse(args.adt.read_bytes()).walk())
     tables = []
-    for path, prop, name, window in TABLES:
+    for path, prop, name, window in tables_for_port(args.port):
         try:
             raw = nodes[path].properties[prop]
         except KeyError as exc:
