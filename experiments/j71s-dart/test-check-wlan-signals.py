@@ -34,6 +34,11 @@ def fixture():
                                           'vm-size': struct.pack('<I', 0x3c000000)})
     nodes[check.DART1].properties.update({'vm-offset': struct.pack('<II', 0x80000000, 0x40000000),
                                           'vm-size': struct.pack('<I', 0x3ffff000)})
+    for path, addr in ((check.DART0, 0x601008000), (check.DART1, 0x602008000)):
+        nodes[path].properties.update({'reg': struct.pack('<QQ', addr, 0x4000),
+                                       'error-reflector': struct.pack('<QQ', 0x20fffc000, 0x1000),
+                                       'fetch-config': struct.pack('<I', 0xe0303),
+                                       'diag-config': struct.pack('<I', 0x100)})
     nodes[check.STORAGE_PORT].properties['function-dart_force_active'] = struct.pack('<I4s', 3, b'test')
     nodes[check.PORT].properties['function-dart_force_active'] = struct.pack('<I4s', 4, b'test')
     for path, name, target, pin in check.CHECKS:
@@ -77,6 +82,14 @@ class SignalComparisonTests(unittest.TestCase):
         result = check.compare(Tree(list(nodes.items())))
         self.assertFalse(result['port1-window-candidate'])
         self.assertFalse(result['wlan-mapper-reference'])
+
+    def test_dart_register_and_initialization_mismatch_are_rejected(self):
+        nodes = fixture()
+        nodes[check.DART1].properties['reg'] = b'bad'
+        nodes[check.DART1].properties['diag-config'] = struct.pack('<I', 0)
+        result = check.compare(Tree(list(nodes.items())))
+        self.assertFalse(result['port1-dart-register-candidate'])
+        self.assertFalse(result['port1-dart-init-candidate'])
 
     def test_duplicate_path_is_rejected(self):
         nodes = fixture()

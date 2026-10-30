@@ -74,6 +74,18 @@ def compare(root):
                         size is not None and len(size) == 4 and
                         struct.unpack_from('<I', offset)[0] == 0x80000000 and
                         struct.unpack('<I', size)[0] == expected_size)
+    for index, path, address in ((0, DART0, 0x601008000), (1, DART1, 0x602008000)):
+        props = nodes[path].properties if path in nodes else {}
+        reg = props.get('reg')
+        result[f'port{index}-dart-register-candidate'] = (
+            reg is not None and len(reg) == 16 and struct.unpack('<QQ', reg) == (address, 0x4000))
+        reflector, fetch, diag = (props.get('error-reflector'), props.get('fetch-config'),
+                                  props.get('diag-config'))
+        result[f'port{index}-dart-init-candidate'] = (
+            reflector is not None and len(reflector) == 16 and
+            struct.unpack_from('<Q', reflector)[0] == 0x20fffc000 and
+            fetch is not None and len(fetch) == 4 and struct.unpack('<I', fetch)[0] == 0xe0303 and
+            diag is not None and len(diag) == 4 and struct.unpack('<I', diag)[0] == 0x100)
     return result
 
 
