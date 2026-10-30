@@ -55,6 +55,14 @@ binding and match data as well as ANS selection; simply describing an S8000
 node would not bind this driver, and claiming S8003 compatibility without
 evidence could apply the wrong hardware sequence.
 
+For the related Wi-Fi path, the saved private J71s ADT has the WLAN reg-on and
+interrupt properties and the PCIe port-1 CLKREQ, device-wake and PERST
+properties. As a preliminary comparison, each corresponding raw property
+contains the same little-endian integer used for that signal in the upstream
+J71t tree. This is only a raw-value comparison, not full property decoding or
+proof of wiring, polarity, electrical sequencing or functional Wi-Fi. The
+J71s root-complex and port-1 path still need independent validation.
+
 Before issuing commands, a combined implementation must establish ownership
 and teardown of DMA buffers and translation tables across failures, reset,
 unbind and kexec; prevent freeing memory while hardware can still access it;
