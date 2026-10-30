@@ -79,3 +79,5 @@ have not yet been tested together. Keep the existing working NFS session until
 a suitable image is prepared and verified.
 
 The previously extracted J71s mtprops from the installed iPadOS 16.7.16 build matched the upstream recipe’s pinned input SHA-256. Orchard CLI `a2dd45f` converted it using the J71s recipe parameters, and the generated Z2FW matched the upstream expected SHA-256. The resulting firmware remains private. This validates the input and conversion only; it does not prove calibration handoff or touch operation with the integrated driver.
+
+Using the current Orchard CLI, the S8000 SmartIO firmware was also extracted from the previously saved iPadOS 16.7.16 kernel cache; its digest matched the J71s upstream recipe. The firmware is kept private. This verifies a second test input, not SmartIO operation with an upstream-built kernel.
