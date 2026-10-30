@@ -48,6 +48,13 @@ would not select this glue under that compatible; S8000 binding and matching
 need design and validation alongside the actual DMA and interrupt work. This
 is not evidence that adding a compatible or borrowing S8003 quirks is safe.
 
+The upstream H9P PCIe host driver's own device match table likewise has no
+S8000 compatible. Its S8003 match selects SoC-specific initialization,
+tunables and NVMMU behavior. Supporting J71s therefore needs a validated host
+binding and match data as well as ANS selection; simply describing an S8000
+node would not bind this driver, and claiming S8003 compatibility without
+evidence could apply the wrong hardware sequence.
+
 Before issuing commands, a combined implementation must establish ownership
 and teardown of DMA buffers and translation tables across failures, reset,
 unbind and kexec; prevent freeing memory while hardware can still access it;
