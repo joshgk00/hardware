@@ -113,6 +113,11 @@ the J71s table, but only one complete tuple matched. None of the four S8003 PHY
 offsets appeared in the saved J71s PHY table. These counts do not prove that
 the blocks have equivalent address bases or that any differing value is safe;
 register mapping and the device-specific sequence still require validation.
+The difference is in the second root-port record in the compared order; its
+offset and mask match the second upstream S8003 record, while its value does
+not. Earlier J71s link diagnostics applied the J71s root-port records from
+the private tree. That observation supports testing the J71s-specific values
+in a future integration, but it does not validate a full PCIe host or DMA.
 
 The offline `extract-pcie-tunables.py` converter now accepts `--port 1`, while
 retaining port 0 as its default. On the saved private J71s ADT it validated
