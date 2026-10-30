@@ -34,6 +34,10 @@ test; it does not claim that later revision was booted.
   keyboard and Omarchy shell were running, and a compositor screenshot showed
   the desktop. Physical display and touch interaction on this exact boot were
   not independently confirmed.
+- At a later sample, after about 3 hours and 7 minutes of uptime, systemd
+  still reported `running`, the battery gauge reported 24%, and the retained
+  kernel log contained no NFS server timeout lines. This sample does not prove
+  uninterrupted operation, and the disabled charger was not tested.
 - The touchscreen registered with axes matching the display dimensions; the
   live calibration property matched the private device calibration. This does
   not establish orientation or touch accuracy.
