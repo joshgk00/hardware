@@ -226,6 +226,8 @@ are driver-reported states, not direct observation of the panel.
 
 ALSA reports a playback and capture PCM for the speaker card, and the Bluetooth radio reports neither software nor hardware blocked. A first NFS write probe did not run because the rescue shell's restricted PATH omitted the utilities; no file was created. A retry using absolute paths wrote and synced 4 MiB of random data as the tablet user: tablet and host SHA-256 matched, and the host saw UID/GID 1000:1000 and mode 0600. The temporary file was removed. This verifies one transfer through the new kernel and NFS setup, not long-term storage reliability.
 
+At approximately 110 minutes of the same boot, a second probe wrote and synced 16 MiB of random data as the tablet user. The tablet's SHA-256 matched a checksum computed in the NFS server's user namespace and the host observed the expected size; the tablet removed the file and the host confirmed its absence. A direct host-user read failed due to namespace ownership, so the server-side checksum was used. This exercises a larger transfer on the upstream-based boot, not internal storage or a controlled NCM congestion test.
+
 Bluetooth's userspace controller reports powered on, but pairing and transfers remain untested. PipeWire reported a default built-in stereo sink. A raw silent-stream attempt exited 1 without a useful error; a separate one-second silent WAV played through `pw-play` as the tablet user and exited 0. Its temporary file was removed. The latter verifies the command completed through PipeWire; it does not prove audible speaker output or microphone capture.
 
 A later short Bluetooth discovery command reported that discovery started;
