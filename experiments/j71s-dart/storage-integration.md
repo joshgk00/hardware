@@ -88,6 +88,11 @@ selected raw fields only; it does not establish how the second offset, mapper
 record or S8000 requester and stream IDs should be translated into a Linux
 mapping. The S8003 mapping must not be applied solely on this basis.
 
+The two saved J71s DART `reg` records, decoded as 64-bit address and size,
+match the corresponding S8003 DART addresses and 0x4000-byte sizes, and both
+saved mapper `reg` values are zero. This is further source-level similarity;
+it does not prove stream IDs, register semantics, isolation or safe DMA.
+
 For the related Wi-Fi path, the saved private J71s ADT has the WLAN reg-on and
 interrupt properties and the PCIe port-1 CLKREQ, device-wake and PERST
 properties. As a preliminary comparison, each corresponding raw property
