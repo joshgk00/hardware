@@ -72,6 +72,11 @@ interrupt word also matches the J71t candidate. This strengthens the source
 comparison, but does not decode the remaining arguments or prove polarity,
 timing, actual electrical behavior or functional Wi-Fi.
 
+The saved J71s UART2 transmit and RTS function records also resolve to the
+SoC GPIO node and have first arguments matching the corresponding J71t WLAN
+UART pin candidates. Their remaining arguments, electrical operation and the
+upstream WLAN UART integration have not been validated on J71s.
+
 Before issuing commands, a combined implementation must establish ownership
 and teardown of DMA buffers and translation tables across failures, reset,
 unbind and kexec; prevent freeing memory while hardware can still access it;
