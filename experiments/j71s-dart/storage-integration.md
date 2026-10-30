@@ -69,6 +69,13 @@ This is evidence that the original device description associates separate DART
 nodes with the two ports. It does not establish Linux requester IDs, stream
 IDs, actual isolation or the correct `iommu-map`; those still need validation.
 
+The saved WLAN endpoint's `iommu-parent` also matches the port-1 DART mapper's
+phandle. The two DART nodes have identical raw `vm-offset` properties but
+different `vm-size` properties on this iPad; their mapper `reg` properties
+match. This rules out treating the two saved window descriptions as identical.
+The meanings of the mapper value and window properties in Linux, their relation
+to PCI requester IDs, and real DMA behavior remain unverified.
+
 For the related Wi-Fi path, the saved private J71s ADT has the WLAN reg-on and
 interrupt properties and the PCIe port-1 CLKREQ, device-wake and PERST
 properties. As a preliminary comparison, each corresponding raw property
