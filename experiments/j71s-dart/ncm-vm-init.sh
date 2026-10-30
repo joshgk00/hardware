@@ -48,10 +48,12 @@ fault=/sys/module/usb_f_ncm/parameters/test_force_busy
 counter=/sys/module/usb_f_ncm/parameters/test_callback_count
 if [ -w "$fault" ]; then
  if [ -r "$counter" ]; then before=$(cat "$counter"); else before=; fi
- echo 1 > "$fault"
+ echo 4 > "$fault"
  if nsenter -t "$ns" -n ping -c 1 -W 2 192.0.2.1; then echo VM_FAULT_PING_PASS; else echo VM_FAULT_PING_FAIL; fi
  if [ "$(cat "$fault")" = 0 ]; then echo VM_FAULT_CONSUMED; else echo VM_FAULT_NOT_CONSUMED; fi
  if [ -n "$before" ]; then after=$(cat "$counter"); printf 'VM_CALLBACK_DELTA %s\n' "$((after - before))"; fi
+ forced=/sys/module/usb_f_ncm/parameters/test_forced_count
+ if [ -r "$forced" ]; then printf 'VM_FORCED_COUNT '; cat "$forced"; fi
  busy=/sys/module/usb_f_ncm/parameters/test_busy_at
  next=/sys/module/usb_f_ncm/parameters/test_next_at
  if [ -r "$busy" ] && [ -r "$next" ]; then
