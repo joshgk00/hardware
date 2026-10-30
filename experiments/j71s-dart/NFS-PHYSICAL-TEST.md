@@ -127,3 +127,5 @@ A further read-only inventory of the running experimental boot found a backlight
 The user confirmed that both touch and on-screen keyboard input work in the running desktop session. This is a functional observation of the current experimental image, not yet of the upstream-based candidate.
 
 The upstream shared iPad 5 device tree describes a CS42L81 audio codec, an S8000 MCA interface and a TSL2581-compatible ambient light sensor. The corrected upstream build configuration enables the corresponding codec, MCA, simple-audio-card and TSL2583 drivers as modules. These source and configuration checks identify candidates for the next hardware inventory; they do not demonstrate successful probing, sound output or light sensing on J71s.
+
+The corrected kernel build produced its J71s DTB while compilation was still in progress. Applying the test-only no-charge overlay to that built DTB produced SHA-256 `ce60928232e09f177baed6fcc947e6a6cbc534058d33f74c184e265ae155c729`, byte-for-byte matching the separately compiled preflight DTB. The kernel build and physical validation are still pending.
