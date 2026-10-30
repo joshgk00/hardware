@@ -39,6 +39,15 @@ as an installation attempt. A production host needs normal PCI configuration,
 verified DMA/IOMMU attachment, interrupts and lifecycle handling rather than
 simply removing these safeguards.
 
+The upstream ANS integration has an additional selection boundary: in the
+tested `0cfb171` kernel, `nvme_pci_apple_ans_hosts` names only S8003 and T8010
+host compatibles. Its patch explicitly leaves `apple,s8000-pcie` out because
+there is no binding. The PCI NVMe driver selects Apple ANS DMA operations and
+quirks through that host match. Thus a future S8000 host description alone
+would not select this glue under that compatible; S8000 binding and matching
+need design and validation alongside the actual DMA and interrupt work. This
+is not evidence that adding a compatible or borrowing S8003 quirks is safe.
+
 Before issuing commands, a combined implementation must establish ownership
 and teardown of DMA buffers and translation tables across failures, reset,
 unbind and kexec; prevent freeing memory while hardware can still access it;
