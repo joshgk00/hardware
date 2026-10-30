@@ -14,9 +14,7 @@ int main(void) {
  if(!u)return 1;
  CHECK(nfs_mount(n,u->server,u->path));
  CHECK(nfs_mkdir(n,"/ops-check"));
- CHECK(nfs_creat(n,"/ops-check/original",0640,&f));
- CHECK(nfs_close(n,f));
- CHECK(nfs_open(n,"/ops-check/original",O_RDWR,&f));
+ CHECK(nfs_create(n,"/ops-check/original",O_WRONLY,0640,&f));
  if (nfs_write(n,f,5,"hello") != 5) { fprintf(stderr,"short or failed NFS write: %s\n",nfs_get_error(n)); return 1; }
  puts("full NFS write passed");
  CHECK(nfs_close(n,f));
