@@ -73,6 +73,11 @@ logs remain private.
   files were built and packaged with the previously tested boot components,
   but the image has not been booted or subjected to controlled congestion,
   suspend, disconnect or concurrent-timer testing.
+- Investigate orientation separately if needed. The open [J71b AOP rotation
+  proposal](https://github.com/OrchardLinux/orchard/pull/36) targets T8010 and
+  its integrated version is not yet device-booted according to its PR; it is
+  not evidence that the iPad 5's S8000 has the same coprocessor or can use
+  that driver. It does not resolve the storage, Wi-Fi or charging blockers.
 
 The current upstream [contribution guide](https://github.com/OrchardLinux/hardware/blob/4f15a70b9c59687fe8cd72b6ea2fbb2823c54d92/CONTRIBUTING.md)
 welcomes measured bring-up findings in device documentation, keeps exploratory
