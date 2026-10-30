@@ -7,7 +7,9 @@ if [ ! -r /dev/kmsg ]; then
  exit 1
 fi
 exec 3< /dev/kmsg || exit 1
-busybox timeout 50 busybox cat <&3 | while IFS= read -r line; do
+# Allow for the diagnostic's 60-second start-gate wait as well as setup time.
+# This remains a bounded observation, not a guarantee that every stage is seen.
+busybox timeout 180 busybox cat <&3 | while IFS= read -r line; do
  case "$line" in
   *'translation fault:'*) printf 'DART translation fault detected (details remain on device)\n' ;;
   *'J71s Identify'*|*'TCB pre-init FIFO'*|*'TCB init experiment'*|*'TCB FIFO experiment'*|*'storage-port NVMMU fault'*) printf '%s\n' "$line" ;;

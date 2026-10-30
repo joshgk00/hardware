@@ -245,6 +245,14 @@ diagnostic connection before a doorbell return or completion was observed;
 whether the controller received a command is unknown, and no successful disk
 command has been demonstrated.
 
+The optional one-shot observer previously stopped after 50 seconds, although
+the candidate start-gate wait can itself last up to 60 seconds after its
+preflight. Its observation window is now 180 seconds to allow additional setup
+time. This remains bounded and does not guarantee the observer survives an
+arbitrarily slow preflight or a USB disconnect. The modified observer has not
+been run on the iPad. The script opens the diagnostic start gate when it is
+available and therefore must only be used for a deliberately prepared test.
+
 ## Upstream initialization comparison
 
 In hardware main `0cfb171`, the S8003 path waits for its candidate invalidate
