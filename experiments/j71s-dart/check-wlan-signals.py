@@ -13,8 +13,11 @@ import struct
 WLAN = '/device-tree/arm-io/uart2/wlan'
 UART = '/device-tree/arm-io/uart2'
 PORT = '/device-tree/arm-io/apcie/pci-bridge1'
+STORAGE_PORT = '/device-tree/arm-io/apcie/pci-bridge0'
 GPIO = '/device-tree/arm-io/gpio'
 PMIC = '/device-tree/arm-io/i2c0/pmu'
+DART0 = '/device-tree/arm-io/dart-apcie0'
+DART1 = '/device-tree/arm-io/dart-apcie1'
 CHECKS = (
     (WLAN, 'function-reg_on', PMIC, 14),
     (PORT, 'function-clkreq', GPIO, 165),
@@ -27,7 +30,7 @@ CHECKS = (
 
 def compare(root):
     entries = list(root.walk())
-    selected = {WLAN, UART, PORT, GPIO, PMIC}
+    selected = {WLAN, UART, PORT, STORAGE_PORT, GPIO, PMIC, DART0, DART1}
     nodes = {}
     for path, node in entries:
         if path in selected:
@@ -53,6 +56,11 @@ def compare(root):
         result[name] = refs.get(phandle) == {target} and first_arg == pin
     raw = nodes.get(WLAN).properties.get('interrupts') if WLAN in nodes else None
     result['wlan-interrupt-record'] = raw is not None and len(raw) == 8 and struct.unpack('<II', raw) == (113, 2)
+    for name, path, target in (('port0-dart-reference', STORAGE_PORT, DART0),
+                               ('port1-dart-reference', PORT, DART1)):
+        raw = nodes.get(path).properties.get('function-dart_force_active') if path in nodes else None
+        result[name] = (raw is not None and len(raw) == 8 and
+                        refs.get(struct.unpack_from('<I', raw)[0]) == {target})
     return result
 
 

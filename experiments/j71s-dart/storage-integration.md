@@ -92,7 +92,8 @@ paths, ambiguous phandles and invalid function-record lengths; it does not print
 the private tree or access hardware. Run it with the Orchard `src` directory
 on `PYTHONPATH` and the private ADT path as its argument. Synthetic tests cover
 matching records and several malformed or ambiguous inputs. The real J71s
-snapshot matched all seven checks; the same physical limitations apply.
+snapshot matched all nine checks, including the two port-to-DART references;
+the same physical limitations apply.
 
 The saved J71s UART2 transmit and RTS function records also resolve to the
 SoC GPIO node and have first arguments matching the corresponding J71t WLAN

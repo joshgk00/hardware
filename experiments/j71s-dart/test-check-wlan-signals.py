@@ -22,9 +22,14 @@ class Tree:
 
 
 def fixture():
-    nodes = {p: Node() for p in (check.WLAN, check.UART, check.PORT, check.GPIO, check.PMIC)}
+    nodes = {p: Node() for p in (check.WLAN, check.UART, check.PORT, check.STORAGE_PORT,
+                                 check.GPIO, check.PMIC, check.DART0, check.DART1)}
     nodes[check.GPIO].properties['AAPL,phandle'] = struct.pack('<I', 1)
     nodes[check.PMIC].properties['AAPL,phandle'] = struct.pack('<I', 2)
+    nodes[check.DART0].properties['AAPL,phandle'] = struct.pack('<I', 3)
+    nodes[check.DART1].properties['AAPL,phandle'] = struct.pack('<I', 4)
+    nodes[check.STORAGE_PORT].properties['function-dart_force_active'] = struct.pack('<I4s', 3, b'test')
+    nodes[check.PORT].properties['function-dart_force_active'] = struct.pack('<I4s', 4, b'test')
     for path, name, target, pin in check.CHECKS:
         handle = 1 if target == check.GPIO else 2
         nodes[path].properties[name] = struct.pack('<I4sII', handle, b'test', pin, 0)
@@ -53,6 +58,11 @@ class SignalComparisonTests(unittest.TestCase):
         nodes = fixture()
         nodes[check.WLAN].properties['interrupts'] = struct.pack('<II', 113, 3)
         self.assertFalse(check.compare(Tree(list(nodes.items())))['wlan-interrupt-record'])
+
+    def test_port_dart_mismatch_is_rejected(self):
+        nodes = fixture()
+        nodes[check.PORT].properties['function-dart_force_active'] = struct.pack('<I4s', 3, b'test')
+        self.assertFalse(check.compare(Tree(list(nodes.items())))['port1-dart-reference'])
 
     def test_duplicate_path_is_rejected(self):
         nodes = fixture()
