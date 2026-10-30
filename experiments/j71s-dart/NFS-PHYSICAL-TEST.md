@@ -10,7 +10,11 @@ unauthenticated; this arrangement is for an isolated, trusted host only.
 - Kernel base: Orchard Linux `6831bc701a6ce059e71e5aaa9488c9195bea6927`,
   plus the local J71s display/touch and hardware overlays used by this
   experiment. The source tree was modified; the base commit alone is not a
-  complete reproduction recipe. The tree used for the patched build differs
+  complete reproduction recipe. A private snapshot now preserves the tracked
+  diff, eight untracked source files and the config; a reverse/apply round trip
+  reconstructed all 29 changed files byte-for-byte. A clean rebuild from that
+  snapshot has not been performed, and the overlays need provenance and licensing
+  review before publication. The tree used for the patched build differs
   from the immediately preceding NFS build's tree in `f_ncm.c` by the two-line
   [proposed upstream NCM timer change](https://patchew.org/linux/20260727165441.1969927-1-flavra@baylibre.com/).
   Credit for that change belongs to its upstream author.
