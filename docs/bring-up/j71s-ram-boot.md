@@ -61,6 +61,11 @@ test; it does not claim that later revision was booted.
   did parse the payload and found two firmware entries with header and data,
   labeled `AOP` and `AOP_ext`. This checks the container's broad structure,
   not the pinned J71b hashes, image internals, loading protocol or safety.
+  The J71s AOP `reg` record contains four 64-bit address/size pairs. None is
+  identical to the proposed J71b IOP, SRAM or auto-boot resource pair. This
+  raw comparison does not account for parent address translation or establish
+  equivalent resource semantics; J71b's addresses must not be copied to J71s
+  without separate validation.
 - The tablet user wrote and synced 16 MiB to the NFS root with a checksum
   matching the host; a separate 16 MiB host-created file also matched when read
   by the tablet. Both files were removed. A 100-packet USB ping sample had no
