@@ -7,6 +7,8 @@ working DMA or disk I/O.
 
 The related [Hoolock A9 feature matrix](https://github.com/HoolockLinux/docs/blob/23ebe1fbc375599221553a7e1815e5de182a6b42/features/A9.md) lists basic A9 and iPad 5 support but does not list PCIe or NVMe as working features. That omission is not proof that no other implementation exists; it is not a basis for claiming internal storage works on S8000.
 
+The separate [pomme device matrix at `8a7780b`](https://github.com/xenoaitham/pomme/blob/8a7780b8824dcad7a21730251782b5a5a4acf6e6/docs/compatibility-matrix.md) lists the J71s device tree but describes its own iPad 5 coverage as untested on hardware. That row does not establish a working J71s PCIe or internal-storage implementation; it is a source to revisit if physical results are later published.
+
 ## Address paths
 
 The J71b H9P implementation allocates its NVMMU TCB, TCB table and SGL using
