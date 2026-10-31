@@ -49,8 +49,10 @@ counter=/sys/module/usb_f_ncm/parameters/test_callback_count
 if [ -w "$fault" ]; then
  if [ -r "$counter" ]; then before=$(cat "$counter"); else before=; fi
  echo 1000 > "$fault"
- nsenter -t "$ns" -n ping -A -q -c 40 -W 3 192.0.2.1 > /tmp/ping-a.log 2>&1 & a=$!
- nsenter -t "$ns" -n ping -A -q -c 40 -W 3 192.0.2.1 > /tmp/ping-b.log 2>&1 & b=$!
+ # Keep individual sequence numbers: the summary can include an extra
+ # request sent before the requested number of replies has arrived.
+ nsenter -t "$ns" -n ping -A -c 40 -W 3 192.0.2.1 > /tmp/ping-a.log 2>&1 & a=$!
+ nsenter -t "$ns" -n ping -A -c 40 -W 3 192.0.2.1 > /tmp/ping-b.log 2>&1 & b=$!
  # Ping can exit successfully despite packet loss; inspect the statistics too.
  if wait "$a"; then echo VM_TRAFFIC_A_EXIT_SUCCESS; else echo VM_TRAFFIC_A_EXIT_FAILURE; fi
  if wait "$b"; then echo VM_TRAFFIC_B_EXIT_SUCCESS; else echo VM_TRAFFIC_B_EXIT_FAILURE; fi
