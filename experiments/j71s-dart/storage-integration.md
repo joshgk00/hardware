@@ -21,6 +21,15 @@ separate address domains; neither the host allocation test nor an endpoint
 allocation proves the other device's translation or that the NVMMU can fetch
 tables. The meaning of these paths on S8000 still needs hardware validation.
 
+The one-shot candidate uses NVMe command ID 1 but FlatDMA slot 0. In the
+related upstream PCI ANS patch, the FlatDMA slot is allocated independently
+from an ANS request-slot bitmap and encoded in the returned FlatDMA address;
+it is not selected by simply equating that slot with the NVMe command ID.
+The distinct Apple SoC NVMe driver uses a different tag-indexed mechanism,
+so its tag rules cannot be assumed to describe this PCI path. This source
+comparison does not establish the S8000 hardware's behavior or explain the
+lost diagnostic connection.
+
 The present J71s overlay disables the DART and the earlier software consumer.
 The previous software-only DART map test validated page-table bookkeeping with
 its own power/control sequence, not simultaneous operation with the PCI host.
