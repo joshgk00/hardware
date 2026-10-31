@@ -51,8 +51,9 @@ if [ -w "$fault" ]; then
  echo 1000 > "$fault"
  nsenter -t "$ns" -n ping -A -q -c 40 -W 3 192.0.2.1 > /tmp/ping-a.log 2>&1 & a=$!
  nsenter -t "$ns" -n ping -A -q -c 40 -W 3 192.0.2.1 > /tmp/ping-b.log 2>&1 & b=$!
- if wait "$a"; then echo VM_TRAFFIC_A_PASS; else echo VM_TRAFFIC_A_FAIL; fi
- if wait "$b"; then echo VM_TRAFFIC_B_PASS; else echo VM_TRAFFIC_B_FAIL; fi
+ # Ping can exit successfully despite packet loss; inspect the statistics too.
+ if wait "$a"; then echo VM_TRAFFIC_A_EXIT_SUCCESS; else echo VM_TRAFFIC_A_EXIT_FAILURE; fi
+ if wait "$b"; then echo VM_TRAFFIC_B_EXIT_SUCCESS; else echo VM_TRAFFIC_B_EXIT_FAILURE; fi
  cat /tmp/ping-a.log /tmp/ping-b.log
  if [ "$(cat "$fault")" = 0 ]; then echo VM_FAULT_CONSUMED; else echo VM_FAULT_NOT_CONSUMED; fi
  if [ -n "$before" ]; then after=$(cat "$counter"); printf 'VM_CALLBACK_DELTA %s\n' "$((after - before))"; fi
